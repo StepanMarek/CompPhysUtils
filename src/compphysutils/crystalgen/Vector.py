@@ -1,0 +1,57 @@
+class Vector:
+    """
+    Implements the basic setting and getting of components, scalar products, scalar multiplication and addition
+    """
+
+    def val_getter(self, valIndex):
+        return self.components[valIndex]
+
+    def val_setter(self, valIndex, val):
+        self.components[valIndex] = val
+        return self.components[valIndex]
+
+    def val_deleter(self, valIndex):
+        del self.components[valIndex]
+
+    x = property(lambda self: self.val_getter(0),lambda self, val: self.val_setter(0, val), lambda self: self.val_deleter(0))
+    y = property(lambda self: self.val_getter(1),lambda self, val: self.val_setter(1, val), lambda self: self.val_deleter(1))
+    z = property(lambda self: self.val_getter(2),lambda self, val: self.val_setter(2, val), lambda self: self.val_deleter(2))
+
+    def __init__(self, *args):
+        self.components = [0,0,0]
+        for i in range(len(args)):
+            self.components[i] = args[i]
+
+    def __str__(self):
+        return "("+",".join(map(str, self.components))+")"
+
+    def __add__(self, other):
+        if type(other) == Vector:
+            return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
+        else:
+            raise TypeError("Addition not implemented for Vector and "+str(type(other)))
+
+    def __sub__(self, other):
+        if type(other) == Vector:
+            return Vector(self.x - other.x, self.y - other.y, self.z - other.z)
+        else:
+            raise TypeError("Subtraction not implemented for Vector and "+str(type(other)))
+
+    def __mul__(self, other):
+        if type(other) == Vector:
+            # Scalar (dot) product
+            return sum(map(lambda comps: comps[0]*comps[1], zip(self.components, other.components)))
+        else:
+            # Asume scalar multiplication
+            res = Vector()
+            for i in range(3):
+                res.components[i] = other * self.components[i]
+            return res
+
+    def __rmul__(self, other):
+        # Multiplication is always symmetric
+        return self.__mul__(other)
+
+    def __neg__(self):
+        # Only return scalar multiple
+        return (-1) * self
