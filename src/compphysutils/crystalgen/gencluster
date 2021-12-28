@@ -1,0 +1,12 @@
+#!/usr/bin/python3
+import argparse
+from compphysutils.crystalgen.generator import createClusterFromConfig
+
+argparser = argparse.ArgumentParser(description="Creates the cluster based on the specification provided in the config file.")
+
+argparser.add_argument("configfile", default=["cluster.cfg"], nargs="*", help="Names of the config files to be used. Default is single instance of cluster.cfg.")
+
+args = argparser.parse_args()
+
+for configFileName in args.configfile:
+	createClusterFromConfig(configFileName)

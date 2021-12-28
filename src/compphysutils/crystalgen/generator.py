@@ -1,4 +1,6 @@
-from .readCrystalChar import readCrystalChar
+import random
+import configparser
+from .readCrystalChar import readCrystalChar, parseCharConfig
 from .VectorRepresentation import VectorRepresentation
 from .VectorReal import VectorReal
 
@@ -33,6 +35,19 @@ def generateNextLevel(crystalRep, unitBasis, basisRep):
     # The argument is augmented and returned
     return crystalRep + newLayer
 
+def addAtoms(crystalRep, basisRep, planarBasis, addatoms, seed=False):
+    if seed:
+        random.seed(seed)
+    for i in range(addatoms):
+        # Choose atom at random
+        atomIndex = random.randint(0,len(crystalRep)-1)
+        newVec = crystalRep[atomIndex]
+        while checkPositionPresent(crystalRep, newVec, basisRep):
+            basisIndex = random.randint(0, len(planarBasis)-1)
+            newVec = newVec + planarBasis[basisIndex]
+        crystalRep = crystalRep + [newVec]
+    return crystalRep
+
 def generateNLevels(N, unitBasis, basisRep):
     crystalRep = [VectorRepresentation(*([0]*len(unitBasis)))]
     for i in range(N-1):
@@ -45,13 +60,91 @@ def getRealStructure(crystalRep, basisReal):
         crystal.append(vecRep.translateToBasis(basisReal))
     return crystal
 
-def generateCrystal(crystalCharFilename, layers=1):
-    basisReal, basisRep, unitLength, elemName = readCrystalChar(crystalCharFilename)
-    unitBasis = getUnitBasis(len(basisRep))
-    crystalRep = generateNLevels(layers, unitBasis, basisRep)
-    crystal = getRealStructure(crystalRep, basisReal)
-    # Finally, convert to standard format - atomic data format and multiply by unitLength
+def getAtomData(crystal, unitLength, elemName):
     data = []
     for pos in crystal:
         data.append(list((unitLength * pos).components) + [elemName])
     return data
+
+def generateCrystalRepresentation(basisRep, planarBasis, layers=1, addatoms=0, seed=False):
+    unitBasis = getUnitBasis(len(basisRep))
+    crystalRep = generateNLevels(layers, unitBasis, basisRep)
+    # add-atoms
+    crystalRep = addAtoms(crystalRep, basisRep, planarBasis, addatoms, seed=seed)
+    return crystalRep
+
+def generateCrystal(crystalCharFilename, layers=1, addatoms=0, seed=False):
+    basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(crystalCharFilename)
+    crystalRep = generateCrystalRepresentation(basisRep, planarBasis, layers=layers, addatoms=addatoms, seed=seed)
+    crystal = getRealStructure(crystalRep, basisReal)
+    # Finally, convert to standard format - atomic data format and multiply by unitLength
+    return getAtomData(crystal, unitLength, elemName)
+
+def moveAtom(crystalRep, basisRep, index, vector):
+    newVec = crystalRep[index] + vector
+    if checkPositionPresent(crystalRep, newVec, basisRep):
+        raise ValueError("Atom would be moved to an already occupied crystal site!")
+    else:
+        crystalRep[index] = newVec
+    return crystalRep
+
+def addAtomAtPosition(crystalRep, basisRep, vector):
+    if checkPositionPresent(crystalRep, vector, basisRep):
+        raise ValueError("Atom would be added to an already occupied crystal site!")
+    else:
+        crystalRep.append(vector)
+    return crystalRep
+
+def getDataString(atomicData):
+    string = str(len(atomicData))+"\n\n"
+    for i in range(len(atomicData)):
+        string = string + atomicData[i][-1].upper()+" "+" ".join(map(str, atomicData[i][:3])) + "\n"
+    return string
+
+def printData(atomicData):
+    print(getDataString(atomicData))
+
+def saveData(atomicData, filename):
+    file = open(filename, "w")
+    file.write(getDataString(atomicData))
+    file.close()
+
+def postProcessVectorSum(unitBasis, planarBasis, instructions):
+    vectorSum = unitBasis[0].cloneZeros()
+    for i in range(0,len(instructions),2):
+        if instructions[i] == "planar":
+            vectorSum = vectorSum + planarBasis[int(instructions[i+1])]
+        elif instructions[i] == "basis":
+            vectorSum = vectorSum + unitBasis[int(instructions[i+1])]
+    return vectorSum
+
+def createClusterFromConfig(configFilename):
+    cfg = configparser.ConfigParser()
+    cfg.read(configFilename)
+    if not (("lattice" in cfg["cluster"]) or (("base" in cfg.sections()) and ("vectors" in cfg.sections()))):
+        raise ValueError("Missing configuration - need a lattice configuration file [cluster]->lattice or [base] and [vectors] sections in the config file.")
+    else:
+        if "lattice" in cfg["cluster"]:
+            basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(cfg["cluster"]["lattice"])
+        else:
+            basisReal, basisRep, unitLength, elemName, planarBasis = parseCharConfig(cfg) 
+        crystalRep = generateCrystalRepresentation(basisRep, planarBasis, layers=int(cfg["cluster"]["layers"]), addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"]["seed"])
+        # Start the post-processing
+        if "post-processing" in cfg.sections():
+            unitBasis = getUnitBasis(len(crystalRep[0].components))
+            if "move" in cfg["post-processing"]:
+                for movementLine in cfg["post-processing"]["move"].split("\n"):
+                    movementInstructions = movementLine.split()
+                    vectorSum = postProcessVectorSum(unitBasis, planarBasis, movementInstructions[1:])
+                    # Final displacement vector complete - displace the atom
+                    crystalRep = moveAtom(crystalRep, basisRep, int(movementInstructions[0]), vectorSum)
+            # Movement instructions finished
+            if "add" in cfg["post-processing"]:
+                for additionLine in cfg["post-processing"]["add"].split("\n"):
+                    additionInstructions = additionLine.split()
+                    vectorSum = postProcessVectorSum(unitBasis, planarBasis, additionInstructions)
+                    crystalRep = addAtomAtPosition(crystalRep, basisRep, vectorSum)
+        # Post-processing finished
+        structure = getRealStructure(crystalRep, basisReal)
+        data = getAtomData(structure, unitLength, elemName)
+        saveData(data, cfg["cluster"]["name"])

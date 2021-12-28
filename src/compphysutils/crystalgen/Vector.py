@@ -28,6 +28,9 @@ class Vector:
     def __str__(self):
         return "("+",".join(map(str, self.components))+")"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __add__(self, other):
         if issubclass(type(other), Vector):
             return type(self)(*map(lambda x: x[0]+x[1], zip(self.components, other.components)))

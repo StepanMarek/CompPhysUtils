@@ -17,6 +17,14 @@ def parseVectors(vectorsString, representation=False):
             vecs.append(VectorRepresentation(*map(int, vecStrings[i].split(","))))
     return vecs
 
+def parseCharConfig(cfg):
+    realBasis = parseVectors(cfg["vectors"]["real"])
+    reprBasis = parseVectors(cfg["vectors"]["representation"], representation=True)
+    planarBasis = parseVectors(cfg["vectors"]["planar"], representation=True)
+    unitCellLength = float(cfg["base"]["unit"])
+    elemName = cfg["base"]["atom"]
+    return realBasis, reprBasis, unitCellLength, elemName, planarBasis
+
 def readCrystalChar(filename):
     """
     Returns the representation and real basis of the crystal
@@ -24,8 +32,4 @@ def readCrystalChar(filename):
     """
     cfg = configparser.ConfigParser()
     cfg.read(filename)
-    realBasis = parseVectors(cfg["vectors"]["real"])
-    reprBasis = parseVectors(cfg["vectors"]["representation"], representation=True)
-    unitCellLength = float(cfg["base"]["unit"])
-    elemName = cfg["base"]["atom"]
-    return realBasis, reprBasis, unitCellLength, elemName
+    return parseCharConfig(cfg)
