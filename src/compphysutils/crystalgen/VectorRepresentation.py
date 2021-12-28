@@ -7,7 +7,10 @@ class VectorRepresentation(Vector):
     """
 
     def __init__(self, *args):
-        self.components = array.array("i", [0,0,0])
+        if len(args) < 3:
+            self.components = array.array("i", [0,0,0])
+        else:
+            self.components = array.array("i", [0]*len(args))
         for i in range(len(args)):
             self.components[i] = args[i]
 
@@ -22,3 +25,10 @@ class VectorRepresentation(Vector):
             return isEqual
         else:
             raise TypeError("Equivalence relation unknown for VectorRepresentation and "+str(type(other)))
+
+    def translateToBasis(self, basis):
+        if len(basis) != len(self.components):
+            #raise ArithmeticError("The basis size "+str(len(basis))+" and the vector size "+str(len(self.components))" are different!")
+            raise ArithmeticError("Different basis and vector size!")
+        return sum(map(lambda x: x[0] * x[1], zip(self.components, basis)), basis[0].cloneZeros())
+
