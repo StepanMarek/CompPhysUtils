@@ -1,0 +1,1 @@
+include examples/cluster.cfg examples/na_pyramid_100.cfg
