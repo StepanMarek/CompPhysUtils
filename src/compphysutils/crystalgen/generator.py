@@ -136,7 +136,7 @@ def postProcessVectorSum(unitBasis, planarBasis, instructions):
 
 def createClusterFromConfig(configFilename):
     cfg = configparser.ConfigParser()
-    cfg["DEFAULT"] = {"indexdump" : False}
+    cfg.set("DEFAULT", "indexdump", "False")
     cfg.read(configFilename)
     if not (("lattice" in cfg["cluster"]) or (("base" in cfg.sections()) and ("vectors" in cfg.sections()))):
         raise ValueError("Missing configuration - need a lattice configuration file [cluster]->lattice or [base] and [vectors] sections in the config file.")
@@ -173,7 +173,8 @@ def createClusterFromConfig(configFilename):
         structure = getRealStructure(crystalRep, basisReal)
         data = getAtomData(structure, unitLength, elemName)
         # If IndexDump is required, output atom data
-        if cfg["post-processing"]["indexdump"]:
+        dumpIndexInfo = cfg.getboolean("post-processing", "indexdump")
+        if dumpIndexInfo:
             for i in range(len(crystalRep)):
                 print(i, crystalRep[i], data[i])
             print("Planar basis")
