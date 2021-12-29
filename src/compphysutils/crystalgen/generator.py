@@ -95,6 +95,22 @@ def addAtomAtPosition(crystalRep, basisRep, vector):
         crystalRep.append(vector)
     return crystalRep
 
+def delAtomAtPosition(crystalRep, basisRep, vector):
+    # Delete if possible, otherwise just raise warning, not exception
+    deleted = False
+    for i in range(len(crystalRep)):
+        if vector == crystalRep[i]:
+            del crystalRep[i]
+            deleted = True
+            break
+    if not deleted:
+        print("No atom found at position "+str(vector))
+    return crystalRep
+
+def delAtomAtIndex(crystalRep, index):
+    del crystalRep[index]
+    return crystalRep
+
 def getDataString(atomicData):
     string = str(len(atomicData))+"\n\n"
     for i in range(len(atomicData)):
@@ -120,6 +136,7 @@ def postProcessVectorSum(unitBasis, planarBasis, instructions):
 
 def createClusterFromConfig(configFilename):
     cfg = configparser.ConfigParser()
+    cfg["DEFAULT"] = {"indexdump" : False}
     cfg.read(configFilename)
     if not (("lattice" in cfg["cluster"]) or (("base" in cfg.sections()) and ("vectors" in cfg.sections()))):
         raise ValueError("Missing configuration - need a lattice configuration file [cluster]->lattice or [base] and [vectors] sections in the config file.")
@@ -144,7 +161,22 @@ def createClusterFromConfig(configFilename):
                     additionInstructions = additionLine.split()
                     vectorSum = postProcessVectorSum(unitBasis, planarBasis, additionInstructions)
                     crystalRep = addAtomAtPosition(crystalRep, basisRep, vectorSum)
+            if "delete" in cfg["post-processing"]:
+                for deletionLine in cfg["post-processing"]["delete"].split("\n"):
+                    deletionInstructions = deletionLine.split()
+                    if deletionInstructions[0] == "index":
+                        crystalRep = delAtomAtIndex(crystalRep, int(deleteInstructions[1]))
+                    else:
+                        vectorSum = postProcessVectorSum(unitBasis, planarBasis, deletionInstructions)
+                        crystalRep = delAtomAtPosition(crystalRep, basisRep, vectorSum)
         # Post-processing finished
         structure = getRealStructure(crystalRep, basisReal)
         data = getAtomData(structure, unitLength, elemName)
+        # If IndexDump is required, output atom data
+        if cfg["post-processing"]["indexdump"]:
+            for i in range(len(crystalRep)):
+                print(i, crystalRep[i], data)
+            print("Planar basis")
+            for i in range(len(planarBasis)):
+                print(i, planarBasis[i])
         saveData(data, cfg["cluster"]["name"])
