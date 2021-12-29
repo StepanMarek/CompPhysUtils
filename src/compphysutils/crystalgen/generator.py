@@ -165,7 +165,7 @@ def createClusterFromConfig(configFilename):
                 for deletionLine in cfg["post-processing"]["delete"].split("\n"):
                     deletionInstructions = deletionLine.split()
                     if deletionInstructions[0] == "index":
-                        crystalRep = delAtomAtIndex(crystalRep, int(deleteInstructions[1]))
+                        crystalRep = delAtomAtIndex(crystalRep, int(deletionInstructions[1]))
                     else:
                         vectorSum = postProcessVectorSum(unitBasis, planarBasis, deletionInstructions)
                         crystalRep = delAtomAtPosition(crystalRep, basisRep, vectorSum)
@@ -175,7 +175,7 @@ def createClusterFromConfig(configFilename):
         # If IndexDump is required, output atom data
         if cfg["post-processing"]["indexdump"]:
             for i in range(len(crystalRep)):
-                print(i, crystalRep[i], data)
+                print(i, crystalRep[i], data[i])
             print("Planar basis")
             for i in range(len(planarBasis)):
                 print(i, planarBasis[i])
