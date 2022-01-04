@@ -42,9 +42,13 @@ def addAtoms(crystalRep, basisRep, planarBasis, addatoms, seed=False):
         # Choose atom at random
         atomIndex = random.randint(0,len(crystalRep)-1)
         newVec = crystalRep[atomIndex]
+        # Create 1/-1 multiplier choices
+        basisMultipliers = []
+        for j in range(len(planarBasis)):
+            basisMultipliers.append(random.choice([1,-1]))
         while checkPositionPresent(crystalRep, newVec, basisRep):
             basisIndex = random.randint(0, len(planarBasis)-1)
-            newVec = newVec + planarBasis[basisIndex]
+            newVec = newVec + (basisMultipliers[basisIndex] * planarBasis[basisIndex])
         crystalRep = crystalRep + [newVec]
     return crystalRep
 
@@ -132,6 +136,10 @@ def postProcessVectorSum(unitBasis, planarBasis, instructions):
             vectorSum = vectorSum + planarBasis[int(instructions[i+1])]
         elif instructions[i] == "basis":
             vectorSum = vectorSum + unitBasis[int(instructions[i+1])]
+        elif instructions[i] == "mbasis":
+            vectorSum = vectorSum - unitBasis[int(instructions[i+1])]
+        elif instructions[i] == "mplanar":
+            vectorSum = vectorSum - planarBasis[int(instructions[i+1])]
     return vectorSum
 
 def createClusterFromConfig(configFilename):
