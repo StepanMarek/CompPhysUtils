@@ -48,8 +48,8 @@ def parseDatasetConfig(configFilename):
             datasetName = groupName.split(".")[1]
             if cfg[groupName]["file"]:
                 # Create datasets from file
-                # TODO : Parser Kwargs
-                datasets[datasetName] = parseFile(cfg[groupName]["file"], cfg[groupName]["filetype"])
+                parserKwargs = cfg.get(groupName, "parser-kwargs", fallback=False)
+                datasets[datasetName] = parseFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserKwargs=parserKwargs)
                 if cfg[groupName]["post-processing"]:
                     commandSplit = cfg[groupName]["post-processing"].split()
                     if len(commandSplit) > 1:
