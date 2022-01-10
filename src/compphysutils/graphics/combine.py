@@ -21,16 +21,32 @@ def average(datasets, commandArgs):
             for datasetName in args.datasets_to_average:
                 sumLin += datasets[datasetName][colIndex][rowIndex]
                 sumSq += datasets[datasetName][colIndex][rowIndex] ** 2
-            averages[colIndex] = sumLin / N
+            averages[colIndex].append(sumLin / N)
             if args.stderr:
-                stderrs[colIndex] = ((sumSq / N - averages[colIndex] ** 2)/(N-1)) ** 0.5
+                stderrs[colIndex].append(((sumSq / N - averages[colIndex][rowIndex] ** 2)/(N-1)) ** 0.5)
     datasets[args.new_name] = []
     for i in range(ncols):
         datasets[args.new_name].append(averages[i])
         if args.stderr:
             datasets[args.new_name].append(stderrs[i])
+    print(datasets)
+    return datasets
+
+unionAP = argparse.ArgumentParser()
+unionAP.add_argument("new_name", help="New name of the dataset")
+unionAP.add_argument("datasets_to_merge", nargs="+", help="Datasets, whose columns are to be added together, in the given order. First dataset determines the number of columns.")
+def union(datasets, commandArgs):
+    args = unionAP.parse_args(commandArgs)
+    ncols = len(datasets[args.datasets_to_merge[0]])
+    newcols = []
+    for i in range(ncols):
+        newcols.append([])
+        for datasetName in args.datasets_to_merge:
+            newcols[i] = newcols[i] + datasets[datasetName][i]
+    datasets[args.new_name] = newcols
     return datasets
 
 commands = {
-        "average" : average
+        "average" : average,
+        "union" : union
 }
