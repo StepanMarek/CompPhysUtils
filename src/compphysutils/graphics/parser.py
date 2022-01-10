@@ -1,6 +1,7 @@
 from . import hlgParser
 from .post_process import postProcessCommands
 import configparser
+import os
 
 lineParseFunctions = {
     "hlg" : hlgParser.hlgLine
@@ -53,8 +54,8 @@ def parseDatasetConfig(configFilename):
             elif "list" in cfg[groupName]:
                 # Create dataset from list, defaultly convert to float
                 # TODO : Should there be som interface to different convertors?
-                datasets[datasetName] = list(map(float, cfg[groupName]["list"].split()))
-            if cfg[groupName]["post-processing"]:
+                datasets[datasetName] = [list(map(float, cfg[groupName]["list"].split()))]
+            if "post-processing" in cfg[groupName]:
                 commandSplit = cfg[groupName]["post-processing"].split()
                 if len(commandSplit) > 1:
                     datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], commandSplit[1:])

@@ -2,17 +2,17 @@ import argparse
 
 averageAP = argparse.ArgumentParser()
 averageAP.add_argument("--stderr", action="store_true", help="If given, second column of the new dataset includes standard error given by the average. Need at least two averaging datasets.")
-averageAP.add_argument("new_name", nargs=1, help="Name of the dataset containing the averaged values.")
+averageAP.add_argument("new_name", help="Name of the dataset containing the averaged values.")
 averageAP.add_argument("datasets_to_average", nargs="+", help="Datasets that are to be averaged, elementwise in each column. Number of columns is given by the first dataset.")
 
 def average(datasets, commandArgs):
     args = averageAP.parse_args(commandArgs)
     averages = []
     stderrs = []
-    ncols = len(datasets[args.datasets_to_average])
+    ncols = len(datasets[args.datasets_to_average[0]])
     N = len(args.datasets_to_average)
     for i in range(ncols):
-        averges.append([])
+        averages.append([])
         stderrs.append([])
     for rowIndex in range(len(datasets[args.datasets_to_average[0]])):
         for colIndex in range(ncols):

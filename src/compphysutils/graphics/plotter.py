@@ -20,9 +20,14 @@ def scatterPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
 
 def errorPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
-        datasetLabels = [False] * len(datasets)
+        datasetLabels = [None] * len(datasets)
     for dataIndex in range(len(datasets)):
-        axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], xerr=datasets[dataIndex][2], yerr=datasets[dataIndex][3], label=datasetLabels[dataIndex])
+        if len(datasets[dataIndex]) >= 4:
+            # If at least four columns provided, plot errors on both axes
+            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][2], xerr=datasets[dataIndex][1], yerr=datasets[dataIndex][3], label=datasetLabels[dataIndex])
+        else:
+            # Otherwise, just plot yerr
+            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], yerr=datasets[dataIndex][2],label=datasetLabels[dataIndex])
     return axisObj
 
 def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
@@ -38,7 +43,7 @@ def plot(datasets, plotType="line", **plotOptions):
         linePlot(datasets, axis, **plotOptions)
     elif plotType == "errorbar":
         errorPlot(datasets, axis, **plotOptions)
-    elif plotType = "level":
+    elif plotType == "level":
         levelPlot(datasets, axis, **plotOptions)
     else:
         # Defaults to scatter
@@ -64,20 +69,39 @@ def fromConfig(configFileName):
     # Run any combine commands
     combineCommands = cfg.get("data", "combine").split("\n")
     for commandLine in combineCommands:
-        commandName = commandLine[0]
-        datasets = commands[commandName](datasets, commandLine[1:])
+        commandSplitLine = commandLine.split()
+        commandName = commandSplitLine[0]
+        datasets = commands[commandName](datasets, commandSplitLine[1:])
     # Now, datasets are complete, and we can read the plot group
     # So far, only 2D graphs
-    graphType = cfg.get("plot", "type", "scatter")
-    colCoords = cfg.get("plot", "cols").split()
+    graphType = cfg["plot"].get("type", "scatter")
+    colCoords = cfg.get("plot", "cols").split("\n")
+    for i in range(len(colCoords)):
+        colCoords[i] = colCoords[i].split()
     chosenDatasets = []
-    for i in range(0,len(colCoords),2):
-        chosenDatasets.append(datasets[colCoords[i]][colCoords[i+1]])
+    for i in range(len(colCoords)):
+        chosenDatasets.append([])
+        for j in range(0,len(colCoords[i]),2):
+            chosenDatasets[i].append(datasets[colCoords[i][j]][int(colCoords[i][j+1])])
     plotOptions = {}
-    plotOptions["legend"] = cfg.getboolean("plot", "legend", True)
-    plotOptions["xlim"] = list(map(float, cfg.get("plot", "xlim").split()))
-    plotOptions["ylim"] = list(map(float, cfg.get("plot", "ylim").split()))
-    plotOptions["xlabel"] = cfg.get("plot", "xlabel", "X")
-    plotOptions["ylabel"] = cfg.get("plot", "ylabel", "Y")
-    plotOptions["figfile"] = cfg.get("plot", "figfile", False)
+    plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
+    if "xlim" in cfg["plot"]:
+        plotOptions["xlim"] = list(map(float, cfg["plot"].get("xlim").split()))
+    else:
+        plotOptions["xlim"] = False
+    if "ylim" in cfg["plot"]:
+        plotOptions["ylim"] = list(map(float, cfg["plot"].get("ylim").split()))
+    else:
+        plotOptions["ylim"] = False
+    plotOptions["xlabel"] = cfg["plot"].get("xlabel", "X")
+    plotOptions["ylabel"] = cfg["plot"].get("ylabel", "Y")
+    plotOptions["figfile"] = cfg["plot"].get("figfile", False)
+    # Dataset labels
+    plotOptions["datasetLabels"] = cfg["plot"].get("labels", False)
+    if plotOptions["datasetLabels"]:
+        plotOptions["datasetLabels"] = plotOptions["datasetLabels"].split("\n")
+        if len(plotOptions["datasetLabels"]) < len(colCoords):
+            toAdd = len(colCoords) - len(plotOptions["datasetLabels"])
+            for i in range(toAdd):
+                plotOptions["datasetLabels"].append(None)
     plot(chosenDatasets, graphType, **plotOptions)
