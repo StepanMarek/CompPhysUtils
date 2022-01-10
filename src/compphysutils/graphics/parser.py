@@ -46,14 +46,18 @@ def parseDatasetConfig(configFilename):
     for groupName in cfg.sections():
         if "dataset" in groupName:
             datasetName = groupName.split(".")[1]
-            if cfg[groupName]["file"]:
+            if "file" in cfg[groupName]:
                 # Create datasets from file
                 parserKwargs = cfg.get(groupName, "parser-kwargs", fallback=False)
                 datasets[datasetName] = parseFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserKwargs=parserKwargs)
-                if cfg[groupName]["post-processing"]:
-                    commandSplit = cfg[groupName]["post-processing"].split()
-                    if len(commandSplit) > 1:
-                        datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], commandSplit[1:])
-                    else:
-                        datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], [])
+            elif "list" in cfg[groupName]:
+                # Create dataset from list, defaultly convert to float
+                # TODO : Should there be som interface to different convertors?
+                datasets[datasetName] = list(map(float, cfg[groupName]["list"].split()))
+            if cfg[groupName]["post-processing"]:
+                commandSplit = cfg[groupName]["post-processing"].split()
+                if len(commandSplit) > 1:
+                    datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], commandSplit[1:])
+                else:
+                    datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], [])
     return datasets

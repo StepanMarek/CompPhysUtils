@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 from .parser import parseDatasetConfig
+import configparser
+from .combine import commands
+
 
 def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
@@ -53,5 +56,28 @@ def plot(datasets, plotType="line", **plotOptions):
     else:
         plt.show()
 
-#TODO : Implement reading of the plotter config file
-#def fromConfig(configFileName):
+def fromConfig(configFileName):
+    cfg = configparser.ConfigParser()
+    cfg.read(configFileName)
+    # Read the datasets
+    datasets = parseDatasetConfig(cfg.get("data", "datasetfile"))
+    # Run any combine commands
+    combineCommands = cfg.get("data", "combine").split("\n")
+    for commandLine in combineCommands:
+        commandName = commandLine[0]
+        datasets = commands[commandName](datasets, commandLine[1:])
+    # Now, datasets are complete, and we can read the plot group
+    # So far, only 2D graphs
+    graphType = cfg.get("plot", "type", "scatter")
+    colCoords = cfg.get("plot", "cols").split()
+    chosenDatasets = []
+    for i in range(0,len(colCoords),2):
+        chosenDatasets.append(datasets[colCoords[i]][colCoords[i+1]])
+    plotOptions = {}
+    plotOptions["legend"] = cfg.getboolean("plot", "legend", True)
+    plotOptions["xlim"] = list(map(float, cfg.get("plot", "xlim").split()))
+    plotOptions["ylim"] = list(map(float, cfg.get("plot", "ylim").split()))
+    plotOptions["xlabel"] = cfg.get("plot", "xlabel", "X")
+    plotOptions["ylabel"] = cfg.get("plot", "ylabel", "Y")
+    plotOptions["figfile"] = cfg.get("plot", "figfile", False)
+    plot(chosenDatasets, graphType, **plotOptions)
