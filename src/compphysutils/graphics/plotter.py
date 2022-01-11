@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from .parser import parseDatasetConfig
 import configparser
 from .combine import commands
-
+from .fitter import plotFit 
 
 def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
@@ -24,10 +24,10 @@ def errorPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     for dataIndex in range(len(datasets)):
         if len(datasets[dataIndex]) >= 4:
             # If at least four columns provided, plot errors on both axes
-            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][2], xerr=datasets[dataIndex][1], yerr=datasets[dataIndex][3], label=datasetLabels[dataIndex])
+            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][2], xerr=datasets[dataIndex][1], yerr=datasets[dataIndex][3], capsize=4, lw=0, elinewidth=2, marker="p", ms=1, label=datasetLabels[dataIndex])
         else:
             # Otherwise, just plot yerr
-            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], yerr=datasets[dataIndex][2],label=datasetLabels[dataIndex])
+            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], yerr=datasets[dataIndex][2], capsize=4, lw=0, elinewidth=2, marker="p", ms=2, label=datasetLabels[dataIndex])
     return axisObj
 
 def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
@@ -56,10 +56,7 @@ def plot(datasets, plotType="line", **plotOptions):
         plt.xlim(*plotOptions["xlim"])
     if plotOptions["ylim"]:
         plt.ylim(*plotOptions["ylim"])
-    if plotOptions["figfile"]:
-        plt.savefig(plotOptions["figfile"], bbox_inches="tight")
-    else:
-        plt.show()
+    return axis
 
 def fromConfig(configFileName):
     cfg = configparser.ConfigParser()
@@ -104,4 +101,13 @@ def fromConfig(configFileName):
             toAdd = len(colCoords) - len(plotOptions["datasetLabels"])
             for i in range(toAdd):
                 plotOptions["datasetLabels"].append(None)
-    plot(chosenDatasets, graphType, **plotOptions)
+    axisObj = plot(chosenDatasets, graphType, **plotOptions)
+    # If fit is present, handle it
+    if cfg["plot"].get("fit", False):
+        fitArgs = cfg["plot"].get("fit").split()
+        # TODO : Fit args?
+        plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axisObj, fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False))
+    if plotOptions["figfile"]:
+        plt.savefig(plotOptions["figfile"], bbox_inches="tight")
+    else:
+        plt.show()

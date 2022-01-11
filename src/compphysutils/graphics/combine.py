@@ -29,7 +29,6 @@ def average(datasets, commandArgs):
         datasets[args.new_name].append(averages[i])
         if args.stderr:
             datasets[args.new_name].append(stderrs[i])
-    print(datasets)
     return datasets
 
 unionAP = argparse.ArgumentParser()
