@@ -10,11 +10,12 @@ def average(datasets, commandArgs):
     averages = []
     stderrs = []
     ncols = len(datasets[args.datasets_to_average[0]])
+    nrows = len(datasets[args.datasets_to_average[0]][0])
     N = len(args.datasets_to_average)
     for i in range(ncols):
         averages.append([])
         stderrs.append([])
-    for rowIndex in range(len(datasets[args.datasets_to_average[0]])):
+    for rowIndex in range(nrows):
         for colIndex in range(ncols):
             sumLin = 0
             sumSq = 0

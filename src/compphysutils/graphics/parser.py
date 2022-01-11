@@ -38,7 +38,7 @@ def parseFile(filename, filetype, parserKwargs=False):
     return datagroups
 
 def postProcess(datagroups, command, args):
-   return postProcessCommands[command](datagroups, *args)
+   return postProcessCommands[command](datagroups, args)
 
 def parseDatasetConfig(configFilename):
     cfg = configparser.ConfigParser()
