@@ -19,6 +19,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/combine.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
 GRAPHICSSOURCE += src/compphysutils/graphics/fitter.py
+GRAPHICSSOURCE += src/compphysutils/graphics/transformer.py
 
 BASESOURCE := src/compphysutils/__init__.py
 

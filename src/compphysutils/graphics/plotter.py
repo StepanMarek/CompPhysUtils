@@ -3,6 +3,7 @@ from .parser import parseDatasetConfig
 import configparser
 from .combine import commands
 from .fitter import plotFit 
+from .transformer import transforms
 
 def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
@@ -69,8 +70,14 @@ def fromConfig(configFileName):
         commandSplitLine = commandLine.split()
         commandName = commandSplitLine[0]
         datasets = commands[commandName](datasets, commandSplitLine[1:])
+    # Now, run any transform commands
+    if "transform" in cfg["plot"]:
+        transformCommands = cfg["plot"].get("transform").split("\n")
+        for commandLine in transformCommands:
+            commandSplitLine = commandLine.split()
+            commandName = commandSplitLine[0]
+            datasets = transforms[commandName](datasets, commandSplitLine[1:])
     # Now, datasets are complete, and we can read the plot group
-    # So far, only 2D graphs
     graphType = cfg["plot"].get("type", "scatter")
     colCoords = cfg.get("plot", "cols").split("\n")
     for i in range(len(colCoords)):

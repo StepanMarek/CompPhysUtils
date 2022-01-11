@@ -7,7 +7,6 @@ def linFit(x, a, b):
 def roundSignificantFigures(number, sigFigs, matchOrder=False):
     if not matchOrder:
         # Default behaviour - match to given number of significant figures
-        print(number, sigFigs)
         return round(number, sigFigs - 1 - math.floor(math.log10(abs(number))))
     else:
         # Match to the order of the sigFigs argument
