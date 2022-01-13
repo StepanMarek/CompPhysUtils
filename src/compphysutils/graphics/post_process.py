@@ -10,6 +10,7 @@ def gapRead(datagroups, args):
             LUMO = datagroups[0][i]
             HOMO = datagroups[0][i-1]
             break
+    print(LUMO-HOMO)
     return [[LUMO - HOMO]]
 
 levelsGetAP = argparse.ArgumentParser()
@@ -30,7 +31,7 @@ def levelsGet(dataset, argsList):
                 homoIndex = i-1
                 break
         for i in range(args.levelNum):
-            levels[i] = dataset[O][homoIndex - args.levelNum + i + 1]
+            levels[i] = dataset[0][homoIndex - args.levelNum + i + 1]
     else:
         # Assume above
         lumoIndex = 0
@@ -50,9 +51,9 @@ def levelsSpacingAverage(dataset, argsList):
     for i in range(len(levels[0])-1):
         sumLin += levels[0][i+1] - levels[0][i]
         sumSq += (levels[0][i+1] - levels[0][i]) ** 2
-    mean = sumLin / len(levels[0])
+    mean = sumLin / (len(levels[0])-1)
     # We know the whole population of the levels
-    stddev = ((sumSq / len(levels[0])) - (mean ** 2)) ** 0.5
+    stddev = ((sumSq / (len(levels[0])-1)) - (mean ** 2)) ** 0.5
     return [[mean],[stddev]]
 
 

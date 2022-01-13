@@ -35,7 +35,8 @@ def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
         datasetLabels = [False] * len(datasets)
     for dataIndex in range(len(datasets)):
-        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0], orientation="vertical", label=datasetLabels[dataIndex])
+        # For x positions, only takes into account first element
+        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex])
     return axisObj
 
 def plot(datasets, plotType="line", **plotOptions):
@@ -65,11 +66,12 @@ def fromConfig(configFileName):
     # Read the datasets
     datasets = parseDatasetConfig(cfg.get("data", "datasetfile"))
     # Run any combine commands
-    combineCommands = cfg.get("data", "combine").split("\n")
-    for commandLine in combineCommands:
-        commandSplitLine = commandLine.split()
-        commandName = commandSplitLine[0]
-        datasets = commands[commandName](datasets, commandSplitLine[1:])
+    if "combine" in cfg["data"]:
+        combineCommands = cfg.get("data", "combine").split("\n")
+        for commandLine in combineCommands:
+            commandSplitLine = commandLine.split()
+            commandName = commandSplitLine[0]
+            datasets = commands[commandName](datasets, commandSplitLine[1:])
     # Now, run any transform commands
     if "transform" in cfg["plot"]:
         transformCommands = cfg["plot"].get("transform").split("\n")

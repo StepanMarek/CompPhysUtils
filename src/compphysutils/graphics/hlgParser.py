@@ -26,7 +26,7 @@ def hlgLine(textline, energyValMatcher, energyUnitMatcher, occupationMatcher, ou
     return [energy*convFactor, occupation]
 
 def initParserObjects():
-    energyValMatcher = re.compile("[-]?[0-9]*\.[0-9]*")
+    energyValMatcher = re.compile("[-]?[0-9]*\.[0-9]*e?[\+\-0-9]*")
     energyUnitMatcher = re.compile(" H|(eV) ")
     occupationMatcher = re.compile("Occupied")
     return energyValMatcher, energyUnitMatcher, occupationMatcher
