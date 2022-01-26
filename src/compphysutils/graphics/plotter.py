@@ -5,6 +5,20 @@ from .combine import commands
 from .fitter import plotFit 
 from .transformer import transforms
 
+class ColorIterator:
+    def __init__(self, singleCycle="b"):
+        self.singleCycle = singleCycle.split()
+        self.currentIndex = 0
+        self.cycleLen = len(self.singleCycle)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        returnVal = self.singleCycle[self.currentIndex % self.cycleLen]
+        self.currentIndex += 1
+        return returnVal
+
 def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
         datasetLabels = [False] * len(datasets)
@@ -36,7 +50,7 @@ def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
         datasetLabels = [False] * len(datasets)
     for dataIndex in range(len(datasets)):
         # For x positions, only takes into account first element
-        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex])
+        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex], colors=plotOptions["colorCycle"])
     return axisObj
 
 def plot(datasets, plotType="line", **plotOptions):
@@ -64,7 +78,10 @@ def fromConfig(configFileName):
     cfg = configparser.ConfigParser()
     cfg.read(configFileName)
     # Read the datasets
-    datasets = parseDatasetConfig(cfg.get("data", "datasetfile"))
+    datasetfiles = cfg.get("data", "datasetfiles").split("\n")
+    datasets = {}
+    for datasetFileName in datasetfiles:
+        datasets.update(parseDatasetConfig(datasetFileName))
     # Run any combine commands
     if "combine" in cfg["data"]:
         combineCommands = cfg.get("data", "combine").split("\n")
@@ -99,6 +116,8 @@ def fromConfig(configFileName):
         plotOptions["ylim"] = list(map(float, cfg["plot"].get("ylim").split()))
     else:
         plotOptions["ylim"] = False
+    plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "b")
+    plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["xlabel"] = cfg["plot"].get("xlabel", "X")
     plotOptions["ylabel"] = cfg["plot"].get("ylabel", "Y")
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
