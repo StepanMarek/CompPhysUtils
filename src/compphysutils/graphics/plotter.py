@@ -50,7 +50,7 @@ def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
         datasetLabels = [False] * len(datasets)
     for dataIndex in range(len(datasets)):
         # For x positions, only takes into account first element
-        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex], colors=plotOptions["colorCycle"])
+        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex], colors=next(plotOptions["colorCycle"]))
     return axisObj
 
 def plot(datasets, plotType="line", **plotOptions):
