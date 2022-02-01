@@ -77,18 +77,21 @@ def plot(datasets, plotType="line", **plotOptions):
 def fromConfig(configFileName):
     cfg = configparser.ConfigParser()
     cfg.read(configFileName)
-    # Read the datasets
-    datasetfiles = cfg.get("data", "datasetfiles").split("\n")
     datasets = {}
-    for datasetFileName in datasetfiles:
-        datasets.update(parseDatasetConfig(datasetFileName))
-    # Run any combine commands
-    if "combine" in cfg["data"]:
-        combineCommands = cfg.get("data", "combine").split("\n")
-        for commandLine in combineCommands:
-            commandSplitLine = commandLine.split()
-            commandName = commandSplitLine[0]
-            datasets = commands[commandName](datasets, commandSplitLine[1:])
+    # Read the datasets
+    if "data" in cfg:
+        datasetfiles = cfg.get("data", "datasetfiles").split("\n")
+        for datasetFileName in datasetfiles:
+            datasets.update(parseDatasetConfig(datasetFileName))
+        # Run any combine commands
+        if "combine" in cfg["data"]:
+            combineCommands = cfg.get("data", "combine").split("\n")
+            for commandLine in combineCommands:
+                commandSplitLine = commandLine.split()
+                commandName = commandSplitLine[0]
+                datasets = commands[commandName](datasets, commandSplitLine[1:])
+    # In place defined datasets take priority
+    datasets.update(parseDatasetConfig(configFileName))
     # Now, run any transform commands
     if "transform" in cfg["plot"]:
         transformCommands = cfg["plot"].get("transform").split("\n")

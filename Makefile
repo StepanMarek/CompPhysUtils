@@ -14,6 +14,7 @@ CRYSTALGENSOURCE += src/compphysutils/crystalgen/__init__.py
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/parser.py
 GRAPHICSSOURCE += src/compphysutils/graphics/hlgParser.py
+GRAPHICSSOURCE += src/compphysutils/graphics/aimsParser.py
 GRAPHICSSOURCE += src/compphysutils/graphics/post_process.py
 GRAPHICSSOURCE += src/compphysutils/graphics/combine.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py

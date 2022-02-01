@@ -1,20 +1,26 @@
 from . import hlgParser
+from . import aimsParser
 from .post_process import postProcessCommands
 import configparser
 import os
 
 lineParseFunctions = {
-    "hlg" : hlgParser.hlgLine
+    "hlg" : hlgParser.hlgLine,
+    "aims" : aimsParser.aimsLine
 }
 
 parserKwargsDefaults = {
     "hlg" : {
         "outputUnit" : "eV"
+    },
+    "aims" : {
+        "outputUnit" : "eV"
     }
 }
 
 initObjectsFunctions = {
-    "hlg" : hlgParser.initParserObjects 
+    "hlg" : hlgParser.initParserObjects,
+    "aims" : aimsParser.initParserObjects
 }
 
 def parseFile(filename, filetype, parserKwargs=False):
