@@ -55,8 +55,8 @@ def parseDatasetConfig(configFilename):
                 # Create dataset from list, defaultly convert to float
                 # TODO : Should there be som interface to different convertors?
                 datasets[datasetName] = [list(map(float, cfg[groupName]["list"].split()))]
-            if "post-processing" in cfg[groupName]:
-                commandSplit = cfg[groupName]["post-processing"].split()
+            if "post-process" in cfg[groupName]:
+                commandSplit = cfg[groupName]["post-process"].split()
                 if len(commandSplit) > 1:
                     datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], commandSplit[1:])
                 else:
