@@ -60,7 +60,14 @@ def parseDatasetConfig(configFilename):
             elif "list" in cfg[groupName]:
                 # Create dataset from list, defaultly convert to float
                 # TODO : Should there be som interface to different convertors?
-                datasets[datasetName] = [list(map(float, cfg[groupName]["list"].split()))]
+                # A more sophisticated and decoupled list types
+                if "listtype" in cfg[groupName]:
+                    if cfg[groupName]["listtype"] == "string":
+                        datasets[datasetName] = [cfg[groupName]["list"].split()]
+                    else:
+                        datasets[datasetName] = [list(map(float, cfg[groupName]["list"].split()))]
+                else:
+                    datasets[datasetName] = [list(map(float, cfg[groupName]["list"].split()))]
             if "post-process" in cfg[groupName]:
                 commandSplit = cfg[groupName]["post-process"].split()
                 if len(commandSplit) > 1:

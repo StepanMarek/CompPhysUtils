@@ -21,14 +21,14 @@ class ColorIterator:
 
 def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
-        datasetLabels = [False] * len(datasets)
+        datasetLabels = [None] * len(datasets)
     for dataIndex in range(len(datasets)):
         axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex])
     return axisObj
 
 def scatterPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
-        datasetLabels = [False] * len(datasets)
+        datasetLabels = [None] * len(datasets)
     for dataIndex in range(len(datasets)):
         axisObj.scatter(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex])
     return axisObj
@@ -47,34 +47,43 @@ def errorPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
 
 def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
-        datasetLabels = [False] * len(datasets)
+        datasetLabels = [None] * len(datasets)
     for dataIndex in range(len(datasets)):
         # For x positions, only takes into account first element
         axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex], colors=next(plotOptions["colorCycle"]))
     return axisObj
 
-def plot(datasets, plotType="line", **plotOptions):
-    axis = plt.gca()
+def plot(datasets, plotType="line", axes=False, **plotOptions):
+    if not axes:
+        axes = plt.gca()
     if plotType == "line":
-        linePlot(datasets, axis, **plotOptions)
+        linePlot(datasets, axes, **plotOptions)
     elif plotType == "errorbar":
-        errorPlot(datasets, axis, **plotOptions)
+        errorPlot(datasets, axes, **plotOptions)
     elif plotType == "level":
-        levelPlot(datasets, axis, **plotOptions)
+        levelPlot(datasets, axes, **plotOptions)
     else:
         # Defaults to scatter
-        scatterPlot(datasets, axis, **plotOptions)
-    plt.xlabel(plotOptions["xlabel"])
-    plt.ylabel(plotOptions["ylabel"])
+        scatterPlot(datasets, axes, **plotOptions)
+    axes.set_xlabel(plotOptions["xlabel"])
+    axes.set_ylabel(plotOptions["ylabel"])
     if plotOptions["legend"]:
-        plt.legend()
+        axes.legend()
     if plotOptions["xlim"]:
-        plt.xlim(*plotOptions["xlim"])
+        axes.set_xlim(*plotOptions["xlim"])
     if plotOptions["ylim"]:
-        plt.ylim(*plotOptions["ylim"])
-    return axis
+        axes.set_ylim(*plotOptions["ylim"])
+    # Insert tick labels
+    if plotOptions["xticks"]:
+        axes.set_xticks(plotOptions["xticks"][0], labels=plotOptions["xticks"][1])
+    if plotOptions["yticks"]:
+        axes.set_yticks(plotOptions["yticks"][0], labels=plotOptions["yticks"][1])
+    return axes
 
-def fromConfig(configFileName):
+def fromConfig(configFileName, axes=False):
+    axesGiven = False
+    if axes:
+        axesGiven = True
     cfg = configparser.ConfigParser()
     cfg.read(configFileName)
     datasets = {}
@@ -83,15 +92,16 @@ def fromConfig(configFileName):
         datasetfiles = cfg.get("data", "datasetfiles").split("\n")
         for datasetFileName in datasetfiles:
             datasets.update(parseDatasetConfig(datasetFileName))
-        # Run any combine commands
+    # In place defined datasets take priority
+    datasets.update(parseDatasetConfig(configFileName))
+    # Now, run the combine directive, if present
+    if "data" in cfg:
         if "combine" in cfg["data"]:
             combineCommands = cfg.get("data", "combine").split("\n")
             for commandLine in combineCommands:
                 commandSplitLine = commandLine.split()
                 commandName = commandSplitLine[0]
                 datasets = commands[commandName](datasets, commandSplitLine[1:])
-    # In place defined datasets take priority
-    datasets.update(parseDatasetConfig(configFileName))
     # Now, run any transform commands
     if "transform" in cfg["plot"]:
         transformCommands = cfg["plot"].get("transform").split("\n")
@@ -121,8 +131,8 @@ def fromConfig(configFileName):
         plotOptions["ylim"] = False
     plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "b")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
-    plotOptions["xlabel"] = cfg["plot"].get("xlabel", "X")
-    plotOptions["ylabel"] = cfg["plot"].get("ylabel", "Y")
+    plotOptions["xlabel"] = cfg["plot"].get("xlabel", None)
+    plotOptions["ylabel"] = cfg["plot"].get("ylabel", None)
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
     # Dataset labels
     plotOptions["datasetLabels"] = cfg["plot"].get("labels", False)
@@ -132,12 +142,27 @@ def fromConfig(configFileName):
             toAdd = len(colCoords) - len(plotOptions["datasetLabels"])
             for i in range(toAdd):
                 plotOptions["datasetLabels"].append(None)
-    axisObj = plot(chosenDatasets, graphType, **plotOptions)
+    # Arguments supplied are the dataset name, convert it to a dataset that is then plotted
+    for ticksName in ["xticks", "yticks"]:
+        plotOptions[ticksName] = cfg["plot"].get(ticksName, False)
+        if plotOptions[ticksName]:
+            plotOptions[ticksName] = datasets[plotOptions[ticksName]]
+    axes = plot(chosenDatasets, graphType, axes=axes, **plotOptions)
     # If fit is present, handle it
     if cfg["plot"].get("fit", False):
         fitArgs = cfg["plot"].get("fit").split()
         # TODO : Fit args?
-        plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axisObj, fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False))
+        plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False))
+    # If an inset directive is present, add an inset to the current axes
+    if cfg["plot"].get("inset", False):
+        insetArgs = cfg["plot"].get("inset").split()
+        # Arguments are xpos, ypos, xwidth, ywidth
+        insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
+        fromConfig(insetArgs[0], axes=insetAxes)
+    # If axes are provided, assume figure is printed somewhere else
+    # TODO : Is this a reasonable assumption?
+    if axesGiven:
+        return True
     if plotOptions["figfile"]:
         plt.savefig(plotOptions["figfile"], bbox_inches="tight")
     else:
