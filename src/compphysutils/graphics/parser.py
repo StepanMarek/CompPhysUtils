@@ -1,12 +1,14 @@
 from . import hlgParser
 from . import aimsParser
+from . import eigerParser
 from .post_process import postProcessCommands
 import configparser
 import os
 
 lineParseFunctions = {
     "hlg" : hlgParser.hlgLine,
-    "aims" : aimsParser.aimsLine
+    "aims" : aimsParser.aimsLine,
+    "eiger" : eigerParser.eigerLine
 }
 
 parserKwargsDefaults = {
@@ -15,12 +17,16 @@ parserKwargsDefaults = {
     },
     "aims" : {
         "outputUnit" : "eV"
+    },
+    "eiger" : {
+        "outputUnit" : "eV"
     }
 }
 
 initObjectsFunctions = {
     "hlg" : hlgParser.initParserObjects,
-    "aims" : aimsParser.initParserObjects
+    "aims" : aimsParser.initParserObjects,
+    "eiger" : eigerParser.initParserObjects
 }
 
 def parseFile(filename, filetype, parserKwargs=False):
