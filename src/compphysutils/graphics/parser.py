@@ -1,3 +1,4 @@
+from . import colsParser
 from . import hlgParser
 from . import aimsParser
 from . import eigerParser
@@ -8,38 +9,35 @@ import os
 lineParseFunctions = {
     "hlg" : hlgParser.hlgLine,
     "aims" : aimsParser.aimsLine,
-    "eiger" : eigerParser.eigerLine
+    "eiger" : eigerParser.eigerLine,
+    "cols" : colsParser.colsLine
 }
 
-parserKwargsDefaults = {
-    "hlg" : {
-        "outputUnit" : "eV"
-    },
-    "aims" : {
-        "outputUnit" : "eV"
-    },
-    "eiger" : {
-        "outputUnit" : "eV"
-    }
+parserArgsDefaults = {
+    "hlg" : "--unit eV",
+    "aims" : "--unit eV",
+    "eiger" : "--unit eV",
+    "cols" : "0 1"
 }
 
 initObjectsFunctions = {
     "hlg" : hlgParser.initParserObjects,
     "aims" : aimsParser.initParserObjects,
-    "eiger" : eigerParser.initParserObjects
+    "eiger" : eigerParser.initParserObjects,
+    "cols" : colsParser.initParserObjects
 }
 
-def parseFile(filename, filetype, parserKwargs=False):
-    if not parserKwargs:
-        parserKwargs = parserKwargsDefaults[filetype]
+def parseFile(filename, filetype, parserArgs=False):
+    if not parserArgs:
+        parserArgs = parserArgsDefaults[filetype]
     file = open(filename, "r")
     datagroups = []
-    parserObjects = initObjectsFunctions[filetype]()
+    parserObjects = initObjectsFunctions[filetype](parserArgs)
     currentParser = lineParseFunctions[filetype]
     for line in file:
         # Read line by line
         # Can return bool False if line is to be skipped
-        readGroups = currentParser(line, *parserObjects, **parserKwargs)
+        readGroups = currentParser(line, *parserObjects)
         if readGroups:
             for i in range(len(readGroups)):
                 if len(datagroups) > i:
@@ -61,8 +59,8 @@ def parseDatasetConfig(configFilename):
             datasetName = groupName.split(".")[1]
             if "file" in cfg[groupName]:
                 # Create datasets from file
-                parserKwargs = cfg.get(groupName, "parser-kwargs", fallback=False)
-                datasets[datasetName] = parseFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserKwargs=parserKwargs)
+                parserArgs = cfg[groupName].get("parser-args", False)
+                datasets[datasetName] = parseFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserArgs=parserArgs)
             elif "list" in cfg[groupName]:
                 # Create dataset from list, defaultly convert to float
                 # TODO : Should there be som interface to different convertors?

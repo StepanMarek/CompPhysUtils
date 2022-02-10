@@ -1,4 +1,5 @@
 import re
+import argparse
 
 def aimsLine(textline, energyValMatcher, occupationMatcher, outputUnit="ev"):
     splitLine = textline.split(",")
@@ -16,13 +17,16 @@ def aimsLine(textline, energyValMatcher, occupationMatcher, outputUnit="ev"):
 
 class AimsReference:
     # Object that ensures that only the converged eigenvalues are read
-    def __init__(self, energyUnit="eV"):
+    def __init__(self, parserArgs="--unit eV"):
         self.converged = False
         self.reading = False
         self.convergedLineRe = re.compile("Begin\s*self\-consistency\s*iteration\s*#\s*(\d+)")
         self.readingLineRe = re.compile("\s*State\s*Occupation\s*Eigenvalue\s*\[Ha\]\s*Eigenvalue\s*\[eV\]")
         self.dataRe = re.compile("([\d\.]+)\s*([\d\.]+)\s*([\-\d\.]+)\s*([\-\d\.]+)")
-        self.energyUnit = energyUnit
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--unit", help="Default unit to be used.", default="eV")
+        self.args = ap.parse_args(parserArgs.split())
+        self.energyUnit = self.args.unit
 
     def testLineConverged(self, line):
         result = self.convergedLineRe.search(line)
@@ -50,8 +54,7 @@ class AimsReference:
         else:
             return [float(energyH), float(occupation)]
 
-def aimsLine(line, AR, outputUnit="eV"):
-    AR.energyUnit = outputUnit
+def aimsLine(line, AR):
     if not AR.converged:
         AR.testLineConverged(line)
         return False
@@ -67,5 +70,5 @@ def aimsLine(line, AR, outputUnit="eV"):
     # Real result present, convert to floats and return
     return result
 
-def initParserObjects():
-    return [AimsReference()]
+def initParserObjects(parserArgs):
+    return [AimsReference(parserArgs)]

@@ -2,11 +2,14 @@ import re
 
 class EigerReference:
     # Object that ensures that only the converged eigenvalues are read
-    def __init__(self, energyUnit="eV"):
+    def __init__(self, parserArgs="--unit eV"):
         self.reading = False
         self.readingLineRe = re.compile("\s*Nr\.\s*Orbital\s*Occupation\s*Energy")
         self.dataRe = re.compile("(\d+\.\d+)?\s*([\-\+]+\d+\.\d+)[H\s=]*([\-\+]+\d+\.\d+)")
-        self.energyUnit = energyUnit
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--unit", help="Unit to be outputed", default="eV")
+        self.args = ap.parse_args(parserArgs.split())
+        self.energyUnit = self.args.unit
 
     def testLineReading(self, line):
         resultObj = self.readingLineRe.match(line)
@@ -28,8 +31,7 @@ class EigerReference:
         else:
             return [float(energyH), float(occupation)]
 
-def eigerLine(line, ER, outputUnit="eV"):
-    ER.energyUnit = outputUnit
+def eigerLine(line, ER):
     if not ER.reading:
         ER.testLineReading(line)
         return False
@@ -41,5 +43,5 @@ def eigerLine(line, ER, outputUnit="eV"):
     # Real result present, convert to floats and return
     return result
 
-def initParserObjects():
-    return [EigerReference()]
+def initParserObjects(parserArgs):
+    return [EigerReference(parserArgs)]

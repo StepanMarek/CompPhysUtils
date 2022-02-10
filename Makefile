@@ -13,6 +13,7 @@ CRYSTALGENSOURCE += src/compphysutils/crystalgen/__init__.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/parser.py
+GRAPHICSSOURCE += src/compphysutils/graphics/colsParser.py
 GRAPHICSSOURCE += src/compphysutils/graphics/hlgParser.py
 GRAPHICSSOURCE += src/compphysutils/graphics/aimsParser.py
 GRAPHICSSOURCE += src/compphysutils/graphics/eigerParser.py

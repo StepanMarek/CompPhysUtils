@@ -1,4 +1,5 @@
 import re
+import argparse
 
 convDict = {
     "eV" :  {
@@ -25,8 +26,11 @@ def hlgLine(textline, energyValMatcher, energyUnitMatcher, occupationMatcher, ou
     convFactor = convDict[fileUnit][outputUnit]
     return [energy*convFactor, occupation]
 
-def initParserObjects():
+def initParserObjects(parserArgs):
     energyValMatcher = re.compile("[-]?[0-9]*\.[0-9]*e?[\+\-0-9]*")
     energyUnitMatcher = re.compile(" H|(eV)")
     occupationMatcher = re.compile("Occupied")
-    return energyValMatcher, energyUnitMatcher, occupationMatcher
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--unit", default="eV", help="Unit for the output")
+    outputUnit = ap.parse_args(parserArgs.split()).unit
+    return energyValMatcher, energyUnitMatcher, occupationMatcher, outputUnit
