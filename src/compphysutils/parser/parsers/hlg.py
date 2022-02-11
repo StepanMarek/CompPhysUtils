@@ -12,7 +12,7 @@ convDict = {
     }
 }
 
-def hlgLine(textline, energyValMatcher, energyUnitMatcher, occupationMatcher, outputUnit="ev"):
+def line(textline, energyValMatcher, energyUnitMatcher, occupationMatcher, outputUnit="ev"):
     splitLine = textline.split(",")
     spin = splitLine[2].split(":")[1].strip()
     energy = float(energyValMatcher.search(splitLine[3]).group(0))
@@ -34,3 +34,5 @@ def initParserObjects(parserArgs):
     ap.add_argument("--unit", default="eV", help="Unit for the output")
     outputUnit = ap.parse_args(parserArgs.split()).unit
     return energyValMatcher, energyUnitMatcher, occupationMatcher, outputUnit
+
+argDefaults = "--unit eV"

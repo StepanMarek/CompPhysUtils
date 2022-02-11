@@ -19,7 +19,6 @@ def gapRead(datagroups, argList):
                 LUMO = datagroups[0][i]
                 HOMO = datagroups[0][i-1]
                 break
-    print(LUMO, HOMO, LUMO-HOMO)
     return [[LUMO - HOMO]]
 
 levelsGetAP = argparse.ArgumentParser()

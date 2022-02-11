@@ -31,7 +31,7 @@ class EigerReference:
         else:
             return [float(energyH), float(occupation)]
 
-def eigerLine(line, ER):
+def line(line, ER):
     if not ER.reading:
         ER.testLineReading(line)
         return False
@@ -45,3 +45,5 @@ def eigerLine(line, ER):
 
 def initParserObjects(parserArgs):
     return [EigerReference(parserArgs)]
+
+argDefaults = "--unit eV"

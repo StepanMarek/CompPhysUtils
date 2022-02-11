@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
-from .parser import parseDatasetConfig
+from ..parser.parser import parseDatasetConfig
 import configparser
-from .combine import commands
+from ..parser.combine import commands
 from .fitter import plotFit 
 from .transformer import transforms
 

@@ -1,20 +1,6 @@
 import re
 import argparse
 
-def aimsLine(textline, energyValMatcher, occupationMatcher, outputUnit="ev"):
-    splitLine = textline.split(",")
-    spin = splitLine[2].split(":")[1].strip()
-    energy = float(energyValMatcher.search(splitLine[3]).group(0))
-    occupation = 0
-    if occupationMatcher.search(splitLine[3]):
-        if spin == "mos":
-            occupation = 2
-        else:
-            occupation = 1
-    fileUnit = energyUnitMatcher.search(splitLine[3]).group(0).strip()
-    convFactor = convDict[fileUnit][outputUnit]
-    return [energy*convFactor, occupation]
-
 class AimsReference:
     # Object that ensures that only the converged eigenvalues are read
     def __init__(self, parserArgs="--unit eV"):
@@ -54,7 +40,7 @@ class AimsReference:
         else:
             return [float(energyH), float(occupation)]
 
-def aimsLine(line, AR):
+def line(line, AR):
     if not AR.converged:
         AR.testLineConverged(line)
         return False
@@ -72,3 +58,5 @@ def aimsLine(line, AR):
 
 def initParserObjects(parserArgs):
     return [AimsReference(parserArgs)]
+
+argDefaults = "--unit eV"

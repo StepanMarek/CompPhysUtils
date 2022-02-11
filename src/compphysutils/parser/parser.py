@@ -1,31 +1,45 @@
-from . import colsParser
-from . import hlgParser
-from . import aimsParser
-from . import eigerParser
 from .post_process import postProcessCommands
 import configparser
 import os
+import importlib
 
-lineParseFunctions = {
-    "hlg" : hlgParser.hlgLine,
-    "aims" : aimsParser.aimsLine,
-    "eiger" : eigerParser.eigerLine,
-    "cols" : colsParser.colsLine
-}
-
-parserArgsDefaults = {
-    "hlg" : "--unit eV",
-    "aims" : "--unit eV",
-    "eiger" : "--unit eV",
-    "cols" : "0 1"
-}
-
-initObjectsFunctions = {
-    "hlg" : hlgParser.initParserObjects,
-    "aims" : aimsParser.initParserObjects,
-    "eiger" : eigerParser.initParserObjects,
-    "cols" : colsParser.initParserObjects
-}
+parserModules = {}
+for parserFileName in os.listdir(os.path.dirname(__file__)+"/parsers"):
+    if parserFileName[0:2] == "__":
+        # Not a parser, but just a init or other module
+        continue
+    parserType = parserFileName.split(".")[0]
+    parserModules[parserType] = importlib.import_module("compphysutils.parser.parsers."+parserType)
+lineParseFunctions = {}
+parserArgsDefaults = {}
+initObjectsFunctions = {}
+for parserName in parserModules:
+    lineParseFunctions[parserName] = parserModules[parserName].line
+    parserArgsDefaults[parserName] = parserModules[parserName].argDefaults
+    initObjectsFunctions[parserName] = parserModules[parserName].initParserObjects
+#lineParseFunctions = {"cols" : parserModules["cols"].colsLine}
+#parserArgsDefaults = {"cols" : "0"}
+#initObjectsFunctions = {"cols" : parserModules["cols"].initParserObjects}
+#lineParseFunctions = {
+#    "hlg" : hlgParser.hlgLine,
+#    "aims" : aimsParser.aimsLine,
+#    "eiger" : eigerParser.eigerLine,
+#    "cols" : colsParser.colsLine
+#}
+#
+#parserArgsDefaults = {
+#    "hlg" : "--unit eV",
+#    "aims" : "--unit eV",
+#    "eiger" : "--unit eV",
+#    "cols" : "0 1"
+#}
+#
+#initObjectsFunctions = {
+#    "hlg" : hlgParser.initParserObjects,
+#    "aims" : aimsParser.initParserObjects,
+#    "eiger" : eigerParser.initParserObjects,
+#    "cols" : colsParser.initParserObjects
+#}
 
 def parseFile(filename, filetype, parserArgs=False):
     if not parserArgs:

@@ -20,7 +20,7 @@ class ColsReference:
             retVal.append(float(splitLine[i]))
         return retVal
 
-def colsLine(line, CR):
+def line(line, CR):
     # Reading
     result = CR.continueReading(line)
     if not result:
@@ -31,3 +31,5 @@ def colsLine(line, CR):
 
 def initParserObjects(parserArgs):
     return [ColsReference(parserArgs)]
+
+argDefaults = "0"
