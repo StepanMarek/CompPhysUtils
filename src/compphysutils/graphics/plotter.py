@@ -89,9 +89,10 @@ def fromConfig(configFileName, axes=False):
     datasets = {}
     # Read the datasets
     if "data" in cfg:
-        datasetfiles = cfg.get("data", "datasetfiles").split("\n")
-        for datasetFileName in datasetfiles:
-            datasets.update(parseDatasetConfig(datasetFileName))
+        datasetfiles = cfg["data"].get("datasetfiles", False)
+        if datasetfiles:
+            for datasetFileName in datasetfiles.split("\n"):
+                datasets.update(parseDatasetConfig(datasetFileName))
     # In place defined datasets take priority
     datasets.update(parseDatasetConfig(configFileName))
     # Now, run the combine directive, if present

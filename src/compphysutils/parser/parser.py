@@ -2,14 +2,28 @@ from .post_process import postProcessCommands
 import configparser
 import os
 import importlib
+import re
 
 parserModules = {}
-for parserFileName in os.listdir(os.path.dirname(__file__)+"/parsers"):
-    if parserFileName[0:2] == "__":
+# Check for custom parser modules
+customParsers = []
+if os.path.isdir(os.path.expanduser("~/.config/compphysutils/parsers")):
+    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/parsers")))
+    customParsers = list(map(lambda f: root+"/"+f, filenames))
+# Check for default parser modules
+root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/parsers"))
+defaultParsers = list(map(lambda f: root+"/"+f, filenames))
+# Ideally, custom parsers should overwrite default parsers, not sure if this works
+rexp = re.compile(".*/(.*)\.py")
+for parserFileName in (defaultParsers + customParsers):
+    parserType = rexp.search(parserFileName).group(1)
+    if parserType[0:2] == "__":
         # Not a parser, but just a init or other module
         continue
-    parserType = parserFileName.split(".")[0]
-    parserModules[parserType] = importlib.import_module("compphysutils.parser.parsers."+parserType)
+    spec = importlib.util.spec_from_file_location("compphysutils.parser.parsers."+parserType, parserFileName)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    parserModules[parserType] = mod
 lineParseFunctions = {}
 parserArgsDefaults = {}
 initObjectsFunctions = {}
