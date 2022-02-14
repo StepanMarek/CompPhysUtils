@@ -13,7 +13,7 @@ CRYSTALGENSOURCE += src/compphysutils/crystalgen/__init__.py
 
 PARSERSOURCE := src/compphysutils/parser/__init__.py
 PARSERSOURCE += src/compphysutils/parser/parser.py
-PARSERSOURCE += src/compphysutils/parser/post_process.py
+PARSERSOURCE += src/compphysutils/parser/post_processor.py
 PARSERSOURCE += src/compphysutils/parser/combine.py
 PARSERSOURCE += src/compphysutils/parser/parsers/__init__.py
 PARSERSOURCE += src/compphysutils/parser/parsers/aims.py

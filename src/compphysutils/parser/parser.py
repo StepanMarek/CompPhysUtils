@@ -1,4 +1,4 @@
-from .post_process import postProcessCommands
+from .post_processor import postProcessCommands
 import configparser
 import os
 import importlib
