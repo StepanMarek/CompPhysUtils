@@ -1,19 +1,26 @@
-import argparse
-import math
+import os
+import importlib
 
-logTransAP = argparse.ArgumentParser()
-logTransAP.add_argument("dataset_name", help="Name of the dataset.")
-logTransAP.add_argument("column_index", type=int, help="Index of the column in the dataset.")
-logTransAP.add_argument("--err", type=int, help="Do also an error calculation, on a different column.", default=False)
-def logTransform(datasets, argsString):
-    args = logTransAP.parse_args(argsString)
-    for i in range(len(datasets[args.dataset_name][args.column_index])):
-        origX = datasets[args.dataset_name][args.column_index][i]
-        datasets[args.dataset_name][args.column_index][i] = math.log(origX)
-        if args.err:
-            datasets[args.dataset_name][args.err][i] = abs(math.log(origX + datasets[args.dataset_name][args.err][i]) - math.log(origX))
-    return datasets
-
-transforms = {
-    "log" : logTransform
-}
+## Search for default post-processing commands
+roots = []
+modFilenames = []
+root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/transforms"))
+roots.append(root)
+modFilenames.append(filenames)
+## Search for custom post_process commands
+if os.path.isdir(os.path.expanduser("~/.config/compphysutils/transforms")):
+    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/transforms")))
+    roots.append(root)
+    modFilenames.append(filenames)
+## Import all commands
+transforms = {}
+for i in range(len(roots)):
+    for filename in modFilenames[i]:
+        commandName = filename.split(".")[0]
+        if commandName[0:2] == "__":
+            # Skip __init__.py and similar commands
+            continue
+        spec = importlib.util.spec_from_file_location("compphysutils.graphics.transforms."+commandName, roots[i]+"/"+filename)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        transforms[commandName] = mod.command
