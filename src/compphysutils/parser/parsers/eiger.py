@@ -1,4 +1,5 @@
 import re
+import argparse
 
 class EigerReference:
     # Object that ensures that only the converged eigenvalues are read

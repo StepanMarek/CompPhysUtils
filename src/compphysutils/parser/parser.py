@@ -93,13 +93,14 @@ def parseDatasetConfig(configFilename):
                 # Create dataset from list, defaultly convert to float
                 # TODO : Should there be som interface to different convertors?
                 # A more sophisticated and decoupled list types
+                splitList = cfg[groupName]["list"].split("\n")
                 if "listtype" in cfg[groupName]:
                     if cfg[groupName]["listtype"] == "string":
-                        datasets[datasetName] = [cfg[groupName]["list"].split()]
+                        datasets[datasetName] = list(map(lambda s: s.split(), splitList))
                     else:
-                        datasets[datasetName] = [list(map(float, cfg[groupName]["list"].split()))]
+                        datasets[datasetName] = list(map(lambda s: list(map(float, s.split())), splitList))
                 else:
-                    datasets[datasetName] = [list(map(float, cfg[groupName]["list"].split()))]
+                    datasets[datasetName] = list(map(lambda s: list(map(float, s.split())), splitList))
             if "post-process" in cfg[groupName]:
                 commandSplit = cfg[groupName]["post-process"].split()
                 if len(commandSplit) > 1:

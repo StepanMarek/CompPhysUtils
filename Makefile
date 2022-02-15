@@ -26,6 +26,9 @@ GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
 GRAPHICSSOURCE += src/compphysutils/graphics/fitter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transformer.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorator.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorate/line.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 
 BASESOURCE := src/compphysutils/__init__.py
 
