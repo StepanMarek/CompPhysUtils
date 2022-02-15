@@ -4,6 +4,7 @@ import configparser
 from ..parser.combine import commands
 from .fitter import plotFit 
 from .transformer import transforms
+from .decorator import decorations
 
 class ColorIterator:
     def __init__(self, singleCycle="b"):
@@ -23,7 +24,7 @@ def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
         datasetLabels = [None] * len(datasets)
     for dataIndex in range(len(datasets)):
-        axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex])
+        axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]))
     return axisObj
 
 def scatterPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
@@ -68,7 +69,7 @@ def plot(datasets, plotType="line", axes=False, **plotOptions):
     axes.set_xlabel(plotOptions["xlabel"])
     axes.set_ylabel(plotOptions["ylabel"])
     if plotOptions["legend"]:
-        axes.legend()
+        axes.legend(loc=plotOptions["legend-pos"])
     if plotOptions["xlim"]:
         axes.set_xlim(*plotOptions["xlim"])
     if plotOptions["ylim"]:
@@ -122,6 +123,7 @@ def fromConfig(configFileName, axes=False):
             chosenDatasets[i].append(datasets[colCoords[i][j]][int(colCoords[i][j+1])])
     plotOptions = {}
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
+    plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "upper right")
     if "xlim" in cfg["plot"]:
         plotOptions["xlim"] = list(map(float, cfg["plot"].get("xlim").split()))
     else:
@@ -154,6 +156,12 @@ def fromConfig(configFileName, axes=False):
         fitArgs = cfg["plot"].get("fit").split()
         # TODO : Fit args?
         plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False))
+    # Handle decorations for main axes
+    if cfg["plot"].get("decorate", False):
+        decorationCommands = cfg["plot"].get("decorate").split("\n")
+        for decorationArgs in decorationCommands:
+            decorationSplit = decorationArgs.split()
+            axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
     # If an inset directive is present, add an inset to the current axes
     if cfg["plot"].get("inset", False):
         insetArgs = cfg["plot"].get("inset").split()
