@@ -20,11 +20,25 @@ class ColorIterator:
         self.currentIndex += 1
         return returnVal
 
+class LinestyleIterator:
+    def __init__(self, singleCycle="solid"):
+        self.singleCycle = singleCycle.split()
+        self.currentIndex = 0
+        self.cycleLen = len(self.singleCycle)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        returnVal = self.singleCycle[self.currentIndex % self.cycleLen]
+        self.currentIndex += 1
+        return returnVal
+
 def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
     if not datasetLabels:
         datasetLabels = [None] * len(datasets)
     for dataIndex in range(len(datasets)):
-        axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]))
+        axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]), linestyle=next(plotOptions["linestyleCycle"]))
     return axisObj
 
 def scatterPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
@@ -134,6 +148,8 @@ def fromConfig(configFileName, axes=False):
         plotOptions["ylim"] = False
     plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "b")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
+    plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")
+    plotOptions["linestyleCycle"] = LinestyleIterator(plotOptions["linestyleCycle"])
     plotOptions["xlabel"] = cfg["plot"].get("xlabel", None)
     plotOptions["ylabel"] = cfg["plot"].get("ylabel", None)
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
