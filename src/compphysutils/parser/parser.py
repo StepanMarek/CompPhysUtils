@@ -1,4 +1,5 @@
 from .post_processor import postProcessCommands
+from .savepoint import datasetParse as savepointDatasetParse
 import configparser
 import os
 import importlib
@@ -25,35 +26,15 @@ for parserFileName in (defaultParsers + customParsers):
     spec.loader.exec_module(mod)
     parserModules[parserType] = mod
 lineParseFunctions = {}
+writeParseFunctions = {}
 parserArgsDefaults = {}
 initObjectsFunctions = {}
 for parserName in parserModules:
     lineParseFunctions[parserName] = parserModules[parserName].line
     parserArgsDefaults[parserName] = parserModules[parserName].argDefaults
     initObjectsFunctions[parserName] = parserModules[parserName].initParserObjects
-#lineParseFunctions = {"cols" : parserModules["cols"].colsLine}
-#parserArgsDefaults = {"cols" : "0"}
-#initObjectsFunctions = {"cols" : parserModules["cols"].initParserObjects}
-#lineParseFunctions = {
-#    "hlg" : hlgParser.hlgLine,
-#    "aims" : aimsParser.aimsLine,
-#    "eiger" : eigerParser.eigerLine,
-#    "cols" : colsParser.colsLine
-#}
-#
-#parserArgsDefaults = {
-#    "hlg" : "--unit eV",
-#    "aims" : "--unit eV",
-#    "eiger" : "--unit eV",
-#    "cols" : "0 1"
-#}
-#
-#initObjectsFunctions = {
-#    "hlg" : hlgParser.initParserObjects,
-#    "aims" : aimsParser.initParserObjects,
-#    "eiger" : eigerParser.initParserObjects,
-#    "cols" : colsParser.initParserObjects
-#}
+    if hasattr(parserModules[parserName], "writeLine"):
+        writeParseFunctions[parserName] = parserModules[parserName].writeLine
 
 def parseFile(filename, filetype, parserArgs=False):
     if not parserArgs:
@@ -101,10 +82,14 @@ def parseDatasetConfig(configFilename):
                         datasets[datasetName] = list(map(lambda s: list(map(float, s.split())), splitList))
                 else:
                     datasets[datasetName] = list(map(lambda s: list(map(float, s.split())), splitList))
+            if "savepoint" in cfg[groupName]:
+                savepointDatasetParse(cfg[groupName].get("savepoint"), "load", datasets[datasetName], writeParseFunctions)
             if "post-process" in cfg[groupName]:
                 commandSplit = cfg[groupName]["post-process"].split()
                 if len(commandSplit) > 1:
                     datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], commandSplit[1:])
                 else:
                     datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], [])
+            if "savepoint" in cfg[groupName]:
+                savepointDatasetParse(cfg[groupName].get("savepoint"), "post-process", datasets[datasetName], writeParseFunctions, "data_post.out")
     return datasets

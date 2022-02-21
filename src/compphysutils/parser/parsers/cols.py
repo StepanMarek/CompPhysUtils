@@ -33,3 +33,7 @@ def initParserObjects(parserArgs):
     return [ColsReference(parserArgs)]
 
 argDefaults = "0"
+
+def writeLine(datarow):
+    datalist = list(map(str, datarow))
+    return " ".join(datalist)
