@@ -7,6 +7,9 @@ def parseVectors(vectorsString, representation=False):
     """
     Returns the real/representation vectors based on the files given in the string
     """
+    # If the strings are not present, return false
+    if not vectorsString:
+        return False
     vecs = []
     vecStrings = vectorsString.split()
     if not representation:
@@ -20,7 +23,7 @@ def parseVectors(vectorsString, representation=False):
 def parseCharConfig(cfg):
     realBasis = parseVectors(cfg["vectors"]["real"])
     reprBasis = parseVectors(cfg["vectors"]["representation"], representation=True)
-    planarBasis = parseVectors(cfg["vectors"]["planar"], representation=True)
+    planarBasis = parseVectors(cfg["vectors"].get("planar", False), representation=True)
     unitCellLength = float(cfg["base"]["unit"])
     elemName = cfg["base"]["atom"]
     return realBasis, reprBasis, unitCellLength, elemName, planarBasis

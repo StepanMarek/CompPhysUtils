@@ -74,7 +74,10 @@ def generateCrystalRepresentation(basisRep, planarBasis, layers=1, addatoms=0, s
     unitBasis = getUnitBasis(len(basisRep))
     crystalRep = generateNLevels(layers, unitBasis, basisRep)
     # add-atoms
-    crystalRep = addAtoms(crystalRep, basisRep, planarBasis, addatoms, seed=seed)
+    if not planarBasis:
+        crystalRep = addAtoms(crystalRep, basisRep, unitBasis, addatoms, seed=seed)
+    else:
+        crystalRep = addAtoms(crystalRep, basisRep, planarBasis, addatoms, seed=seed)
     return crystalRep
 
 def generateCrystal(crystalCharFilename, layers=1, addatoms=0, seed=False):
@@ -152,8 +155,8 @@ def createClusterFromConfig(configFilename):
         if "lattice" in cfg["cluster"]:
             basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(cfg["cluster"]["lattice"])
         else:
-            basisReal, basisRep, unitLength, elemName, planarBasis = parseCharConfig(cfg) 
-        crystalRep = generateCrystalRepresentation(basisRep, planarBasis, layers=int(cfg["cluster"]["layers"]), addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"]["seed"])
+            basisReal, basisRep, unitLength, elemName, planarBasis = parseCharConfig(cfg)
+        crystalRep = generateCrystalRepresentation(basisRep, planarBasis, layers=int(cfg["cluster"]["layers"]), addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"].get("seed", False))
         # Start the post-processing
         if "post-processing" in cfg.sections():
             unitBasis = getUnitBasis(len(crystalRep[0].components))
@@ -177,15 +180,22 @@ def createClusterFromConfig(configFilename):
                     else:
                         vectorSum = postProcessVectorSum(unitBasis, planarBasis, deletionInstructions)
                         crystalRep = delAtomAtPosition(crystalRep, basisRep, vectorSum)
-        # Post-processing finished
         structure = getRealStructure(crystalRep, basisReal)
         data = getAtomData(structure, unitLength, elemName)
         # If IndexDump is required, output atom data
-        dumpIndexInfo = cfg.getboolean("post-processing", "indexdump")
-        if dumpIndexInfo:
-            for i in range(len(crystalRep)):
-                print(i, crystalRep[i], data[i])
-            print("Planar basis")
-            for i in range(len(planarBasis)):
-                print(i, planarBasis[i])
+        if "post-processing" in cfg.sections():
+            if "sphere-cut" in cfg["post-processing"]:
+                radius = float(cfg["post-processing"].get("sphere-cut", 1.0))
+                newData = []
+                for atom in data:
+                    if atom[0] ** 2 + atom[1] ** 2 + atom [2] ** 2 <= radius ** 2:
+                        newData.append(atom)
+                data = newData
+            dumpIndexInfo = cfg.getboolean("post-processing", "indexdump")
+            if dumpIndexInfo:
+                for i in range(len(crystalRep)):
+                    print(i, crystalRep[i], data[i])
+                print("Planar basis")
+                for i in range(len(planarBasis)):
+                    print(i, planarBasis[i])
         saveData(data, cfg["cluster"]["name"])
