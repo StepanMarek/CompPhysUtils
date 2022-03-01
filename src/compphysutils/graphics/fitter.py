@@ -1,8 +1,32 @@
 from scipy.optimize import curve_fit
 import math
+import importlib
+import os
 
-def linFit(x, a, b):
-    return a*x + b
+roots = []
+modFilenames = []
+root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/fit_types"))
+roots.append(root)
+modFilenames.append(filenames)
+## Search for custom post_process commands
+if os.path.isdir(os.path.expanduser("~/.config/compphysutils/fit_types")):
+    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/fit_types")))
+    roots.append(root)
+    modFilenames.append(filenames)
+## Import all commands
+fitFunctions = {}
+paramNames = {}
+for i in range(len(roots)):
+    for filename in modFilenames[i]:
+        fitFuncName = filename.split(".")[0]
+        if fitFuncName[0:2] == "__":
+            # Skip __init__.py and similar commands
+            continue
+        spec = importlib.util.spec_from_file_location("compphysutils.graphics.fit_types."+fitFuncName, roots[i]+"/"+filename)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        fitFunctions[fitFuncName] = mod.fit
+        paramNames[fitFuncName] = mod.paramNames
 
 def roundSignificantFigures(number, sigFigs, matchOrder=False):
     if not matchOrder:
@@ -22,14 +46,18 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
     perr = []
     for i in range(len(pcov)):
         perr.append(pcov[i][i] ** 0.5)
-    x0 = min(dataset[0])
-    x1 = max(dataset[0])
-    y0 = fitFunctions[fitFunctionName](x0, *popt)
-    y1 = fitFunctions[fitFunctionName](x1, *popt)
+    xMin = min(dataset[0])
+    xMax = max(dataset[0])
+    dx = (xMax - xMin) / (fitParams["fitPoints"] - 1)
+    xs = []
+    ys = []
+    for i in range(fitParams["fitPoints"]):
+        xs.append(xMin + dx*i)
+        ys.append(fitFunctions[fitFunctionName](xMin + dx*i, *popt))
     if fitParams["fitLabel"]:
-        axisObj.plot([x0,x1],[y0,y1],label=fitParams["fitLabel"])
+        axisObj.plot(xs,ys,label=fitParams["fitLabel"])
     else:
-        axisObj.plot([x0,x1],[y0,y1])
+        axisObj.plot(xs,ys)
     # Construct the param string
     pstring = ""
     for i in range(len(popt)):
@@ -41,10 +69,3 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
         # Default to top left
         axisObj.text(0.1, 0.9-0.1*(len(paramNames[fitFunctionName])-1+fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
     return popt
-
-fitFunctions = {
-    "lin" : linFit
-}
-paramNames = {
-    "lin" : ["Gradient", "Intercept"]
-}

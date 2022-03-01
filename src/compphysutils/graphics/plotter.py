@@ -62,40 +62,6 @@ class LinestyleIterator:
         self.currentIndex += 1
         return returnVal
 
-#def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-#    if not datasetLabels:
-#        datasetLabels = [None] * len(datasets)
-#    for dataIndex in range(len(datasets)):
-#        axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]), linestyle=next(plotOptions["linestyleCycle"]))
-#    return axisObj
-#
-#def scatterPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-#    if not datasetLabels:
-#        datasetLabels = [None] * len(datasets)
-#    for dataIndex in range(len(datasets)):
-#        axisObj.scatter(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex])
-#    return axisObj
-#
-#def errorPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-#    if not datasetLabels:
-#        datasetLabels = [None] * len(datasets)
-#    for dataIndex in range(len(datasets)):
-#        if len(datasets[dataIndex]) >= 4:
-#            # If at least four columns provided, plot errors on both axes
-#            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][2], xerr=datasets[dataIndex][1], yerr=datasets[dataIndex][3], capsize=4, lw=0, elinewidth=2, marker="p", ms=1, label=datasetLabels[dataIndex])
-#        else:
-#            # Otherwise, just plot yerr
-#            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], yerr=datasets[dataIndex][2], capsize=4, lw=0, elinewidth=2, marker="p", ms=2, label=datasetLabels[dataIndex])
-#    return axisObj
-#
-#def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-#    if not datasetLabels:
-#        datasetLabels = [None] * len(datasets)
-#    for dataIndex in range(len(datasets)):
-#        # For x positions, only takes into account first element
-#        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex], colors=next(plotOptions["colorCycle"]))
-#    return axisObj
-
 def plot(datasets, plotType="line", axes=False, **plotOptions):
     if not axes:
         axes = plt.gca()
@@ -201,7 +167,7 @@ def fromConfig(configFileName, axes=False):
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
-            prevFitParams += list(plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False), paramsOffset=len(prevFitParams)))
+            prevFitParams += list(plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitPoints=int(cfg["plot"].get("fit-points", 2)), fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False), paramsOffset=len(prevFitParams)))
     # Handle decorations for main axes
     if cfg["plot"].get("decorate", False):
         decorationCommands = cfg["plot"].get("decorate").split("\n")
