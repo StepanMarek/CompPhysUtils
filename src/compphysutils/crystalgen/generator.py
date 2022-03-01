@@ -3,6 +3,7 @@ import configparser
 from .readCrystalChar import readCrystalChar, parseCharConfig
 from .VectorRepresentation import VectorRepresentation
 from .VectorReal import VectorReal
+import os
 
 def getUnitBasis(N):
     basis = []
@@ -153,7 +154,12 @@ def createClusterFromConfig(configFilename):
         raise ValueError("Missing configuration - need a lattice configuration file [cluster]->lattice or [base] and [vectors] sections in the config file.")
     else:
         if "lattice" in cfg["cluster"]:
-            basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(cfg["cluster"]["lattice"])
+            # Check whether the lattice exists in cwd or in config directory, cwd takes priority
+            if os.path.isfile(cfg["cluster"]["lattice"]):
+                basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(cfg["cluster"]["lattice"])
+            else:
+                # Try config dir
+                basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(os.path.expanduser("~/.config/compphysutils/lattices/")+cfg["cluster"]["lattice"])
         else:
             basisReal, basisRep, unitLength, elemName, planarBasis = parseCharConfig(cfg)
         crystalRep, unitBasis = generateCrystalRepresentation(basisRep, layers=int(cfg["cluster"]["layers"]), )
