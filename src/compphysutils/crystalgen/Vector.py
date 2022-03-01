@@ -60,5 +60,9 @@ class Vector:
         # Only return scalar multiple
         return (-1) * self
 
+    def __abs__(self):
+        # Returns magnitude of the vector
+        return (sum(map(lambda x:x**2, self.components)))**0.5
+
     def cloneZeros(self):
         return type(self)(*([0]*len(self.components)))
