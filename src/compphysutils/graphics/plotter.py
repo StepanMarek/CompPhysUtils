@@ -7,6 +7,32 @@ from ..parser.combine import commands
 from .fitter import plotFit 
 from .transformer import transforms
 from .decorator import decorations
+import importlib
+import os
+
+# Search for default plot types
+roots = []
+modFilenames = []
+root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/plot_types"))
+roots.append(root)
+modFilenames.append(filenames)
+# Search for custom plot types
+if os.path.isdir(os.path.expanduser("~/.config/compphysutils/plot_types")):
+    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/plot_types")))
+    roots.append(root)
+    modFilenames.append(filenames)
+# Import all plot types
+plotTypes = {}
+for i in range(len(roots)):
+    for filename in modFilenames[i]:
+        plotTypeName = filename.split(".")[0]
+        if plotTypeName[0:2] == "__":
+            # Skip __init__.py and similar commands
+            continue
+        spec = importlib.util.spec_from_file_location("compphysutils.graphics.plot_types."+plotTypeName, roots[i]+"/"+filename)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        plotTypes[plotTypeName] = mod.plot
 
 class ColorIterator:
     def __init__(self, singleCycle="b"):
@@ -36,52 +62,48 @@ class LinestyleIterator:
         self.currentIndex += 1
         return returnVal
 
-def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-    if not datasetLabels:
-        datasetLabels = [None] * len(datasets)
-    for dataIndex in range(len(datasets)):
-        axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]), linestyle=next(plotOptions["linestyleCycle"]))
-    return axisObj
-
-def scatterPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-    if not datasetLabels:
-        datasetLabels = [None] * len(datasets)
-    for dataIndex in range(len(datasets)):
-        axisObj.scatter(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex])
-    return axisObj
-
-def errorPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-    if not datasetLabels:
-        datasetLabels = [None] * len(datasets)
-    for dataIndex in range(len(datasets)):
-        if len(datasets[dataIndex]) >= 4:
-            # If at least four columns provided, plot errors on both axes
-            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][2], xerr=datasets[dataIndex][1], yerr=datasets[dataIndex][3], capsize=4, lw=0, elinewidth=2, marker="p", ms=1, label=datasetLabels[dataIndex])
-        else:
-            # Otherwise, just plot yerr
-            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], yerr=datasets[dataIndex][2], capsize=4, lw=0, elinewidth=2, marker="p", ms=2, label=datasetLabels[dataIndex])
-    return axisObj
-
-def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
-    if not datasetLabels:
-        datasetLabels = [None] * len(datasets)
-    for dataIndex in range(len(datasets)):
-        # For x positions, only takes into account first element
-        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex], colors=next(plotOptions["colorCycle"]))
-    return axisObj
+#def linePlot(datasets, axisObj, datasetLabels=False, **plotOptions):
+#    if not datasetLabels:
+#        datasetLabels = [None] * len(datasets)
+#    for dataIndex in range(len(datasets)):
+#        axisObj.plot(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]), linestyle=next(plotOptions["linestyleCycle"]))
+#    return axisObj
+#
+#def scatterPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
+#    if not datasetLabels:
+#        datasetLabels = [None] * len(datasets)
+#    for dataIndex in range(len(datasets)):
+#        axisObj.scatter(datasets[dataIndex][0], datasets[dataIndex][1], label=datasetLabels[dataIndex])
+#    return axisObj
+#
+#def errorPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
+#    if not datasetLabels:
+#        datasetLabels = [None] * len(datasets)
+#    for dataIndex in range(len(datasets)):
+#        if len(datasets[dataIndex]) >= 4:
+#            # If at least four columns provided, plot errors on both axes
+#            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][2], xerr=datasets[dataIndex][1], yerr=datasets[dataIndex][3], capsize=4, lw=0, elinewidth=2, marker="p", ms=1, label=datasetLabels[dataIndex])
+#        else:
+#            # Otherwise, just plot yerr
+#            axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], yerr=datasets[dataIndex][2], capsize=4, lw=0, elinewidth=2, marker="p", ms=2, label=datasetLabels[dataIndex])
+#    return axisObj
+#
+#def levelPlot(datasets, axisObj, datasetLabels=False, **plotOptions):
+#    if not datasetLabels:
+#        datasetLabels = [None] * len(datasets)
+#    for dataIndex in range(len(datasets)):
+#        # For x positions, only takes into account first element
+#        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], orientation="vertical", label=datasetLabels[dataIndex], colors=next(plotOptions["colorCycle"]))
+#    return axisObj
 
 def plot(datasets, plotType="line", axes=False, **plotOptions):
     if not axes:
         axes = plt.gca()
-    if plotType == "line":
-        linePlot(datasets, axes, **plotOptions)
-    elif plotType == "errorbar":
-        errorPlot(datasets, axes, **plotOptions)
-    elif plotType == "level":
-        levelPlot(datasets, axes, **plotOptions)
+    if plotType in plotTypes:
+        plotTypes[plotType](datasets, axes, **plotOptions)
     else:
         # Defaults to scatter
-        scatterPlot(datasets, axes, **plotOptions)
+        plotTypes["scatter"](datasets, axes, **plotOptions)
     axes.set_xlabel(plotOptions["xlabel"])
     axes.set_ylabel(plotOptions["ylabel"])
     if plotOptions["legend"]:

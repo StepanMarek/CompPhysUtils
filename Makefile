@@ -24,6 +24,11 @@ PARSERSOURCE += src/compphysutils/parser/parsers/hlg.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/__init__.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/line.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/scatter.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/errorbar.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/level.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
 GRAPHICSSOURCE += src/compphysutils/graphics/fitter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transformer.py
