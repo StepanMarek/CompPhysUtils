@@ -175,9 +175,11 @@ def fromConfig(configFileName, axes=False):
     axes = plot(chosenDatasets, graphType, axes=axes, **plotOptions)
     # If fit is present, handle it
     if cfg["plot"].get("fit", False):
-        fitArgs = cfg["plot"].get("fit").split()
-        # TODO : Fit args?
-        plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False))
+        prevFitParams = []
+        for allFitArgs in cfg["plot"].get("fit").split("\n"):
+            fitArgs = allFitArgs.split()
+            # TODO : Fit args?
+            prevFitParams += list(plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False), paramsOffset=len(prevFitParams)))
     # Handle decorations for main axes
     if cfg["plot"].get("decorate", False):
         decorationCommands = cfg["plot"].get("decorate").split("\n")

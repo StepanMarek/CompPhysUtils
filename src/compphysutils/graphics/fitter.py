@@ -36,10 +36,11 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
         pstring += paramNames[fitFunctionName][i]+" : "+str(roundSignificantFigures(popt[i], perr[i], matchOrder=True))+r"$\pm$"+str(roundSignificantFigures(perr[i],1))+"\n"
     if fitParams["paramsPlacement"]:
         if fitParams["paramsPlacement"] == "tl":
-            axisObj.text(0.1, 0.9-0.1*(len(paramNames[fitFunctionName])-1), pstring, transform=axisObj.transAxes)
+            axisObj.text(0.1, 0.9-0.1*(len(paramNames[fitFunctionName])-1+fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
     else:
         # Default to top left
-        axisObj.text(0.1, 0.9-0.1*(len(paramNames[fitFunctionName])-1), pstring, transform=axisObj.transAxes)
+        axisObj.text(0.1, 0.9-0.1*(len(paramNames[fitFunctionName])-1+fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
+    return popt
 
 fitFunctions = {
     "lin" : linFit
