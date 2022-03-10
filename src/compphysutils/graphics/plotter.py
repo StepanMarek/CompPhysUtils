@@ -85,13 +85,12 @@ def plot(datasets, plotType="line", axes=False, **plotOptions):
         axes.set_yticks(plotOptions["yticks"][0], labels=plotOptions["yticks"][1])
     return axes
 
-def fromConfig(configFileName, axes=False):
+def fromConfig(configFileName, axes=False, datasets={}):
     axesGiven = False
     if axes:
         axesGiven = True
     cfg = configparser.ConfigParser()
     cfg.read(configFileName)
-    datasets = {}
     # Read the datasets
     if "data" in cfg:
         datasetfiles = cfg["data"].get("datasetfiles", False)
@@ -179,7 +178,7 @@ def fromConfig(configFileName, axes=False):
         insetArgs = cfg["plot"].get("inset").split()
         # Arguments are xpos, ypos, xwidth, ywidth
         insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
-        fromConfig(insetArgs[0], axes=insetAxes)
+        fromConfig(insetArgs[0], axes=insetAxes, datasets=datasets)
     # If axes are provided, assume figure is printed somewhere else
     # TODO : Is this a reasonable assumption?
     if axesGiven:
