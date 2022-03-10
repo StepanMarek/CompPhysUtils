@@ -164,9 +164,9 @@ def createClusterFromConfig(configFilename):
             basisReal, basisRep, unitLength, elemName, planarBasis = parseCharConfig(cfg)
         crystalRep, unitBasis = generateCrystalRepresentation(basisRep, layers=int(cfg["cluster"]["layers"]), )
         # Remove the atoms if doing a sphere cut
-        if "post-processing" in cfg.sections():
-            if "sphere-cut" in cfg["post-processing"]:
-                radius = float(cfg["post-processing"].get("sphere-cut", 1.0))
+        if "post-process" in cfg.sections():
+            if "sphere-cut" in cfg["post-process"]:
+                radius = float(cfg["post-process"].get("sphere-cut", 1.0))
                 newCrystalRep = []
                 for atom in crystalRep:
                     realPos = atom.translateToBasis(basisReal) * unitLength
@@ -178,23 +178,23 @@ def createClusterFromConfig(configFilename):
             crystalRep = addAtoms(crystalRep, basisRep, unitBasis, addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"].get("seed", False))
         else:
             crystalRep = addAtoms(crystalRep, basisRep, planarBasis, addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"].get("seed", False))
-        # Start the post-processing
-        if "post-processing" in cfg.sections():
+        # Start the post-process
+        if "post-process" in cfg.sections():
             unitBasis = getUnitBasis(len(crystalRep[0].components))
-            if "move" in cfg["post-processing"]:
-                for movementLine in cfg["post-processing"]["move"].split("\n"):
+            if "move" in cfg["post-process"]:
+                for movementLine in cfg["post-process"]["move"].split("\n"):
                     movementInstructions = movementLine.split()
                     vectorSum = postProcessVectorSum(unitBasis, planarBasis, movementInstructions[1:])
                     # Final displacement vector complete - displace the atom
                     crystalRep = moveAtom(crystalRep, basisRep, int(movementInstructions[0]), vectorSum)
             # Movement instructions finished
-            if "add" in cfg["post-processing"]:
-                for additionLine in cfg["post-processing"]["add"].split("\n"):
+            if "add" in cfg["post-process"]:
+                for additionLine in cfg["post-process"]["add"].split("\n"):
                     additionInstructions = additionLine.split()
                     vectorSum = postProcessVectorSum(unitBasis, planarBasis, additionInstructions)
                     crystalRep = addAtomAtPosition(crystalRep, basisRep, vectorSum)
-            if "delete" in cfg["post-processing"]:
-                for deletionLine in cfg["post-processing"]["delete"].split("\n"):
+            if "delete" in cfg["post-process"]:
+                for deletionLine in cfg["post-process"]["delete"].split("\n"):
                     deletionInstructions = deletionLine.split()
                     if deletionInstructions[0] == "index":
                         crystalRep = delAtomAtIndex(crystalRep, int(deletionInstructions[1]))
@@ -204,8 +204,8 @@ def createClusterFromConfig(configFilename):
         structure = getRealStructure(crystalRep, basisReal)
         data = getAtomData(structure, unitLength, elemName)
         # If IndexDump is required, output atom data
-        if "post-processing" in cfg.sections():
-            dumpIndexInfo = cfg.getboolean("post-processing", "indexdump")
+        if "post-process" in cfg.sections():
+            dumpIndexInfo = cfg.getboolean("post-process", "indexdump")
             if dumpIndexInfo:
                 for i in range(len(crystalRep)):
                     print(i, crystalRep[i], data[i])

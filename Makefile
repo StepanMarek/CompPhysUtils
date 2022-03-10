@@ -17,10 +17,9 @@ PARSERSOURCE += src/compphysutils/parser/post_processor.py
 PARSERSOURCE += src/compphysutils/parser/combine.py
 PARSERSOURCE += src/compphysutils/parser/savepoint.py
 PARSERSOURCE += src/compphysutils/parser/parsers/__init__.py
-PARSERSOURCE += src/compphysutils/parser/parsers/aims.py
 PARSERSOURCE += src/compphysutils/parser/parsers/cols.py
+PARSERSOURCE += src/compphysutils/parser/parsers/csv.py
 PARSERSOURCE += src/compphysutils/parser/parsers/eiger.py
-PARSERSOURCE += src/compphysutils/parser/parsers/hlg.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
