@@ -1,4 +1,4 @@
-VERSION := 0.0.6
+VERSION := 0.1.0
 
 WHEELFILE := dist/compphysutils-$(VERSION)-py3-none-any.whl
 TARFILE := dist/compphysutils-$(VERSION).tar.gz
@@ -43,8 +43,11 @@ BASESOURCE := src/compphysutils/__init__.py
 install: $(WHEELFILE)
 	pip3 install --force-reinstall $(WHEELFILE)
 
-upload: $(WHEELFILE)
+upload-test: $(WHEELFILE)
 	python -m twine upload --repository testpypi $(WHEELFILE) $(TARFILE)
+
+upload: $(WHEELFILE)
+	python -m twine upload $(WHEELFILE) $(TARFILE)
 
 $(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE)
 	python -m build
