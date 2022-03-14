@@ -3,6 +3,9 @@ import argparse
 
 class EigerReference:
     # Object that ensures that only the converged eigenvalues are read
+    # https://physics.nist.gov/cgi-bin/cuu/Value?hrev
+    HtoEv = 27.211386245988
+
     def __init__(self, parserArgs="--unit eV"):
         self.reading = False
         self.readingLineRe = re.compile("\s*Nr\.\s*Orbital\s*Occupation\s*Energy")
@@ -22,13 +25,12 @@ class EigerReference:
         if not resultObj:
             self.reading = False
             return False
-        energyEv = resultObj.group(3)
         energyH = resultObj.group(2)
         occupation = resultObj.group(1)
         if occupation == None:
             occupation = "0.0"
         if self.energyUnit == "eV":
-            return [float(energyEv), float(occupation)]
+            return [float(energyH)*self.HtoEv, float(occupation)]
         else:
             return [float(energyH), float(occupation)]
 
