@@ -119,7 +119,9 @@ def fromConfig(configFileName, axes=False, datasets={}):
     if "savepoint" in cfg["plot"]:
         savepointParse(cfg["plot"].get("savepoint"), "transform", datasets, writeParseFunctions, "data_transform.out")
     # Now, datasets are complete, and we can read the plot group
-    graphType = cfg["plot"].get("type", "scatter")
+    # Also include options that are set directly via type - should be reserved for options that are not usable for many plot types
+    graphTypeSplit = cfg["plot"].get("type", "scatter").split()
+    graphType = graphTypeSplit[0]
     colCoords = cfg.get("plot", "cols").split("\n")
     for i in range(len(colCoords)):
         colCoords[i] = colCoords[i].split()
@@ -129,6 +131,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
         for j in range(0,len(colCoords[i]),2):
             chosenDatasets[i].append(datasets[colCoords[i][j]][int(colCoords[i][j+1])])
     plotOptions = {}
+    plotOptions["plotArgString"] = graphTypeSplit[1:]
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
     plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "upper right")
     if "xlim" in cfg["plot"]:
