@@ -27,6 +27,8 @@ for parserFileName in (defaultParsers + customParsers):
     parserModules[parserType] = mod
 lineParseFunctions = {}
 writeParseFunctions = {}
+writeHeaderFunctions = {}
+writeFooterFunctions = {}
 parserArgsDefaults = {}
 initObjectsFunctions = {}
 for parserName in parserModules:
@@ -35,6 +37,16 @@ for parserName in parserModules:
     initObjectsFunctions[parserName] = parserModules[parserName].initParserObjects
     if hasattr(parserModules[parserName], "writeLine"):
         writeParseFunctions[parserName] = parserModules[parserName].writeLine
+    else:
+        writeParseFunctions[parserName] = False
+    if hasattr(parserModules[parserName], "writeHeaders"):
+        writeHeaderFunctions[parserName] = parserModules[parserName].writeHeaders
+    else:
+        writeHeaderFunctions[parserName] = False
+    if hasattr(parserModules[parserName], "writeFooters"):
+        writeFooterFunctions[parserName] = parserModules[parserName].writeFooters
+    else:
+        writeFooterFunctions[parserName] = False
 
 def parseFile(filename, filetype, parserArgs=False):
     if not parserArgs:
@@ -83,7 +95,7 @@ def parseDatasetConfig(configFilename):
                 else:
                     datasets[datasetName] = list(map(lambda s: list(map(float, s.split())), splitList))
             if "savepoint" in cfg[groupName]:
-                savepointDatasetParse(cfg[groupName].get("savepoint"), "load", datasets[datasetName], writeParseFunctions)
+                savepointDatasetParse(cfg[groupName].get("savepoint"), "load", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions)
             if "post-process" in cfg[groupName]:
                 commandSplit = cfg[groupName]["post-process"].split()
                 if len(commandSplit) > 1:
@@ -91,5 +103,5 @@ def parseDatasetConfig(configFilename):
                 else:
                     datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], [])
             if "savepoint" in cfg[groupName]:
-                savepointDatasetParse(cfg[groupName].get("savepoint"), "post-process", datasets[datasetName], writeParseFunctions, "data_post.out")
+                savepointDatasetParse(cfg[groupName].get("savepoint"), "post-process", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, defFilename="data_post.out")
     return datasets

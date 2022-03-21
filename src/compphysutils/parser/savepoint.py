@@ -1,15 +1,19 @@
-def save(dataset, writeLine, filename):
+def save(dataset, writeLine, filename, writeHeaders=False, writeFooters=False):
     nrows = len(dataset[0])
     ncols = len(dataset)
     file = open(filename, "w+")
+    if writeHeaders:
+        file.write(writeHeaders(dataset)+"\n")
     for i in range(nrows):
         datarow = []
         for j in range(ncols):
             datarow.append(dataset[j][i])
         file.write(writeLine(datarow)+"\n")
+    if writeFooters:
+        file.write(writeFooters(dataset)+"\n")
     file.close()
 
-def datasetParse(savepointLines, context, dataset, writeLineFunctions, defFilename="data.out"):
+def datasetParse(savepointLines, context, dataset, writeLineFunctions, writeHeaderFunctions, writeFooterFunctions, defFilename="data.out"):
     # Parsers for the case when savepoint directive is provided at a given dataset - lacks one argument
     savepointSplit = savepointLines.split("\n")
     for i in range(len(savepointSplit)):
@@ -19,9 +23,11 @@ def datasetParse(savepointLines, context, dataset, writeLineFunctions, defFilena
             if len(savepointArgs) > 2:
                 filename = savepointArgs[2]
             # Save the dataset
-            save(dataset, writeLineFunctions[savepointArgs[1]], filename)
+            if not writeLineFunctions[savepointArgs[1]]:
+                raise ValueError("No writeLine function defined for parser "+savepointArgs[1])
+            save(dataset, writeLineFunctions[savepointArgs[1]], filename, writeHeaders=writeHeaderFunctions[savepointArgs[1]], writeFooters=writeFooterFunctions[savepointArgs[1]])
 
-def parse(savepointLines, context, datasets, writeLineFunctions, defFilename="data.out"):
+def parse(savepointLines, context, datasets, writeLineFunctions, writeHeaderFunctions, writeFooterFunctions, defFilename="data.out"):
     # Each line has following arguments - desired context, dataset name, parser with writeLine function, optional filename
     savepointSplit = savepointLines.split("\n")
     for i in range(len(savepointSplit)):
@@ -31,4 +37,6 @@ def parse(savepointLines, context, datasets, writeLineFunctions, defFilename="da
             if len(savepointArgs) > 3:
                 filename = savepointArgs[3]
             # Save the dataset
-            save(datasets[savepointArgs[1]], writeLineFunctions[savepointArgs[2]], filename)
+            if not writeLineFunctions[savepointArgs[1]]:
+                raise ValueError("No writeLine function defined for parser "+savepointArgs[1])
+            save(datasets[savepointArgs[1]], writeLineFunctions[savepointArgs[2]], filename, writeHeaders=writeHeaderFunctions[savepointArgs[2]], writeFooters=writeFooterFunctions[savepointArgs[2]])

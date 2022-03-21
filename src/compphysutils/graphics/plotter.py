@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from ..parser.parser import parseDatasetConfig
 from ..parser.parser import writeParseFunctions 
+from ..parser.parser import writeHeaderFunctions 
+from ..parser.parser import writeFooterFunctions 
 from ..parser.savepoint import parse as savepointParse 
 import configparser
 from ..parser.combine import commands
@@ -108,7 +110,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
                 commandName = commandSplitLine[0]
                 datasets = commands[commandName](datasets, commandSplitLine[1:])
         if "savepoint" in cfg["data"]:
-            savepointParse(cfg["data"].get("savepoint"), "combine", datasets, writeParseFunctions, "data_combine.out")
+            savepointParse(cfg["data"].get("savepoint"), "combine", datasets, writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, "data_combine.out")
     # Now, run any transform commands
     if "transform" in cfg["plot"]:
         transformCommands = cfg["plot"].get("transform").split("\n")
@@ -117,7 +119,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
             commandName = commandSplitLine[0]
             datasets = transforms[commandName](datasets, commandSplitLine[1:])
     if "savepoint" in cfg["plot"]:
-        savepointParse(cfg["plot"].get("savepoint"), "transform", datasets, writeParseFunctions, "data_transform.out")
+        savepointParse(cfg["plot"].get("savepoint"), "transform", datasets, writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, "data_transform.out")
     # Now, datasets are complete, and we can read the plot group
     # Also include options that are set directly via type - should be reserved for options that are not usable for many plot types
     graphTypeSplit = cfg["plot"].get("type", "scatter").split()

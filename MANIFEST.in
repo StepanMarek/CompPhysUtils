@@ -1,3 +1,4 @@
 include examples/cluster.cfg examples/na_pyramid_100.cfg
 include src/compphysutils/crystalgen/gencluster
 include src/compphysutils/graphics/plotconfig
+include src/compphysutils/parser/runparser src/compphysutils/parser/parsecoords
