@@ -213,4 +213,15 @@ def createClusterFromConfig(configFilename):
                     print("Planar basis")
                     for i in range(len(planarBasis)):
                         print(i, planarBasis[i])
+        if "post-process" in  cfg.sections():
+            if "random-noise" in cfg["post-process"]:
+                # Generate random Gaussian noise with given amplitude for each atom in the system
+                # This is applied at the very end in order to allow manipulation of crystal before
+                argSplit = cfg["post-process"].get("random-noise").split()
+                radius = float(argSplit[0])
+                seed = int(argSplit[1])
+                random.seed(seed)
+                for i in range(len(data)):
+                    for j in range(3):
+                        data[i][j] += random.gauss(0,radius)
         saveData(data, cfg["cluster"]["name"])
