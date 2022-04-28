@@ -37,3 +37,9 @@ argDefaults = "0"
 def writeLine(datarow):
     datalist = list(map(str, datarow))
     return " ".join(datalist)
+
+def writeHeaders(dataset):
+    return ""
+
+def writeFooters(dataset):
+    return ""

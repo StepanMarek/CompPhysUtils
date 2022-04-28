@@ -37,6 +37,6 @@ def parse(savepointLines, context, datasets, writeLineFunctions, writeHeaderFunc
             if len(savepointArgs) > 3:
                 filename = savepointArgs[3]
             # Save the dataset
-            if not writeLineFunctions[savepointArgs[1]]:
-                raise ValueError("No writeLine function defined for parser "+savepointArgs[1])
+            if not writeLineFunctions[savepointArgs[2]]:
+                raise ValueError("No writeLine function defined for parser "+savepointArgs[2])
             save(datasets[savepointArgs[1]], writeLineFunctions[savepointArgs[2]], filename, writeHeaders=writeHeaderFunctions[savepointArgs[2]], writeFooters=writeFooterFunctions[savepointArgs[2]])
