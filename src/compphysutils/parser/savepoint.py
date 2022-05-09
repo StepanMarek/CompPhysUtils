@@ -3,14 +3,20 @@ def save(dataset, writeLine, filename, writeHeaders=False, writeFooters=False):
     ncols = len(dataset)
     file = open(filename, "w+")
     if writeHeaders:
-        file.write(writeHeaders(dataset)+"\n")
+        headers = writeHeaders(dataset)
+        if len(headers) > 0:
+            headers = headers + "\n"
+        file.write(headers)
     for i in range(nrows):
         datarow = []
         for j in range(ncols):
             datarow.append(dataset[j][i])
         file.write(writeLine(datarow)+"\n")
     if writeFooters:
-        file.write(writeFooters(dataset)+"\n")
+        footers = writeFooters(dataset)
+        if len(footers) > 0:
+            footers = footers + "\n"
+        file.write(footers)
     file.close()
 
 def datasetParse(savepointLines, context, dataset, writeLineFunctions, writeHeaderFunctions, writeFooterFunctions, defFilename="data.out"):
