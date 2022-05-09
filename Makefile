@@ -18,6 +18,7 @@ PARSERSOURCE += src/compphysutils/parser/combine.py
 PARSERSOURCE += src/compphysutils/parser/savepoint.py
 PARSERSOURCE += src/compphysutils/parser/parsecoords
 PARSERSOURCE += src/compphysutils/parser/runparser
+PARSERSOURCE += src/compphysutils/parser/runcombine
 PARSERSOURCE += src/compphysutils/parser/parsers/__init__.py
 PARSERSOURCE += src/compphysutils/parser/parsers/cols.py
 PARSERSOURCE += src/compphysutils/parser/parsers/csv.py

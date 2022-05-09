@@ -1,5 +1,10 @@
 import importlib
 import os
+from .parser import parseDatasetConfig
+from .parser import writeParseFunctions
+from .parser import writeHeaderFunctions
+from .parser import writeFooterFunctions
+from .savepoint import parse as savepointParse
 
 ## Search for default combine commands
 roots = []
@@ -24,3 +29,25 @@ for i in range(len(roots)):
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         commands[commandName] = mod.command
+
+def runGroupData(cfg, datasets, cfgFileName):
+    # First, load data from datasetfiles
+    if "data" in cfg:
+        datasetfiles = cfg["data"].get("datasetfiles", False)
+        if datasetfiles:
+            for datasetFileName in datasetfiles.split("\n"):
+                datasets.update(parseDatasetConfig(datasetFileName))
+    # If there are in place defined datasets, they take priority
+    datasets.update(parseDatasetConfig(cfgFileName))
+    # Now, progress to the combine command
+    if "combine" in cfg["data"]:
+        combineCommands = cfg.get("data", "combine").split("\n")
+        for commandLine in combineCommands:
+            commandSplitLine = commandLine.split()
+            commandName = commandSplitLine[0]
+            datasets = commands[commandName](datasets, commandSplitLine[1:])
+    # Finally, handle savepoint in the combine context
+    if "savepoint" in cfg["data"]:
+        savepointParse(cfg["data"].get("savepoint"), "combine", datasets, writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, "data_combine.out")
+    # End by returning the (changed) datasets
+    return datasets

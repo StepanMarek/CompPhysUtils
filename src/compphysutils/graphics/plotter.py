@@ -6,6 +6,7 @@ from ..parser.parser import writeFooterFunctions
 from ..parser.savepoint import parse as savepointParse 
 import configparser
 from ..parser.combine import commands
+from ..parser.combine import runGroupData
 from .fitter import plotFit 
 from .transformer import transforms
 from .decorator import decorations
@@ -93,24 +94,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
         axesGiven = True
     cfg = configparser.ConfigParser()
     cfg.read(configFileName)
-    # Read the datasets
-    if "data" in cfg:
-        datasetfiles = cfg["data"].get("datasetfiles", False)
-        if datasetfiles:
-            for datasetFileName in datasetfiles.split("\n"):
-                datasets.update(parseDatasetConfig(datasetFileName))
-    # In place defined datasets take priority
-    datasets.update(parseDatasetConfig(configFileName))
-    # Now, run the combine directive, if present
-    if "data" in cfg:
-        if "combine" in cfg["data"]:
-            combineCommands = cfg.get("data", "combine").split("\n")
-            for commandLine in combineCommands:
-                commandSplitLine = commandLine.split()
-                commandName = commandSplitLine[0]
-                datasets = commands[commandName](datasets, commandSplitLine[1:])
-        if "savepoint" in cfg["data"]:
-            savepointParse(cfg["data"].get("savepoint"), "combine", datasets, writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, "data_combine.out")
+    runGroupData(cfg, datasets, configFileName)
     # Now, run any transform commands
     if "transform" in cfg["plot"]:
         transformCommands = cfg["plot"].get("transform").split("\n")

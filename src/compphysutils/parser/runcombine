@@ -1,0 +1,17 @@
+#!/usr/bin/python
+import argparse
+import sys
+import configparser
+from compphysutils.parser.combine import runGroupData
+
+ap = argparse.ArgumentParser(description="Runs the config file up to the [data] group, meaning that all parser commands are carried out + combine commands are done. Useful for transforming and combining data into new datasets. Each config file is run independently.")
+ap.add_argument("filenames", metavar="filename", nargs="+", help="Names of the dataset config files.")
+
+args = ap.parse_args()
+
+for filename in args.filenames:
+    cfg = configparser.ConfigParser()
+    cfg.read(filename)
+    runGroupData(cfg, {}, filename)
+
+sys.exit(0)
