@@ -75,8 +75,6 @@ def plot(datasets, plotType="line", axes=False, **plotOptions):
         plotTypes["scatter"](datasets, axes, **plotOptions)
     axes.set_xlabel(plotOptions["xlabel"])
     axes.set_ylabel(plotOptions["ylabel"])
-    if plotOptions["legend"]:
-        axes.legend(loc=plotOptions["legend-pos"])
     if plotOptions["xlim"]:
         axes.set_xlim(*plotOptions["xlim"])
     if plotOptions["ylim"]:
@@ -94,7 +92,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
         axesGiven = True
     cfg = configparser.ConfigParser()
     cfg.read(configFileName)
-    runGroupData(cfg, datasets, configFileName)
+    datasets.update(runGroupData(cfg, datasets, configFileName))
     # Now, run any transform commands
     if "transform" in cfg["plot"]:
         transformCommands = cfg["plot"].get("transform").split("\n")
@@ -150,18 +148,31 @@ def fromConfig(configFileName, axes=False, datasets={}):
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
     axes = plot(chosenDatasets, graphType, axes=axes, **plotOptions)
     # If fit is present, handle it
+    fitIndex = 0
     if cfg["plot"].get("fit", False):
+        fitLabels = cfg["plot"].get("fit-labels", False)
+        numFits = len(cfg["plot"].get("fit").split("\n"))
+        if not fitLabels:
+            fitLabels = [False] * numFits
+        else:
+            fitLabels = fitLabels.split("\n")
+        if len(fitLabels) < numFits:
+            fitLabels += [False] * (numFits - len(fitLabels))
         prevFitParams = []
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
-            prevFitParams += list(plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitPoints=int(cfg["plot"].get("fit-points", 2)), fitLabel=cfg["plot"].get("fit-label", False), paramsPlacement=cfg["plot"].get("params-placement", False), paramsOffset=len(prevFitParams), xMin=float(cfg["plot"].get("fit-xmin", False)), xMax=float(cfg["plot"].get("fit-xmax", False)), dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)))
+            prevFitParams += list(plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitPoints=int(cfg["plot"].get("fit-points", 100)), fitLabel=fitLabels[fitIndex], paramsPlacement=cfg["plot"].get("params-placement", False), paramsOffset=len(prevFitParams), xMin=float(cfg["plot"].get("fit-xmin", False)), xMax=float(cfg["plot"].get("fit-xmax", False)), dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)))
+            fitIndex += 1
     # Handle decorations for main axes
     if cfg["plot"].get("decorate", False):
         decorationCommands = cfg["plot"].get("decorate").split("\n")
         for decorationArgs in decorationCommands:
             decorationSplit = decorationArgs.split()
             axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
+    # Move the legend render here, even after decorations (which can also be annotated)
+    if plotOptions["legend"]:
+        axes.legend(loc=plotOptions["legend-pos"])
     # If an inset directive is present, add an inset to the current axes
     if cfg["plot"].get("inset", False):
         insetArgs = cfg["plot"].get("inset").split()

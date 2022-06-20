@@ -31,14 +31,17 @@ for i in range(len(roots)):
         commands[commandName] = mod.command
 
 def runGroupData(cfg, datasets, cfgFileName):
-    # First, load data from datasetfiles
     if "data" in cfg:
+        # First, load data from datasetfiles
         datasetfiles = cfg["data"].get("datasetfiles", False)
         if datasetfiles:
-            for datasetFileName in datasetfiles.split("\n"):
+            for datasetFileName in datasetfiles.split():
                 datasets.update(parseDatasetConfig(datasetFileName))
     # If there are in place defined datasets, they take priority
     datasets.update(parseDatasetConfig(cfgFileName))
+    # If there is no data group, this is all that is done
+    if not "data" in cfg:
+        return datasets
     # Now, progress to the combine command
     if "combine" in cfg["data"]:
         combineCommands = cfg.get("data", "combine").split("\n")
