@@ -117,7 +117,8 @@ def fromConfig(configFileName, axes=False, datasets={}):
     plotOptions = {}
     plotOptions["plotArgString"] = graphTypeSplit[1:]
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
-    plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "upper right")
+    plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "best")
+    plotOptions["legend-cols"] = int(cfg["plot"].get("legend-cols", 1))
     if "xlim" in cfg["plot"]:
         plotOptions["xlim"] = list(map(float, cfg["plot"].get("xlim").split()))
     else:
@@ -168,7 +169,19 @@ def fromConfig(configFileName, axes=False, datasets={}):
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
-            prevFitParams += list(plotFit(chosenDatasets[int(fitArgs[1])], fitArgs[0], axes, fitPoints=int(cfg["plot"].get("fit-points", 100)), fitLabel=fitLabels[fitIndex], paramsPlacement=cfg["plot"].get("params-placement", False), paramsOffset=len(prevFitParams), xMin=float(cfg["plot"].get("fit-xmin", False)), xMax=float(cfg["plot"].get("fit-xmax", False)), dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)))
+            prevFitParams += list(plotFit(
+                chosenDatasets[int(fitArgs[1])],
+                fitArgs[0],
+                axes,
+                fitPoints=int(cfg["plot"].get("fit-points", 100)),
+                fitLabel=fitLabels[fitIndex],
+                showParams=cfg["plot"].getboolean("fit-show-params", True),
+                paramsPlacement=cfg["plot"].get("params-placement", False),
+                paramsOffset=len(prevFitParams),
+                xMin=float(cfg["plot"].get("fit-xmin", False)),
+                xMax=float(cfg["plot"].get("fit-xmax", False)),
+                dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)
+                ))
             fitIndex += 1
     # Handle decorations for main axes
     if cfg["plot"].get("decorate", False):
@@ -178,7 +191,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
             axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
     # Move the legend render here, even after decorations (which can also be annotated)
     if plotOptions["legend"]:
-        axes.legend(loc=plotOptions["legend-pos"])
+        axes.legend(loc=plotOptions["legend-pos"], ncol=plotOptions["legend-cols"])
     # If an inset directive is present, add an inset to the current axes
     if cfg["plot"].get("inset", False):
         insetArgs = cfg["plot"].get("inset").split()
