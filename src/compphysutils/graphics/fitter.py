@@ -77,9 +77,9 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
         xs.append(xMin + dx*i)
         ys.append(fitFunctions[fitFunctionName](xMin + dx*i, *popt))
     if fitParams["fitLabel"]:
-        axisObj.plot(xs,ys,label=fitParams["fitLabel"])
+        axisObj.plot(xs,ys,label=fitParams["fitLabel"],color=next(fitParams["fitColorCycle"]))
     else:
-        axisObj.plot(xs,ys)
+        axisObj.plot(xs,ys,color=next(fitParams["fitColorCycle"]))
     # Construct the param string
     if fitParams["showParams"]:
         pstring = ""

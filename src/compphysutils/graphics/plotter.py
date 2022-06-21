@@ -166,6 +166,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
         if len(fitLabels) < numFits:
             fitLabels += [False] * (numFits - len(fitLabels))
         prevFitParams = []
+        fitColorIterator = ColorIterator(cfg["plot"].get("fit-colorCycle", "tab:blue tab:orange tab:green tab:cyan"))
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
@@ -176,6 +177,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
                 fitPoints=int(cfg["plot"].get("fit-points", 100)),
                 fitLabel=fitLabels[fitIndex],
                 showParams=cfg["plot"].getboolean("fit-show-params", True),
+                fitColorCycle=fitColorIterator,
                 paramsPlacement=cfg["plot"].get("params-placement", False),
                 paramsOffset=len(prevFitParams),
                 xMin=float(cfg["plot"].get("fit-xmin", False)),
