@@ -126,6 +126,12 @@ def fromConfig(configFileName, axes=False, datasets={}):
         plotOptions["ylim"] = list(map(float, cfg["plot"].get("ylim").split()))
     else:
         plotOptions["ylim"] = False
+    if "font" in cfg["plot"]:
+        plt.rcParams["font.family"] = cfg["plot"].get("font", "sans")
+    if "font-size" in cfg["plot"]:
+        plt.rcParams["font.size"] = int(cfg["plot"].get("font-size", 12))
+    if "mathfont" in cfg["plot"]:
+        plt.rcParams["mathtext.fontset"] = cfg["plot"].get("mathfont", "cm")
     plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "b")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")
