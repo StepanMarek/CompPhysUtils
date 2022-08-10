@@ -1,4 +1,4 @@
-VERSION := 0.2.0
+VERSION := 0.2.1
 
 WHEELFILE := dist/compphysutils-$(VERSION)-py3-none-any.whl
 TARFILE := dist/compphysutils-$(VERSION).tar.gz
@@ -50,7 +50,7 @@ upload-test: $(WHEELFILE)
 	python -m twine upload --repository testpypi $(WHEELFILE) $(TARFILE)
 
 upload: $(WHEELFILE)
-	python -m twine upload $(WHEELFILE) $(TARFILE)
+	python -m twine upload --verbose $(WHEELFILE) $(TARFILE)
 
 $(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE)
 	python -m build
