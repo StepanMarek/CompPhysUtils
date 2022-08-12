@@ -31,6 +31,7 @@ writeHeaderFunctions = {}
 writeFooterFunctions = {}
 parserArgsDefaults = {}
 initObjectsFunctions = {}
+initWriterObjects = {}
 for parserName in parserModules:
     lineParseFunctions[parserName] = parserModules[parserName].line
     parserArgsDefaults[parserName] = parserModules[parserName].argDefaults
@@ -47,6 +48,10 @@ for parserName in parserModules:
         writeFooterFunctions[parserName] = parserModules[parserName].writeFooters
     else:
         writeFooterFunctions[parserName] = False
+    if hasattr(parserModules[parserName], "initWriterObjects"):
+        initWriterObjects[parserName] = parserModules[parserName].initWriterObjects
+    else:
+        initWriterObjects[parserName] = False
 
 def parseFile(filename, filetype, parserArgs=False):
     if not parserArgs:
@@ -95,7 +100,7 @@ def parseDatasetConfig(configFilename):
                 else:
                     datasets[datasetName] = list(map(lambda s: list(map(float, s.split())), splitList))
             if "savepoint" in cfg[groupName]:
-                savepointDatasetParse(cfg[groupName].get("savepoint"), "load", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions)
+                savepointDatasetParse(cfg[groupName].get("savepoint"), "load", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects)
             if "post-process" in cfg[groupName]:
                 commandSplit = cfg[groupName]["post-process"].split()
                 if len(commandSplit) > 1:
@@ -103,5 +108,5 @@ def parseDatasetConfig(configFilename):
                 else:
                     datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], [])
             if "savepoint" in cfg[groupName]:
-                savepointDatasetParse(cfg[groupName].get("savepoint"), "post-process", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, defFilename="data_post.out")
+                savepointDatasetParse(cfg[groupName].get("savepoint"), "post-process", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects, defFilename="data_post.out")
     return datasets
