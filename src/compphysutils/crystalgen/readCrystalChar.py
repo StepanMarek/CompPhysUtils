@@ -25,8 +25,22 @@ def parseCharConfig(cfg):
     reprBasis = parseVectors(cfg["vectors"]["representation"], representation=True)
     planarBasis = parseVectors(cfg["vectors"].get("planar", False), representation=True)
     unitCellLength = float(cfg["base"]["unit"])
-    elemName = cfg["base"]["atom"]
-    return realBasis, reprBasis, unitCellLength, elemName, planarBasis
+    elemName = cfg["base"].get("atom", False)
+    atomicBasisChar = cfg["base"].get("atomicbasis", False)
+    if not atomicBasisChar:
+        if not elemName:
+            raise ValueError("Missing atomic basis or element name in lattice definition")
+        else:
+            return realBasis, reprBasis, unitCellLength, planarBasis, [elemName]
+    else:
+        atomicBasis = []
+        atomicBasisSplit = atomicBasisChar.split("\n")
+        for i in range(len(atomicBasisSplit)):
+            namePositionSplit = atomicBasisSplit[i].split()
+            atomicBasisPosition = VectorReal(*map(float, namePositionSplit[0].split(",")))
+            atomicBasis.append(namePositionSplit[1])
+            atomicBasis.append(atomicBasisPosition)
+        return realBasis, reprBasis, unitCellLength, planarBasis, atomicBasis
 
 def readCrystalChar(filename):
     """

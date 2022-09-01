@@ -7,7 +7,8 @@ class VectorRepresentation(Vector):
     """
 
     def __init__(self, *args):
-        if len(args) < 3:
+        # For undefined args, assume 3D representation
+        if len(args) < 1:
             self.components = array.array("i", [0,0,0])
         else:
             self.components = array.array("i", [0]*len(args))
@@ -28,7 +29,7 @@ class VectorRepresentation(Vector):
 
     def translateToBasis(self, basis):
         if len(basis) != len(self.components):
-            #raise ArithmeticError("The basis size "+str(len(basis))+" and the vector size "+str(len(self.components))" are different!")
-            raise ArithmeticError("Different basis and vector size!")
+            raise ArithmeticError("The basis size "+str(len(basis))+" and the vector size "+str(len(self.components))+" are different!")
+            #raise ArithmeticError("Different basis and vector size!")
         return sum(map(lambda x: x[0] * x[1], zip(self.components, basis)), basis[0].cloneZeros())
 

@@ -65,10 +65,24 @@ def getRealStructure(crystalRep, basisReal):
         crystal.append(vecRep.translateToBasis(basisReal))
     return crystal
 
-def getAtomData(crystal, unitLength, elemName):
+def getAtomData(crystal, unitLength, *atomicBasis):
+    """
+        Generates the atomic data based on the real crystal and the unit length
+        Now updated to replicate the basis at each point of the crystal
+        In order to do that, arguments are given as follows
+        *args = [elemOneName, elemOneBasisVector, elemTwoName, elemTwoBasisVector, ...]
+        if only single element is present, assume basis position is 0,0,0
+    """
     data = []
-    for pos in crystal:
-        data.append(list((unitLength * pos).components) + [elemName])
+    if len(atomicBasis) < 1:
+        raise ValueError("Cannot assign elements to crystal points - no element name provided!")
+    if len(atomicBasis) == 1:
+        for pos in crystal:
+            data.append(list((unitLength * pos).components) + [elemName])
+    else:
+        for pos in crystal:
+            for i in range(0,len(atomicBasis),2):
+                data.append(list((unitLength * (pos + atomicBasis[i+1])).components) + [atomicBasis[i]])
     return data
 
 def generateCrystalRepresentation(basisRep, layers=1):
@@ -82,11 +96,11 @@ def generateCrystalRepresentation(basisRep, layers=1):
     return crystalRep, unitBasis
 
 def generateCrystal(crystalCharFilename, layers=1, addatoms=0, seed=False):
-    basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(crystalCharFilename)
+    basisReal, basisRep, unitLength, planarBasis, atomicBasis = readCrystalChar(crystalCharFilename)
     crystalRep = generateCrystalRepresentation(basisRep, planarBasis, layers=layers, addatoms=addatoms, seed=seed)
     crystal = getRealStructure(crystalRep, basisReal)
     # Finally, convert to standard format - atomic data format and multiply by unitLength
-    return getAtomData(crystal, unitLength, elemName)
+    return getAtomData(crystal, unitLength, *atomicBasis)
 
 def moveAtom(crystalRep, basisRep, index, vector):
     newVec = crystalRep[index] + vector
@@ -156,12 +170,12 @@ def createClusterFromConfig(configFilename):
         if "lattice" in cfg["cluster"]:
             # Check whether the lattice exists in cwd or in config directory, cwd takes priority
             if os.path.isfile(cfg["cluster"]["lattice"]):
-                basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(cfg["cluster"]["lattice"])
+                basisReal, basisRep, unitLength, planarBasis, atomicBasis = readCrystalChar(cfg["cluster"]["lattice"])
             else:
                 # Try config dir
-                basisReal, basisRep, unitLength, elemName, planarBasis = readCrystalChar(os.path.expanduser("~/.config/compphysutils/lattices/")+cfg["cluster"]["lattice"])
+                basisReal, basisRep, unitLength, planarBasis, atomicBasis = readCrystalChar(os.path.expanduser("~/.config/compphysutils/lattices/")+cfg["cluster"]["lattice"])
         else:
-            basisReal, basisRep, unitLength, elemName, planarBasis = parseCharConfig(cfg)
+            basisReal, basisRep, unitLength, planarBasis, atomicBasis = parseCharConfig(cfg)
         crystalRep, unitBasis = generateCrystalRepresentation(basisRep, layers=int(cfg["cluster"]["layers"]), )
         # Remove the atoms if doing a sphere cut
         if "post-process" in cfg.sections():
@@ -174,10 +188,11 @@ def createClusterFromConfig(configFilename):
                         newCrystalRep.append(atom)
                 crystalRep = newCrystalRep
         # add-atoms
-        if not planarBasis:
-            crystalRep = addAtoms(crystalRep, basisRep, unitBasis, addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"].get("seed", False))
-        else:
-            crystalRep = addAtoms(crystalRep, basisRep, planarBasis, addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"].get("seed", False))
+        if "addatoms" in cfg["cluster"]:
+            if not planarBasis:
+                crystalRep = addAtoms(crystalRep, basisRep, unitBasis, addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"].get("seed", False))
+            else:
+                crystalRep = addAtoms(crystalRep, basisRep, planarBasis, addatoms=int(cfg["cluster"]["addatoms"]), seed=cfg["cluster"].get("seed", False))
         # Start the post-process
         if "post-process" in cfg.sections():
             unitBasis = getUnitBasis(len(crystalRep[0].components))
@@ -202,7 +217,7 @@ def createClusterFromConfig(configFilename):
                         vectorSum = postProcessVectorSum(unitBasis, planarBasis, deletionInstructions)
                         crystalRep = delAtomAtPosition(crystalRep, basisRep, vectorSum)
         structure = getRealStructure(crystalRep, basisReal)
-        data = getAtomData(structure, unitLength, elemName)
+        data = getAtomData(structure, unitLength, *atomicBasis)
         # If IndexDump is required, output atom data
         if "post-process" in cfg.sections():
             dumpIndexInfo = cfg.getboolean("post-process", "indexdump")
