@@ -206,6 +206,8 @@ def fromConfig(configFileName, axes=False, datasets={}):
     if axesGiven:
         return True
     if plotOptions["figfile"]:
-        plt.savefig(plotOptions["figfile"], bbox_inches="tight")
+        # Can output the same figure in different formats
+        for figFileName in plotOptions["figfile"].split():
+            plt.savefig(figFileName, bbox_inches="tight")
     else:
         plt.show()
