@@ -36,10 +36,24 @@ for i in range(len(roots)):
 def roundSignificantFigures(number, sigFigs, matchOrder=False):
     if not matchOrder:
         # Default behaviour - match to given number of significant figures
-        return round(number, sigFigs - 1 - math.floor(math.log10(abs(number))))
+        try:
+            result = round(number, sigFigs - 1 - math.floor(math.log10(abs(number))))
+        except OverflowError:
+            # Number is infinity, just output infinity
+            result = "Infinity"
     else:
         # Match to the order of the sigFigs argument
-        return round(number, -math.floor(math.log10(abs(sigFigs))))
+        # Problem is that the variance may be very high
+        try:
+            result = round(number, -math.floor(math.log10(abs(sigFigs))))
+        except OverflowError:
+            # Infinity - return number rounded to one significant figure
+            try:
+                result = round(number, -math.floor(math.log10(abs(number))))
+            except OverflowError:
+                # If even this overflows, number is infinity, can just output infinity
+                result = "Infinity"
+    return result
 
 def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
     # Behaviour changes depending on the number of columns
@@ -84,7 +98,12 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
     if fitParams["showParams"]:
         pstring = ""
         for i in range(len(popt)):
-            pstring += paramNames[fitFunctionName][i]+" : "+str(roundSignificantFigures(popt[i], perr[i], matchOrder=True))+r"$\pm$"+str(roundSignificantFigures(perr[i],1))+"\n"
+            result = roundSignificantFigures(popt[i], perr[i], matchOrder=True)
+            error = roundSignificantFigures(perr[i], 1)
+            if fitParams["showError"]:
+                pstring += paramNames[fitFunctionName][i]+" : "+str(result)+r"$\pm$"+str(error)+"\n"
+            else:
+                pstring += paramNames[fitFunctionName][i]+" : "+str(result)+"\n"
         if fitParams["paramsPlacement"]:
             # Text anchor is the bottom left corner by default
             if fitParams["paramsPlacement"] == "tl":

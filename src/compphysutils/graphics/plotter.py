@@ -178,6 +178,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
                 fitPoints=int(cfg["plot"].get("fit-points", 100)),
                 fitLabel=fitLabels[fitIndex],
                 showParams=cfg["plot"].getboolean("fit-show-params", True),
+                showError=cfg["plot"].getboolean("fit-show-error", True),
                 fitColorCycle=fitColorIterator,
                 paramsPlacement=cfg["plot"].get("params-placement", False),
                 paramsOffset=len(prevFitParams),
