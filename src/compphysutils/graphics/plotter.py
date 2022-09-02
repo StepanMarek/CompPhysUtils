@@ -118,8 +118,8 @@ def fromConfig(configFileName, axes=False, datasets={}):
     plotOptions = {}
     plotOptions["plotArgString"] = graphTypeSplit[1:]
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
-    plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "best")
-    plotOptions["legend-cols"] = int(cfg["plot"].get("legend-cols", 1))
+    plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "best").split("\n")
+    plotOptions["legend-cols"] = list(map(int, cfg["plot"].get("legend-cols", "1").split("\n")))
     if "xlim" in cfg["plot"]:
         plotOptions["xlim"] = list(map(float, cfg["plot"].get("xlim").split()))
     else:
@@ -195,7 +195,32 @@ def fromConfig(configFileName, axes=False, datasets={}):
             axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
     # Move the legend render here, even after decorations (which can also be annotated)
     if plotOptions["legend"]:
-        axes.legend(loc=plotOptions["legend-pos"], ncol=plotOptions["legend-cols"])
+        if len(plotOptions["legend-pos"]) == 1:
+            # Apply the same location and number of columns for each legend
+            axes.legend(loc=plotOptions["legend-pos"][0], ncol=plotOptions["legend-cols"][0])
+        else:
+            # Split the legend - now need that the number of lines and legend entries are the same
+            handles, labels = axes.get_legend_handles_labels()
+            # First, organize line handles into list with the same positions - use dictionary
+            legendsOrganized = {}
+            currentLocation = 0
+            for i in range(len(handles)):
+                if plotOptions["legend-pos"][i] in legendsOrganized:
+                    legendsOrganized[plotOptions["legend-pos"][i]]["handles"].append(handles[i])
+                else:
+                    # Create new descriptor object
+                    legendsOrganized[plotOptions["legend-pos"][i]] = {}
+                    legendsOrganized[plotOptions["legend-pos"][i]]["handles"] = [handles[i]]
+                    if currentLocation < len(plotOptions["legend-cols"]):
+                        legendsOrganized[plotOptions["legend-pos"][i]]["cols"] = plotOptions["legend-cols"][currentLocation]
+                    else:
+                        legendsOrganized[plotOptions["legend-pos"][i]]["cols"] = 1
+            legendArtists = []
+            for legendLoc in legendsOrganized:
+                legendArtists.append(axes.legend(handles=legendsOrganized[legendLoc]["handles"], loc=legendLoc, ncol=legendsOrganized[legendLoc]["cols"]))
+            # Finally, add overwritten artists back to the axes
+            for i in range(len(legendArtists)-1):
+                axes.add_artist(legendArtists[i])
     # If an inset directive is present, add an inset to the current axes
     if cfg["plot"].get("inset", False):
         insetArgs = cfg["plot"].get("inset").split()
