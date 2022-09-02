@@ -213,6 +213,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
                     legendsOrganized[plotOptions["legend-pos"][i]]["handles"] = [handles[i]]
                     if currentLocation < len(plotOptions["legend-cols"]):
                         legendsOrganized[plotOptions["legend-pos"][i]]["cols"] = plotOptions["legend-cols"][currentLocation]
+                        currentLocation += 1
                     else:
                         legendsOrganized[plotOptions["legend-pos"][i]]["cols"] = 1
             legendArtists = []
