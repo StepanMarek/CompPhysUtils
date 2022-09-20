@@ -1,7 +1,8 @@
 from .post_processor import postProcessCommands
-from .savepoint import datasetParse as savepointDatasetParse
+from .savepoint import handleSavepoints
 import configparser
 import os
+import sys
 import importlib
 import re
 
@@ -25,21 +26,60 @@ for parserFileName in (defaultParsers + customParsers):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     parserModules[parserType] = mod
-lineParseFunctions = {}
-writeParseFunctions = {}
+readLineFunctions = {}
+writeLineFunctions = {}
+readFileFunctions = {}
+writeFileFunctions = {}
+readHeaderFunctions = {}
 writeHeaderFunctions = {}
+readFooterFunctions = {}
 writeFooterFunctions = {}
-parserArgsDefaults = {}
-initObjectsFunctions = {}
-initWriterObjects = {}
+readArgDefaults = {}
+writeArgDefaults = {}
+initReadObjects = {}
+initWriteObjects = {}
 for parserName in parserModules:
-    lineParseFunctions[parserName] = parserModules[parserName].line
-    parserArgsDefaults[parserName] = parserModules[parserName].argDefaults
-    initObjectsFunctions[parserName] = parserModules[parserName].initParserObjects
-    if hasattr(parserModules[parserName], "writeLine"):
-        writeParseFunctions[parserName] = parserModules[parserName].writeLine
+    # Prefer line-by-line reading when possible
+    if hasattr(parserModules[parserName], "line"):
+        readLineFunctions[parserName] = parserModules[parserName].line
+    elif hasattr(parserModules[parserName], "file"):
+        readFileFunctions[parserName] = parserModules[parserName].file
+        readLineFunctions[parserName] = False
     else:
-        writeParseFunctions[parserName] = False
+        # Neither line nor file reading utility provided, exception
+        raise ModuleNotFoundError("Neither file nor line functions found for parser "+parserName+"!")
+    if hasattr(parserModules[parserName], "writeLine"):
+        writeLineFunctions[parserName] = parserModules[parserName].writeLine
+    else:
+        writeLineFunctions[parserName] = False
+    if hasattr(parserModules[parserName], "writeFile"):
+        writeFileFunctions[parserName] = parserModules[parserName].writeFile
+    else:
+        writeFileFunctions[parserName] = False
+    if hasattr(parserModules[parserName], "argDefaults"):
+        readArgDefaults[parserName] = parserModules[parserName].argDefaults
+    else:
+        readArgDefaults[parserName] = []
+    if hasattr(parserModules[parserName], "writeArgDefaults"):
+        writeArgDefaults[parserName] = parserModules[parserName].writeArgDefaults
+    else:
+        writeArgDefaults[parserName] = []
+    if hasattr(parserModules[parserName], "initParserObjects"):
+        initReadObjects[parserName] = parserModules[parserName].initParserObjects
+    else:
+        initReadObjects[parserName] = False
+    if hasattr(parserModules[parserName], "initWriterObjects"):
+        initWriteObjects[parserName] = parserModules[parserName].initWriterObjects
+    else:
+        initWriteObjects[parserName] = False
+    if hasattr(parserModules[parserName], "readHeaders"):
+        readHeaderFunctions[parserName] = parserModules[parserName].readHeaders
+    else:
+        readHeaderFunctions[parserName] = False
+    if hasattr(parserModules[parserName], "readFooters"):
+        readFooterFunctions[parserName] = parserModules[parserName].readFooters
+    else:
+        readFooterFunctions[parserName] = False
     if hasattr(parserModules[parserName], "writeHeaders"):
         writeHeaderFunctions[parserName] = parserModules[parserName].writeHeaders
     else:
@@ -48,33 +88,118 @@ for parserName in parserModules:
         writeFooterFunctions[parserName] = parserModules[parserName].writeFooters
     else:
         writeFooterFunctions[parserName] = False
-    if hasattr(parserModules[parserName], "initWriterObjects"):
-        initWriterObjects[parserName] = parserModules[parserName].initWriterObjects
-    else:
-        initWriterObjects[parserName] = False
 
-def parseFile(filename, filetype, parserArgs=False):
+def readFile(filename, filetype, parserArgs=False):
+    """
+    Reads the file with given filetype parser and parserArgs
+
+    First, generates the reader objects from parserArgs. Then, splits into two possibilities:
+    If line reader is present, iterates line by line. Starts with header reader, if present, until
+    it throws ValueError. Then it continues to line reader. Each line should be converted to set of values
+    of the same size for each line. False is returned if the line is to be skipped. ValueError is to
+    be thrown if going to footer reader is required. Footer reader is the last stage. On the other hand,
+    if line reader is not present, default to file reader. There, leave file opening to the parser, only parse
+    filename and objects. Expect the entire dataset returned.
+    """
+    # Allow for default arguments
     if not parserArgs:
-        parserArgs = parserArgsDefaults[filetype]
-    file = open(filename, "r")
-    datagroups = []
-    parserObjects = initObjectsFunctions[filetype](parserArgs)
-    currentParser = lineParseFunctions[filetype]
-    for line in file:
-        # Read line by line
-        # Can return bool False if line is to be skipped
-        readGroups = currentParser(line, *parserObjects)
-        if readGroups:
-            for i in range(len(readGroups)):
-                if len(datagroups) > i:
-                    datagroups[i].append(readGroups[i])
-                else:
-                    datagroups.append([readGroups[i]])
-    file.close()
-    return datagroups
+        parserArgs = readArgDefaults[filetype]
+    # Initiate reading objects
+    if initReadObjects[filetype]:
+        readerObjects = initReadObjects[filetype](parserArgs)
+    else:
+        readerObjects = []
+    # Check whether reading line by line is present, as it is preferred
+    if readLineFunctions[filetype]:
+        # read lines
+        # requires text mode
+        with open(filename, "r") as f:
+            # Read headers, until False is produced
+            if readHeaderFunctions[filetype]:
+                for line in f:
+                    try:
+                        readHeaderFunctions[filetype](line, *readerObjects)
+                    except ValueError:
+                        # Value error signals that it is time to move to main content reading
+                        break
+            # Finished reading headers, read main content
+            dataset = []
+            for line in f:
+                try:
+                    datarow = readLineFunctions[filetype](line, *readerObjects)
+                    if datarow:
+                        # Either initiate dataset or append datarow
+                        if len(datarow) > len(dataset):
+                            for dataitem in datarow:
+                                dataset.append([dataitem])
+                        else:
+                            for i in range(len(datarow)):
+                                dataset[i].append(datarow[i])
+                    else:
+                        continue
+                except ValueError:
+                    # Time to read footers
+                    break
+            # Finished reading main content, read footers
+            if readFooterFunctions[filetype]:
+                for line in f:
+                    readFooterFunctions[filetype](line, *readerObjects)
+            # Done
+        return dataset
+    else:
+        # Read whole file in one go
+        return readFileFunctions[filetype](filename, *readerObjects)
+
+def writeFile(filename, filetype, dataset, parserArgs=False):
+    # Initialize parserArgs
+    if not parserArgs:
+        parserArgs = writeArgDefaults[filetype]
+    # Start by initialising writer objects
+    if initWriteObjects[filetype]:
+        writerObjects = initWriteObjects[filetype](parserArgs)
+    else:
+        writerObjects = []
+    # Differentiate between line-by-line writing and all-in-one writing
+    if writeLineFunctions[filetype]:
+        # Write line by line
+        # If filename is false, write to stdout
+        if not filename:
+            f = sys.stdout
+        else:
+            f = open(filename, "w+")
+        # Start by writing headers
+        # Headers/footers can be written all-in-one always
+        if writeHeaderFunctions[filetype]:
+            headers = writeHeaderFunctions[filetype](dataset, *writerObjects)
+            if len(headers) > 0:
+                headers += "\n"
+            f.write(headers)
+        # Continue with lines
+        for i in range(len(dataset[0])):
+            datarow = []
+            for j in range(len(dataset)):
+                datarow.append(dataset[j][i])
+            line = writeLineFunctions[filetype](datarow, *writerObjects)
+            f.write(line+"\n")
+        # Finish by writing footers
+        if writeFooterFunctions[filetype]:
+            footers = writeFooterFunctions[filetype](dataset, *writerObjects)
+            if len(footers) > 0:
+                footers += "\n"
+            f.write(footers)
+        if filename:
+            f.close()
+    else:
+        # Write all-in-one
+        writeFileFunctions[filetype](filename, dataset, *writerObjects)
 
 def postProcess(datagroups, command, args):
    return postProcessCommands[command](datagroups, args)
+
+def save(savepointGroup, context, datasets, defaultDatasetName=False):
+    toSave = handleSavepoints(savepointGroup, context, defaultDatasetName)
+    for savepointArgs in toSave:
+        writeFile(savepointArgs["filename"], savepointArgs["parserName"], datasets[savepointArgs["datasetName"]], savepointArgs["parserArgs"])
 
 def parseDatasetConfig(configFilename):
     cfg = configparser.ConfigParser()
@@ -86,7 +211,7 @@ def parseDatasetConfig(configFilename):
             if "file" in cfg[groupName]:
                 # Create datasets from file
                 parserArgs = cfg[groupName].get("parser-args", False)
-                datasets[datasetName] = parseFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserArgs=parserArgs)
+                datasets[datasetName] = readFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserArgs=parserArgs)
             elif "list" in cfg[groupName]:
                 # Create dataset from list, defaultly convert to float
                 # TODO : Should there be som interface to different convertors?
@@ -100,13 +225,15 @@ def parseDatasetConfig(configFilename):
                 else:
                     datasets[datasetName] = list(map(lambda s: list(map(float, s.split())), splitList))
             if "savepoint" in cfg[groupName]:
-                savepointDatasetParse(cfg[groupName].get("savepoint"), "load", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects)
+                save(cfg[groupName].get("savepoint"), "load", datasets, datasetName)
             if "post-process" in cfg[groupName]:
-                commandSplit = cfg[groupName]["post-process"].split()
-                if len(commandSplit) > 1:
-                    datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], commandSplit[1:])
-                else:
-                    datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], [])
+                differentCommands = cfg[groupName].get("post-process").split("\n")
+                for commandLine in differentCommands:
+                    commandSplit = commandLine.split()
+                    if len(commandSplit) > 1:
+                        datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], commandSplit[1:])
+                    else:
+                        datasets[datasetName] = postProcess(datasets[datasetName], commandSplit[0], [])
             if "savepoint" in cfg[groupName]:
-                savepointDatasetParse(cfg[groupName].get("savepoint"), "post-process", datasets[datasetName], writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects, defFilename="data_post.out")
+                save(cfg[groupName].get("savepoint"), "post-process", datasets, datasetName)
     return datasets

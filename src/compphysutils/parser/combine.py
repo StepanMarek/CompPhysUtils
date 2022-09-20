@@ -1,11 +1,6 @@
 import importlib
 import os
-from .parser import parseDatasetConfig
-from .parser import writeParseFunctions
-from .parser import writeHeaderFunctions
-from .parser import writeFooterFunctions
-from .parser import initWriterObjects
-from .savepoint import parse as savepointParse
+from . import save, parseDatasetConfig
 
 ## Search for default combine commands
 roots = []
@@ -52,6 +47,6 @@ def runGroupData(cfg, datasets, cfgFileName):
             datasets = commands[commandName](datasets, commandSplitLine[1:])
     # Finally, handle savepoint in the combine context
     if "savepoint" in cfg["data"]:
-        savepointParse(cfg["data"].get("savepoint"), "combine", datasets, writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects, "data_combine.out")
+        save(cfg["data"].get("savepoint"), "combine", datasets)
     # End by returning the (changed) datasets
     return datasets

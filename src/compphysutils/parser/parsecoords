@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import sys
-from compphysutils.parser.parser import initObjectsFunctions, lineParseFunctions, parserArgsDefaults, writeParseFunctions, writeHeaderFunctions, writeFooterFunctions
+from compphysutils.parser import writeFile, readFile
 
 ap = argparse.ArgumentParser(description="Parses coordinate files from one format to another.")
 ap.add_argument("source_filename", help="Filename of the source file that contains the coordinates in the source_format.")
@@ -11,39 +11,9 @@ ap.add_argument("--source_parser_args", nargs="*", default=False, help="Optional
 ap.add_argument("--target_parser_args", nargs="*", default=False, help="Optional args to be given to the target parser.")
 
 args = ap.parse_args()
-# Get parser arguments
-if args.source_parser_args:
-    sourceArgs = args.source_parser_args
-else:
-    sourceArgs = parserArgsDefaults[args.source_format]
-if args.target_parser_args:
-    targetArgs = args.target_parser_args
-else:
-    targetArgs = parserArgsDefaults[args.target_format]
-# Initiate parser objects
-sourceObjs = initObjectsFunctions[args.source_format](sourceArgs)
-targetObjs = initObjectsFunctions[args.target_format](targetArgs)
-# Read source file
-sourceFile = open(args.source_filename, "r")
-dataset = []
-for line in sourceFile:
-    datarow = lineParseFunctions[args.source_format](line, *sourceObjs)
-    if datarow:
-        for i in range(len(datarow)):
-            if len(dataset) > i:
-                dataset[i].append(datarow[i])
-            else:
-                dataset.append([datarow[i]])
-sourceFile.close()
-# Write target file to stdout
-if writeHeaderFunctions[args.target_format]:
-    print(writeHeaderFunctions[args.target_format](dataset))
-for i in range(len(dataset[0])):
-    datarow = []
-    for j in range(len(dataset)):
-        datarow.append(dataset[j][i])
-    print(writeParseFunctions[args.target_format](datarow))
-if writeFooterFunctions[args.target_format]:
-    print(writeFooterFunctions[args.target_format](dataset))
 
+# Read input file
+dataset = readFile(args.source_filename, args.source_format, args.source_parser_args)
+# Write output file
+writeFile(False, args.target_format, dataset, args.target_parser_args)
 sys.exit(0)

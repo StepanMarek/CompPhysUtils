@@ -1,12 +1,7 @@
 import matplotlib.pyplot as plt
-from ..parser.parser import parseDatasetConfig
-from ..parser.parser import writeParseFunctions 
-from ..parser.parser import writeHeaderFunctions 
-from ..parser.parser import writeFooterFunctions 
-from ..parser.parser import initWriterObjects 
-from ..parser.savepoint import parse as savepointParse 
+from ..parser import parseDatasetConfig
+from ..parser import save 
 import configparser
-from ..parser.combine import commands
 from ..parser.combine import runGroupData
 from .fitter import plotFit 
 from .transformer import transforms
@@ -82,7 +77,9 @@ def plot(datasets, plotType="line", axes=False, **plotOptions):
         axes.set_ylim(*plotOptions["ylim"])
     # Insert tick labels
     if plotOptions["xticks"]:
-        axes.set_xticks(plotOptions["xticks"][0], labels=plotOptions["xticks"][1])
+        #axes.set_xticks(plotOptions["xticks"][0], labels=plotOptions["xticks"][1])
+        axes.set_xticks(plotOptions["xticks"][0])
+        axes.set_xticklabels(plotOptions["xticks"][1])
     if plotOptions["yticks"]:
         axes.set_yticks(plotOptions["yticks"][0], labels=plotOptions["yticks"][1])
     return axes
@@ -102,7 +99,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
             commandName = commandSplitLine[0]
             datasets = transforms[commandName](datasets, commandSplitLine[1:])
     if "savepoint" in cfg["plot"]:
-        savepointParse(cfg["plot"].get("savepoint"), "transform", datasets, writeParseFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects, "data_transform.out")
+        save(cfg["plot"].get("savepoint"), "transform", datasets)
     # Now, datasets are complete, and we can read the plot group
     # Also include options that are set directly via type - should be reserved for options that are not usable for many plot types
     graphTypeSplit = cfg["plot"].get("type", "scatter").split()

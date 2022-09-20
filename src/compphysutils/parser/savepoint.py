@@ -1,51 +1,52 @@
-def save(dataset, writeLine, filename, writeHeaders=False, writeFooters=False, initWriterObjects=False):
-    nrows = len(dataset[0])
-    ncols = len(dataset)
-    file = open(filename, "w+")
-    writerObjects = []
-    if initWriterObjects:
-        writerObjects = initWriterObjects(dataset)
-    if writeHeaders:
-        headers = writeHeaders(dataset, *writerObjects)
-        if len(headers) > 0:
-            headers = headers + "\n"
-        file.write(headers)
-    for i in range(nrows):
-        datarow = []
-        for j in range(ncols):
-            datarow.append(dataset[j][i])
-        file.write(writeLine(datarow, *writerObjects)+"\n")
-    if writeFooters:
-        footers = writeFooters(dataset, *writerObjects)
-        if len(footers) > 0:
-            footers = footers + "\n"
-        file.write(footers)
-    file.close()
+shortContexts = ["load", "post-process"]
 
-def datasetParse(savepointLines, context, dataset, writeLineFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects, defFilename="data.out"):
-    # Parsers for the case when savepoint directive is provided at a given dataset - lacks one argument
-    savepointSplit = savepointLines.split("\n")
-    for i in range(len(savepointSplit)):
-        savepointArgs = savepointSplit[i].split()
-        if savepointArgs[0] == context:
-            filename = defFilename
-            if len(savepointArgs) > 2:
-                filename = savepointArgs[2]
-            # Save the dataset
-            if not writeLineFunctions[savepointArgs[1]]:
-                raise ValueError("No writeLine function defined for parser "+savepointArgs[1])
-            save(dataset, writeLineFunctions[savepointArgs[1]], filename, writeHeaders=writeHeaderFunctions[savepointArgs[1]], writeFooters=writeFooterFunctions[savepointArgs[1]], initWriterObjects=initWriterObjects[savepointArgs[1]])
+def parseArgs(savepointArgString, context, defaultDatasetName=False):
+    result = {}
+    savepointArgs = savepointArgString.split()
+    result["context"] = savepointArgs[0]
+    parserArgsStartIndex = 3
+    # If the context is short, expect no dataset name - it needs to be provided by program
+    if result["context"] in shortContexts:
+        if not defaultDatasetName:
+            raise ValueError("Invoking savepoint at short context but not providing default dataset name!")
+        else:
+            # Dataset name defined, proceed with parsing
+            result["datasetName"] = defaultDatasetName
+            result["parserName"] = savepointArgs[1]
+            # Change parser start index
+            parserArgsStartIndex = 2
+    else:
+        # Lond context
+        result["datasetName"] = savepointArgs[1]
+        result["parserName"] = savepointArgs[2]
+    # Check for index before filename
+    try:
+        filenameSeparatorIndex = savepointArgs.index("--")
+    except ValueError:
+        filenameSeparatorIndex = -1
+    if filenameSeparatorIndex == -1:
+        # No filename, go to default filename
+        result["filename"] = result["context"] + ".out"
+        # If there is a single extra arg after parserName, assume it is also fileName
+        if len(savepointArgs) == parserArgsStartIndex+1:
+            result["filename"] = savepointArgs[parserArgsStartIndex]
+            filenameSeparatorIndex = parserArgsStartIndex
+    else:
+        result["filename"] = savepointArgs[filenameSeparatorIndex+1]
+    # Finally, determine parser args
+    if filenameSeparatorIndex != -1:
+        parserArgs = savepointArgs[parserArgsStartIndex:filenameSeparatorIndex]
+    else:
+        parserArgs = savepointArgs[parserArgsStartIndex:]
+    result["parserArgs"] = parserArgs
+    return result
 
-def parse(savepointLines, context, datasets, writeLineFunctions, writeHeaderFunctions, writeFooterFunctions, initWriterObjects, defFilename="data.out"):
-    # Each line has following arguments - desired context, dataset name, parser with writeLine function, optional filename
-    savepointSplit = savepointLines.split("\n")
-    for i in range(len(savepointSplit)):
-        savepointArgs = savepointSplit[i].split()
-        if savepointArgs[0] == context:
-            filename = defFilename
-            if len(savepointArgs) > 3:
-                filename = savepointArgs[3]
-            # Save the dataset
-            if not writeLineFunctions[savepointArgs[2]]:
-                raise ValueError("No writeLine function defined for parser "+savepointArgs[2])
-            save(datasets[savepointArgs[1]], writeLineFunctions[savepointArgs[2]], filename, writeHeaders=writeHeaderFunctions[savepointArgs[2]], writeFooters=writeFooterFunctions[savepointArgs[2]], initWriterObjects=initWriterObjects[savepointArgs[2]])
+def handleSavepoints(savepointGroup, context, defaultDatasetName=False):
+    results = []
+    for savepointArgs in savepointGroup.split("\n"):
+        # Get parser arguments
+        partialResult = parseArgs(savepointArgs, context, defaultDatasetName=defaultDatasetName)
+        if partialResult["context"] == context:
+            results.append(partialResult)
+    return results
+

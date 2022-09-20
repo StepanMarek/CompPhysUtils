@@ -31,7 +31,7 @@ def parseCharConfig(cfg):
         if not elemName:
             raise ValueError("Missing atomic basis or element name in lattice definition")
         else:
-            return realBasis, reprBasis, unitCellLength, planarBasis, [elemName]
+            return realBasis, reprBasis, unitCellLength, planarBasis, [elemName, VectorReal(0,0,0)]
     else:
         atomicBasis = []
         atomicBasisSplit = atomicBasisChar.split("\n")
