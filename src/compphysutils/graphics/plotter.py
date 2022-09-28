@@ -33,39 +33,39 @@ for i in range(len(roots)):
         spec.loader.exec_module(mod)
         plotTypes[plotTypeName] = mod.plot
 
-class ColorIterator:
+class CyclicIterator:
+    def __init__(self, cycle=[]):
+        self.singleCycle = cycle
+        self.cycleLen = len(cycle)
+        self.currentIndex = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        returnVal = self.singleCycle[self.currentIndex % self.cycleLen]
+        self.currentIndex += 1
+        return returnVal
+
+class ColorIterator(CyclicIterator):
     def __init__(self, singleCycle="b"):
-        self.singleCycle = singleCycle.split()
-        self.currentIndex = 0
-        self.cycleLen = len(self.singleCycle)
+        super().__init__(singleCycle)
 
-    def __iter__(self):
-        return self
+class LinestyleIterator(CyclicIterator):
+    def __init__(self, singleCycle="-"):
+        super().__init__(singleCycle)
 
-    def __next__(self):
-        returnVal = self.singleCycle[self.currentIndex % self.cycleLen]
-        self.currentIndex += 1
-        return returnVal
+class MarkerstyleIterator(CyclicIterator):
+    def __init__(self, singleCycle="o"):
+        super().__init__(singleCycle)
 
-class LinestyleIterator:
-    def __init__(self, singleCycle="solid"):
-        self.singleCycle = singleCycle.split()
-        self.currentIndex = 0
-        self.cycleLen = len(self.singleCycle)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        returnVal = self.singleCycle[self.currentIndex % self.cycleLen]
-        self.currentIndex += 1
-        return returnVal
-
-def plot(datasets, plotType="line", axes=False, **plotOptions):
+def plot(datasets, plotType="line", axes=False, figure=False, **plotOptions):
+    if not figure:
+        figure = plt.gcf()
     if not axes:
-        axes = plt.gca()
+        axes = figure.gca()
     if plotType in plotTypes:
-        plotTypes[plotType](datasets, axes, **plotOptions)
+        plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     else:
         # Defaults to scatter
         plotTypes["scatter"](datasets, axes, **plotOptions)
@@ -84,8 +84,10 @@ def plot(datasets, plotType="line", axes=False, **plotOptions):
         axes.set_yticks(plotOptions["yticks"][0], labels=plotOptions["yticks"][1])
     return axes
 
-def fromConfig(configFileName, axes=False, datasets={}):
+def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     axesGiven = False
+    if not figure:
+        figure = plt.gcf()
     if axes:
         axesGiven = True
     cfg = configparser.ConfigParser()
@@ -135,6 +137,8 @@ def fromConfig(configFileName, axes=False, datasets={}):
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")
     plotOptions["linestyleCycle"] = LinestyleIterator(plotOptions["linestyleCycle"])
+    plotOptions["markerstyleCycle"] = cfg["plot"].get("markerstyleCycle", "o")
+    plotOptions["markerstyleCycle"] = LinestyleIterator(plotOptions["markerstyleCycle"])
     plotOptions["xlabel"] = cfg["plot"].get("xlabel", None)
     plotOptions["ylabel"] = cfg["plot"].get("ylabel", None)
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
@@ -151,7 +155,7 @@ def fromConfig(configFileName, axes=False, datasets={}):
         plotOptions[ticksName] = cfg["plot"].get(ticksName, False)
         if plotOptions[ticksName]:
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
-    axes = plot(chosenDatasets, graphType, axes=axes, **plotOptions)
+    axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
     # If fit is present, handle it
     fitIndex = 0
     if cfg["plot"].get("fit", False):
@@ -224,7 +228,10 @@ def fromConfig(configFileName, axes=False, datasets={}):
         insetArgs = cfg["plot"].get("inset").split()
         # Arguments are xpos, ypos, xwidth, ywidth
         insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
-        fromConfig(insetArgs[0], axes=insetAxes, datasets=datasets)
+        fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets)
+    if cfg["plot"].get("overlay", False):
+        # Apply a second graph on top of this one
+        fromConfig(cfg["plot"].get("overlay"), axes=axes, figure=figure, datasets=datasets)
     # If axes are provided, assume figure is printed somewhere else
     # TODO : Is this a reasonable assumption?
     if axesGiven:
