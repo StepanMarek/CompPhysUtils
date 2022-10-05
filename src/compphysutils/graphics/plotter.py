@@ -49,17 +49,17 @@ class CyclicIterator:
 
 class ColorIterator(CyclicIterator):
     def __init__(self, singleCycle="b"):
-        super().__init__(singleCycle)
+        super().__init__(singleCycle.split())
 
 class LinestyleIterator(CyclicIterator):
     def __init__(self, singleCycle="-"):
-        super().__init__(singleCycle)
+        super().__init__(singleCycle.split())
 
 class MarkerstyleIterator(CyclicIterator):
     def __init__(self, singleCycle="o"):
-        super().__init__(singleCycle)
+        super().__init__(singleCycle.split())
 
-def plot(datasets, plotType="line", axes=False, figure=False, **plotOptions):
+def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
     if not figure:
         figure = plt.gcf()
     if not axes:
@@ -142,6 +142,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     plotOptions["xlabel"] = cfg["plot"].get("xlabel", None)
     plotOptions["ylabel"] = cfg["plot"].get("ylabel", None)
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
+    print(cfg["plot"].get("colorCycle", "b"))
     # Dataset labels
     plotOptions["datasetLabels"] = cfg["plot"].get("labels", False)
     if plotOptions["datasetLabels"]:
