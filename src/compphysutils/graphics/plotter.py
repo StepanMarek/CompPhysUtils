@@ -142,7 +142,6 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     plotOptions["xlabel"] = cfg["plot"].get("xlabel", None)
     plotOptions["ylabel"] = cfg["plot"].get("ylabel", None)
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
-    print(cfg["plot"].get("colorCycle", "b"))
     # Dataset labels
     plotOptions["datasetLabels"] = cfg["plot"].get("labels", False)
     if plotOptions["datasetLabels"]:
@@ -220,7 +219,14 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
                         legendsOrganized[plotOptions["legend-pos"][i]]["cols"] = 1
             legendArtists = []
             for legendLoc in legendsOrganized:
-                legendArtists.append(axes.legend(handles=legendsOrganized[legendLoc]["handles"], loc=legendLoc, ncol=legendsOrganized[legendLoc]["cols"]))
+                if len(legendLoc.split()) <= 2:
+                    # Only loc is provided
+                    legendArtists.append(axes.legend(handles=legendsOrganized[legendLoc]["handles"], loc=legendLoc, ncol=legendsOrganized[legendLoc]["cols"]))
+                else:
+                    # Loc and bbox are provided
+                    legendLocOnly = " ".join(legendLoc.split()[:-2])
+                    legendBBOXOnly = tuple(map(float, legendLoc.split()[-2:]))
+                    legendArtists.append(axes.legend(handles=legendsOrganized[legendLoc]["handles"], loc=legendLocOnly, bbox_to_anchor=legendBBOXOnly, ncol=legendsOrganized[legendLoc]["cols"]))
             # Finally, add overwritten artists back to the axes
             for i in range(len(legendArtists)-1):
                 axes.add_artist(legendArtists[i])
