@@ -113,7 +113,10 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     for i in range(len(colCoords)):
         chosenDatasets.append([])
         for j in range(0,len(colCoords[i]),2):
-            chosenDatasets[i].append(datasets[colCoords[i][j]][int(colCoords[i][j+1])])
+            try:
+                chosenDatasets[i].append(datasets[colCoords[i][j]][int(colCoords[i][j+1])])
+            except IndexError:
+                raise IndexError("Cannot create plot for coordinates "+colCoords[i][j]+" "+colCoords[i][j+1])
     plotOptions = {}
     plotOptions["plotArgString"] = graphTypeSplit[1:]
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
