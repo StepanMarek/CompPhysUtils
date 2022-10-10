@@ -1,4 +1,5 @@
 import os
+from .. import __user_conf_dir
 import importlib
 
 ## Search for default post-processing commands
@@ -8,8 +9,8 @@ root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/transforms"))
 roots.append(root)
 modFilenames.append(filenames)
 ## Search for custom post_process commands
-if os.path.isdir(os.path.expanduser("~/.config/compphysutils/transforms")):
-    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/transforms")))
+if os.path.isdir(os.path.expanduser(__user_conf_dir+"/transforms")):
+    root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/transforms")))
     roots.append(root)
     modFilenames.append(filenames)
 ## Import all commands

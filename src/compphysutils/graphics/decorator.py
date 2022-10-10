@@ -1,4 +1,5 @@
 import os
+from .. import __user_conf_dir
 import importlib
 
 ## Search for default post-processing commands
@@ -8,8 +9,8 @@ root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/decorate"))
 roots.append(root)
 modFilenames.append(filenames)
 ## Search for custom post_process commands
-if os.path.isdir(os.path.expanduser("~/.config/compphysutils/decorate")):
-    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/decorate")))
+if os.path.isdir(os.path.expanduser(__user_conf_dir+"/decorate")):
+    root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/decorate")))
     roots.append(root)
     modFilenames.append(filenames)
 ## Import all commands

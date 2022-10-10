@@ -1,5 +1,6 @@
 from .post_processor import postProcessCommands
 from .savepoint import handleSavepoints
+from .. import __user_conf_dir
 import configparser
 import os
 import sys
@@ -9,8 +10,8 @@ import re
 parserModules = {}
 # Check for custom parser modules
 customParsers = []
-if os.path.isdir(os.path.expanduser("~/.config/compphysutils/parsers")):
-    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/parsers")))
+if os.path.isdir(os.path.expanduser(__user_conf_dir+"/parsers")):
+    root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/parsers")))
     customParsers = list(map(lambda f: root+"/"+f, filenames))
 # Check for default parser modules
 root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/parsers"))

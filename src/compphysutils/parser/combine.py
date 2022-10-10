@@ -1,6 +1,7 @@
 import importlib
 import os
 from . import save, parseDatasetConfig
+from .. import __user_conf_dir
 
 ## Search for default combine commands
 roots = []
@@ -9,8 +10,8 @@ root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/combine_commands")
 roots.append(root)
 modFilenames.append(filenames)
 ## Search for custom combine commands
-if os.path.isdir(os.path.expanduser("~/.config/compphysutils/combine_commands")):
-    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/combine_commands")))
+if os.path.isdir(os.path.expanduser(__user_conf_dir+"/combine_commands")):
+    root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/combine_commands")))
     roots.append(root)
     modFilenames.append(filenames)
 ## Import all commands

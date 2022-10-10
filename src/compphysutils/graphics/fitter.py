@@ -1,4 +1,5 @@
 from scipy.optimize import curve_fit
+from .. import __user_conf_dir
 import math
 import importlib
 import os
@@ -9,8 +10,8 @@ root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/fit_types"))
 roots.append(root)
 modFilenames.append(filenames)
 ## Search for custom post_process commands
-if os.path.isdir(os.path.expanduser("~/.config/compphysutils/fit_types")):
-    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/fit_types")))
+if os.path.isdir(os.path.expanduser(__user_conf_dir+"/fit_types")):
+    root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/fit_types")))
     roots.append(root)
     modFilenames.append(filenames)
 ## Import all commands

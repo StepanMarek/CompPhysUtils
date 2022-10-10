@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from .. import __user_conf_dir
 from ..parser import parseDatasetConfig
 from ..parser import save 
 import configparser
@@ -16,8 +17,8 @@ root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/plot_types"))
 roots.append(root)
 modFilenames.append(filenames)
 # Search for custom plot types
-if os.path.isdir(os.path.expanduser("~/.config/compphysutils/plot_types")):
-    root, _, filenames = next(os.walk(os.path.expanduser("~/.config/compphysutils/plot_types")))
+if os.path.isdir(os.path.expanduser(__user_conf_dir+"/plot_types")):
+    root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/plot_types")))
     roots.append(root)
     modFilenames.append(filenames)
 # Import all plot types
