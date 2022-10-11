@@ -137,6 +137,10 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         plt.rcParams["font.size"] = int(cfg["plot"].get("font-size", 12))
     if "mathfont" in cfg["plot"]:
         plt.rcParams["mathtext.fontset"] = cfg["plot"].get("mathfont", "cm")
+    figure.set_size_inches(
+            float(cfg["plot"].get("fig-width-inches", 6.4)),
+            float(cfg["plot"].get("fig-height-inches", 4.8))
+    )
     plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "b")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")
@@ -253,3 +257,4 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             plt.savefig(figFileName, bbox_inches="tight")
     else:
         plt.show()
+    return figure

@@ -7,5 +7,4 @@ argparser.add_argument("configfilenames", nargs="+", help="name of the config fi
 
 args = argparser.parse_args()
 for filename in args.configfilenames:
-	fromConfig(filename)
-
+	fromConfig(filename).clear()
