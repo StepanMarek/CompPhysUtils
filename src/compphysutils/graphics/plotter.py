@@ -247,6 +247,9 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     if cfg["plot"].get("overlay", False):
         # Apply a second graph on top of this one
         fromConfig(cfg["plot"].get("overlay"), axes=axes, figure=figure, datasets=datasets)
+    if cfg["plot"].get("twinx", False):
+        # Plot another dataset sharing the same x axis but different y axis
+        fromConfig(cfg["plot"].get("twinx"), axes=axes.twinx(), figure=figure, datasets=datasets)
     # If axes are provided, assume figure is printed somewhere else
     # TODO : Is this a reasonable assumption?
     if axesGiven:
