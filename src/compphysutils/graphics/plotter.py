@@ -206,7 +206,11 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     if plotOptions["legend"]:
         if len(plotOptions["legend-pos"]) == 1:
             # Apply the same location and number of columns for each legend
-            axes.legend(loc=plotOptions["legend-pos"][0], ncol=plotOptions["legend-cols"][0])
+            legendArgs = plotOptions["legend-pos"][0].split()
+            if len(legendArgs) == 4:
+                axes.legend(loc=" ".join(legendArgs[:-2]), ncol=plotOptions["legend-cols"][0], bbox_to_anchor=tuple(map(float, legendArgs[-2:])))
+            else:
+                axes.legend(loc=plotOptions["legend-pos"][0], ncol=plotOptions["legend-cols"][0])
         else:
             # Split the legend - now need that the number of lines and legend entries are the same
             handles, labels = axes.get_legend_handles_labels()
