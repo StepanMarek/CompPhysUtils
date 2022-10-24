@@ -23,6 +23,7 @@ PARSERSOURCE += src/compphysutils/parser/parsers/__init__.py
 PARSERSOURCE += src/compphysutils/parser/parsers/cols.py
 PARSERSOURCE += src/compphysutils/parser/parsers/csv.py
 PARSERSOURCE += src/compphysutils/parser/parsers/eiger.py
+PARSERSOURCE += src/compphysutils/parser/parsers/image.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
@@ -39,6 +40,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/transformer.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transforms/log.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorator.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/line.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorate/image.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 
 BASESOURCE := src/compphysutils/__init__.py
