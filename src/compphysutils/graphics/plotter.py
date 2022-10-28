@@ -82,7 +82,8 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         axes.set_xticks(plotOptions["xticks"][0])
         axes.set_xticklabels(plotOptions["xticks"][1])
     if plotOptions["yticks"]:
-        axes.set_yticks(plotOptions["yticks"][0], labels=plotOptions["yticks"][1])
+        axes.set_yticks(plotOptions["yticks"][0])
+        axes.set_yticklabels(plotOptions["yticks"][1])
     return axes
 
 def fromConfig(configFileName, axes=False, figure=False, datasets={}):
@@ -107,7 +108,11 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     # Also include options that are set directly via type - should be reserved for options that are not usable for many plot types
     graphTypeSplit = cfg["plot"].get("type", "scatter").split()
     graphType = graphTypeSplit[0]
-    colCoords = cfg.get("plot", "cols").split("\n")
+    colCoords = cfg["plot"].get("cols", False)
+    if colCoords:
+        colCoords = colCoords.split("\n")
+    else:
+        colCoords = []
     for i in range(len(colCoords)):
         colCoords[i] = colCoords[i].split()
     chosenDatasets = []
@@ -161,8 +166,10 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     # Arguments supplied are the dataset name, convert it to a dataset that is then plotted
     for ticksName in ["xticks", "yticks"]:
         plotOptions[ticksName] = cfg["plot"].get(ticksName, False)
-        if plotOptions[ticksName]:
+        if plotOptions[ticksName] and (not cfg["plot"].get("hide-"+ticksName, False)):
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
+        elif cfg["plot"].get("hide-"+ticksName, False):
+            plotOptions[ticksName] = [[],[]]
     axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
     # If fit is present, handle it
     fitIndex = 0
@@ -244,15 +251,21 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
                 axes.add_artist(legendArtists[i])
     # If an inset directive is present, add an inset to the current axes
     if cfg["plot"].get("inset", False):
-        insetArgs = cfg["plot"].get("inset").split()
-        # Arguments are xpos, ypos, xwidth, ywidth
-        insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
-        fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets)
+        insetLines = cfg["plot"].get("inset").split("\n")
+        for i in range(len(insetLines)):
+            insetArgs = insetLines[i].split()
+            # Arguments are xpos, ypos, xwidth, ywidth
+            insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
+            fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets)
     if cfg["plot"].get("overlay", False):
-        # Apply a second graph on top of this one
-        fromConfig(cfg["plot"].get("overlay"), axes=axes, figure=figure, datasets=datasets)
+        # Split by any whitespace
+        overlayLines = cfg["plot"].get("overlay").split()
+        for i in range(len(overlayLines)):
+            # Apply a second graph on top of this one
+            fromConfig(overlayLines[i], axes=axes, figure=figure, datasets=datasets)
     if cfg["plot"].get("twinx", False):
         # Plot another dataset sharing the same x axis but different y axis
+        # Always, only a single twinx makes sense - provide no arguments
         fromConfig(cfg["plot"].get("twinx"), axes=axes.twinx(), figure=figure, datasets=datasets)
     # If axes are provided, assume figure is printed somewhere else
     # TODO : Is this a reasonable assumption?
