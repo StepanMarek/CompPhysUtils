@@ -171,6 +171,9 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
     axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
+    # If the axes are hidden, hide them
+    if cfg["plot"].get("hide-axes", False):
+        axes.set_axis_off()
     # If fit is present, handle it
     fitIndex = 0
     if cfg["plot"].get("fit", False):
