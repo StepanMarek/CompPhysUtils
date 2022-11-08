@@ -50,7 +50,12 @@ class CyclicIterator:
 
 class ColorIterator(CyclicIterator):
     def __init__(self, singleCycle="b"):
-        super().__init__(singleCycle.split())
+        # Change the format if necessary
+        listOfColors = singleCycle.split()
+        for i in range(len(listOfColors)):
+            if listOfColors[i].find(",") >= 0:
+                listOfColors[i] = tuple(map(float, listOfColors[i].split(",")))
+        super().__init__(listOfColors)
 
 class LinestyleIterator(CyclicIterator):
     def __init__(self, singleCycle="-"):
