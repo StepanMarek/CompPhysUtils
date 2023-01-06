@@ -60,11 +60,11 @@ for parserName in parserModules:
     if hasattr(parserModules[parserName], "argDefaults"):
         readArgDefaults[parserName] = parserModules[parserName].argDefaults
     else:
-        readArgDefaults[parserName] = []
+        readArgDefaults[parserName] = ""
     if hasattr(parserModules[parserName], "writeArgDefaults"):
         writeArgDefaults[parserName] = parserModules[parserName].writeArgDefaults
     else:
-        writeArgDefaults[parserName] = []
+        writeArgDefaults[parserName] = ""
     if hasattr(parserModules[parserName], "initParserObjects"):
         initReadObjects[parserName] = parserModules[parserName].initParserObjects
     else:
@@ -107,7 +107,7 @@ def readFile(filename, filetype, parserArgs=False):
         parserArgs = readArgDefaults[filetype]
     # Initiate reading objects
     if initReadObjects[filetype]:
-        readerObjects = initReadObjects[filetype](parserArgs)
+        readerObjects = initReadObjects[filetype](parserArgs.split())
     else:
         readerObjects = []
     # Check whether reading line by line is present, as it is preferred
@@ -157,7 +157,7 @@ def writeFile(filename, filetype, dataset, parserArgs=False):
         parserArgs = writeArgDefaults[filetype]
     # Start by initialising writer objects
     if initWriteObjects[filetype]:
-        writerObjects = initWriteObjects[filetype](parserArgs)
+        writerObjects = initWriteObjects[filetype](parserArgs.split())
     else:
         writerObjects = []
     # Differentiate between line-by-line writing and all-in-one writing
