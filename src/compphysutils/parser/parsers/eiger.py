@@ -6,13 +6,13 @@ class EigerReference:
     # https://physics.nist.gov/cgi-bin/cuu/Value?hrev
     HtoEv = 27.211386245988
 
-    def __init__(self, parserArgs="--unit eV"):
+    def __init__(self, parserArgs=["--unit","eV"]):
         self.reading = False
         self.readingLineRe = re.compile("\s*Nr\.\s*Orbital\s*Occupation\s*Energy")
         self.dataRe = re.compile("(\d+\.\d+)?\s*([\-\+]+\d+\.\d+)[H\s=]*([\-\+]+\d+\.\d+)")
         ap = argparse.ArgumentParser()
         ap.add_argument("--unit", help="Unit to be outputed", default="eV")
-        self.args = ap.parse_args(parserArgs.split())
+        self.args = ap.parse_args(parserArgs)
         self.energyUnit = self.args.unit
 
     def testLineReading(self, line):

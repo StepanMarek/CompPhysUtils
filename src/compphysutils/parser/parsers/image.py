@@ -5,7 +5,7 @@ import numpy as np
 def initParserObjects(parserArgs):
     ap = argparse.ArgumentParser()
     ap.add_argument("-v", action="store_true", help="Whether to output debug information. Default : False")
-    args = ap.parse_args(parserArgs.split())
+    args = ap.parse_args(parserArgs)
     return [args]
 
 def file(filename, args):
