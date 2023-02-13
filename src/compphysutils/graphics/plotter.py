@@ -159,6 +159,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     plotOptions["markerstyleCycle"] = LinestyleIterator(plotOptions["markerstyleCycle"])
     plotOptions["xlabel"] = cfg["plot"].get("xlabel", None)
     plotOptions["ylabel"] = cfg["plot"].get("ylabel", None)
+    plotOptions["axis-width"] = cfg["plot"].get("axis-width", 1);
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
     # Dataset labels
     plotOptions["datasetLabels"] = cfg["plot"].get("labels", False)
@@ -179,6 +180,9 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
         axes.set_axis_off()
+    # Change width of all axes
+    for place in ["top", "bottom", "left", "right"]:
+        axes.spines[place].set_linewidth(plotOptions["axis-width"]);
     # If fit is present, handle it
     fitIndex = 0
     if cfg["plot"].get("fit", False):
