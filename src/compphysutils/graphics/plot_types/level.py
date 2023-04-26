@@ -13,5 +13,5 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
         datasetLabels = [None] * len(datasets)
     for dataIndex in range(len(datasets)):
         # For x positions, only takes into account first element
-        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], linelengths=args.linelength, orientation=orientation, label=datasetLabels[dataIndex], colors=next(plotOptions["colorCycle"]))
+        axisObj.eventplot(datasets[dataIndex][1], lineoffsets=datasets[dataIndex][0][0], linelengths=args.linelength, orientation=orientation, label=datasetLabels[dataIndex], colors=next(plotOptions["colorCycle"]), linestyles=next(plotOptions["linestyleCycle"]))
     return axisObj
