@@ -46,7 +46,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 BASESOURCE := src/compphysutils/__init__.py
 
 install: $(WHEELFILE)
-	pip3 install --force-reinstall $(WHEELFILE)
+	pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
 
 upload-test: $(WHEELFILE)
 	python -m twine upload --repository testpypi $(WHEELFILE) $(TARFILE)
