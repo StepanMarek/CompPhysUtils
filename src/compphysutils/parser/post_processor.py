@@ -23,5 +23,4 @@ for i in range(len(roots)):
             continue
         spec = importlib.util.spec_from_file_location("compphysutils.parser.post_process."+commandName, roots[i]+"/"+filename)
         mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        postProcessCommands[commandName] = mod.command
+        postProcessCommands[commandName] = {"spec" : spec, "module" : mod, "loaded" : False}

@@ -15,6 +15,7 @@ if os.path.isdir(os.path.expanduser(__user_conf_dir+"/transforms")):
     modFilenames.append(filenames)
 ## Import all commands
 transforms = {}
+transformModules = {}
 for i in range(len(roots)):
     for filename in modFilenames[i]:
         commandName = filename.split(".")[0]
@@ -23,5 +24,4 @@ for i in range(len(roots)):
             continue
         spec = importlib.util.spec_from_file_location("compphysutils.graphics.transforms."+commandName, roots[i]+"/"+filename)
         mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        transforms[commandName] = mod.command
+        transformModules[commandName] = {"spec" : spec, "module" : mod, "loaded" : False}

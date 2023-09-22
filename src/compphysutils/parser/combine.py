@@ -15,6 +15,8 @@ if os.path.isdir(os.path.expanduser(__user_conf_dir+"/combine_commands")):
     roots.append(root)
     modFilenames.append(filenames)
 ## Import all commands
+## Defer load for when it will be used
+commandModules = {}
 commands = {}
 for i in range(len(roots)):
     for filename in modFilenames[i]:
@@ -24,12 +26,15 @@ for i in range(len(roots)):
             continue
         spec = importlib.util.spec_from_file_location("compphysutils.parser.combine_commands."+commandName, roots[i]+"/"+filename)
         mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        commands[commandName] = mod.command
+        commandModules[commandName] = {"spec" : spec, "module" : mod, "loaded" : False}
+        #spec.loader.exec_module(mod)
+        #commands[commandName] = mod.command
 
 def runGroupData(cfg, datasets, cfgFileName):
     if "data" in cfg:
         # First, load data from datasetfiles
+        # This way, same definitions can be used for different datasets
+        # TODO : Add to documentation
         datasetfiles = cfg["data"].get("datasetfiles", False)
         if datasetfiles:
             for datasetFileName in datasetfiles.split():
@@ -45,6 +50,12 @@ def runGroupData(cfg, datasets, cfgFileName):
         for commandLine in combineCommands:
             commandSplitLine = commandLine.split()
             commandName = commandSplitLine[0]
+            if not commandName in commandModules:
+                raise ModuleNotFoundError("Combine command "+commandName+" not found in the search tree!")
+            if not commandModules[commandName]["loaded"]:
+                commandModules[commandName]["spec"].loader.exec_module(commandModules[commandName]["module"])
+                commandModules[commandName]["loaded"] = True
+                commands[commandName] = commandModules[commandName]["module"].command
             datasets = commands[commandName](datasets, commandSplitLine[1:])
     # Finally, handle savepoint in the combine context
     if "savepoint" in cfg["data"]:

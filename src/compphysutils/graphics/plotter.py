@@ -5,8 +5,8 @@ from ..parser import save
 import configparser
 from ..parser.combine import runGroupData
 from .fitter import plotFit 
-from .transformer import transforms
-from .decorator import decorations
+from .transformer import transforms,transformModules
+from .decorator import decorations,decorationModules
 import importlib
 import os
 
@@ -23,6 +23,7 @@ if os.path.isdir(os.path.expanduser(__user_conf_dir+"/plot_types")):
     modFilenames.append(filenames)
 # Import all plot types
 plotTypes = {}
+plotModules = {}
 for i in range(len(roots)):
     for filename in modFilenames[i]:
         plotTypeName = filename.split(".")[0]
@@ -31,8 +32,7 @@ for i in range(len(roots)):
             continue
         spec = importlib.util.spec_from_file_location("compphysutils.graphics.plot_types."+plotTypeName, roots[i]+"/"+filename)
         mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        plotTypes[plotTypeName] = mod.plot
+        plotModules[plotTypeName] = {"spec" : spec, "module" : mod, "loaded" : False}
 
 class CyclicIterator:
     def __init__(self, cycle=[]):
@@ -72,6 +72,12 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         axes = figure.gca()
     if plotType in plotTypes:
         plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
+    elif plotType in plotModules:
+        # Module is present but probably not loaded
+        plotModules[plotType]["spec"].loader.exec_module(plotModules[plotType]["module"])
+        plotModules[plotType]["loaded"] = True
+        plotTypes[plotType] = plotModules[plotType]["module"].plot
+        plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     else:
         # Defaults to scatter
         plotTypes["scatter"](datasets, axes, **plotOptions)
@@ -106,6 +112,13 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         for commandLine in transformCommands:
             commandSplitLine = commandLine.split()
             commandName = commandSplitLine[0]
+            if not commandName in transformModules:
+                raise ModuleNotFoundError("Transform module "+commandName+" not found in the search tree!")
+            if not commandName in transforms:
+                # Load
+                transformModules[commandName]["spec"].loader.exec_module(transformModules[commandName]["module"])
+                transforms[commandName] = transformModules[commandName]["module"].command
+                transformModules[commandName]["loaded"] = True
             datasets = transforms[commandName](datasets, commandSplitLine[1:])
     if "savepoint" in cfg["plot"]:
         save(cfg["plot"].get("savepoint"), "transform", datasets)
@@ -220,6 +233,12 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         decorationCommands = cfg["plot"].get("decorate").split("\n")
         for decorationArgs in decorationCommands:
             decorationSplit = decorationArgs.split()
+            if not decorationSplit[0] in decorationModules:
+                raise ModuleNotFoundError("Decoration module "+decorationSplit[0]+" not found!")
+            if not decorationModules[decorationSplit[0]]["loaded"]:
+                decorationModules[decorationSplit[0]]["spec"].loader.exec_module(decorationModules[decorationSplit[0]]["module"])
+                decorations[decorationSplit[0]] = decorationModules[decorationSplit[0]]["module"].command
+                decorationModules[decorationSplit[0]]["loaded"] = True
             axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
     # Move the legend render here, even after decorations (which can also be annotated)
     if plotOptions["legend"]:

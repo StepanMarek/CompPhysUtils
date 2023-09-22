@@ -11,22 +11,25 @@ parserModules = {}
 # Check for custom parser modules
 customParsers = []
 if os.path.isdir(os.path.expanduser(__user_conf_dir+"/parsers")):
+    # Custom defined parsers
     root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/parsers")))
     customParsers = list(map(lambda f: root+"/"+f, filenames))
 # Check for default parser modules
 root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/parsers"))
 defaultParsers = list(map(lambda f: root+"/"+f, filenames))
 # Ideally, custom parsers should overwrite default parsers, not sure if this works
+# TODO : Check that this works
 rexp = re.compile(".*/(.*)\.py")
 for parserFileName in (defaultParsers + customParsers):
     parserType = rexp.search(parserFileName).group(1)
     if parserType[0:2] == "__":
-        # Not a parser, but just a init or other module
+        # Not a parser, but just a init or other module file
         continue
     spec = importlib.util.spec_from_file_location("compphysutils.parser.parsers."+parserType, parserFileName)
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    parserModules[parserType] = mod
+    #Try just reading the module, but not executing it?
+    #spec.loader.exec_module(mod)
+    parserModules[parserType] = {"module" : mod, "spec" : spec, "loaded" : False}
 readLineFunctions = {}
 writeLineFunctions = {}
 readFileFunctions = {}
@@ -39,54 +42,93 @@ readArgDefaults = {}
 writeArgDefaults = {}
 initReadObjects = {}
 initWriteObjects = {}
-for parserName in parserModules:
-    # Prefer line-by-line reading when possible
-    if hasattr(parserModules[parserName], "line"):
-        readLineFunctions[parserName] = parserModules[parserName].line
+def loadParserModule(parserName):
+    """
+    Load the given module and try to distribute its defined attributes
+
+    Each parser module has to have either line or file functions, which reads a line in a given file or
+    reads the whole file in one go, which should be used primarily for binary files. There are few other
+    possible attributes and functions that can be defined:
+    
+     - writeLine - writes the line given a dataset row
+     - writeFile - writes a file given a dataset
+
+    One of these two functions is required to also enable writing data via parsers, for example in savepoints.
+
+     - argDefaults - string of default arguments for the reading parser
+     - writeArgDefaults - string of default arguments for the writing parser
+
+    This is useful when you want the parser to run in a generic mode but need some fine control for specific files.
+
+     - initParserObjects - function that returns various objects that are defined before the parser runs
+     - initWriterObjects - function that returns various objects that are defined before the parser writing runs
+
+    These objects can define number of lines based on the dataset, create instances that track progress through reading
+    of the lines etc. Mostly used for the latter, i.e. keep track of read data and change reading modes based on previously
+    read lines. In parsers which use file function, this might not be necessary.
+
+     - readHeaders
+     - readFooters
+     - writeHeaders
+     - writeFooters
+
+    Reads/writes footers of the files, can be used for different mode in line mode. Also can be used to skip the headers.
+    """
+    # Load
+    if not parserName in parserModules:
+        # No module found
+        raise ModuleNotFoundError("The parser file "+parserName+" was not found in the search tree!")
+    parserModules[parserName]["spec"].loader.exec_module(parserModules[parserName]["module"])
+    parserModules[parserName]["loaded"] = True
+    targetModule = parserModules[parserName]["module"]
+    # distribute loaded functions
+    if hasattr(targetModule, "line"):
+        readLineFunctions[parserName] = targetModule.line
     elif hasattr(parserModules[parserName], "file"):
-        readFileFunctions[parserName] = parserModules[parserName].file
+        readFileFunctions[parserName] = targetModule.file
         readLineFunctions[parserName] = False
     else:
         # Neither line nor file reading utility provided, exception
         raise ModuleNotFoundError("Neither file nor line functions found for parser "+parserName+"!")
-    if hasattr(parserModules[parserName], "writeLine"):
-        writeLineFunctions[parserName] = parserModules[parserName].writeLine
+    # Write line functions are optional
+    if hasattr(targetModule, "writeLine"):
+        writeLineFunctions[parserName] = targetModule.writeLine
     else:
         writeLineFunctions[parserName] = False
-    if hasattr(parserModules[parserName], "writeFile"):
-        writeFileFunctions[parserName] = parserModules[parserName].writeFile
+    if hasattr(targetModule, "writeFile"):
+        writeFileFunctions[parserName] = targetModule.writeFile
     else:
         writeFileFunctions[parserName] = False
-    if hasattr(parserModules[parserName], "argDefaults"):
-        readArgDefaults[parserName] = parserModules[parserName].argDefaults
+    if hasattr(targetModule, "argDefaults"):
+        readArgDefaults[parserName] = targetModule.argDefaults
     else:
         readArgDefaults[parserName] = ""
-    if hasattr(parserModules[parserName], "writeArgDefaults"):
-        writeArgDefaults[parserName] = parserModules[parserName].writeArgDefaults
+    if hasattr(targetModule, "writeArgDefaults"):
+        writeArgDefaults[parserName] = targetModule.writeArgDefaults
     else:
         writeArgDefaults[parserName] = ""
-    if hasattr(parserModules[parserName], "initParserObjects"):
-        initReadObjects[parserName] = parserModules[parserName].initParserObjects
+    if hasattr(targetModule, "initParserObjects"):
+        initReadObjects[parserName] = targetModule.initParserObjects
     else:
         initReadObjects[parserName] = False
-    if hasattr(parserModules[parserName], "initWriterObjects"):
-        initWriteObjects[parserName] = parserModules[parserName].initWriterObjects
+    if hasattr(targetModule, "initWriterObjects"):
+        initWriteObjects[parserName] = targetModule.initWriterObjects
     else:
         initWriteObjects[parserName] = False
-    if hasattr(parserModules[parserName], "readHeaders"):
-        readHeaderFunctions[parserName] = parserModules[parserName].readHeaders
+    if hasattr(targetModule, "readHeaders"):
+        readHeaderFunctions[parserName] = targetModule.readHeaders
     else:
         readHeaderFunctions[parserName] = False
-    if hasattr(parserModules[parserName], "readFooters"):
-        readFooterFunctions[parserName] = parserModules[parserName].readFooters
+    if hasattr(targetModule, "readFooters"):
+        readFooterFunctions[parserName] = targetModule.readFooters
     else:
         readFooterFunctions[parserName] = False
-    if hasattr(parserModules[parserName], "writeHeaders"):
-        writeHeaderFunctions[parserName] = parserModules[parserName].writeHeaders
+    if hasattr(targetModule, "writeHeaders"):
+        writeHeaderFunctions[parserName] = targetModule.writeHeaders
     else:
         writeHeaderFunctions[parserName] = False
-    if hasattr(parserModules[parserName], "writeFooters"):
-        writeFooterFunctions[parserName] = parserModules[parserName].writeFooters
+    if hasattr(targetModule, "writeFooters"):
+        writeFooterFunctions[parserName] = targetModule.writeFooters
     else:
         writeFooterFunctions[parserName] = False
 
@@ -102,6 +144,8 @@ def readFile(filename, filetype, parserArgs=False):
     if line reader is not present, default to file reader. There, leave file opening to the parser, only parse
     filename and objects. Expect the entire dataset returned.
     """
+    if not parserModules[filetype]["loaded"]:
+        loadParserModule(filetype)
     # Allow for default arguments
     if not parserArgs:
         parserArgs = readArgDefaults[filetype]
@@ -152,6 +196,8 @@ def readFile(filename, filetype, parserArgs=False):
         return readFileFunctions[filetype](filename, *readerObjects)
 
 def writeFile(filename, filetype, dataset, parserArgs=False):
+    if not parserModules[filetype]["loaded"]:
+        loadParserModule(filetype)
     # Initialize parserArgs
     if not parserArgs:
         parserArgs = writeArgDefaults[filetype]
@@ -195,7 +241,10 @@ def writeFile(filename, filetype, dataset, parserArgs=False):
         writeFileFunctions[filetype](filename, dataset, *writerObjects)
 
 def postProcess(datagroups, command, args):
-   return postProcessCommands[command](datagroups, args)
+    # Load if not loaded
+    if not postProcessCommands[command]["loaded"]:
+        postProcessCommands[command]["spec"].loader.exec_module(postProcessCommands[command]["module"])
+    return postProcessCommands[command]["module"].command(datagroups, args)
 
 def save(savepointGroup, context, datasets, defaultDatasetName=False):
     toSave = handleSavepoints(savepointGroup, context, defaultDatasetName)
