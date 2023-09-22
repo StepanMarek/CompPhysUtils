@@ -286,7 +286,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
     if plotOptions["figfile"]:
         # Can output the same figure in different formats
         for figFileName in plotOptions["figfile"].split():
-            plt.savefig(figFileName, bbox_inches="tight")
+            plt.savefig(figFileName, bbox_inches="tight", dpi=int(cfg["plot"].get("dpi", "300")))
     else:
         plt.show()
     return figure
