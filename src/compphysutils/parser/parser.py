@@ -84,7 +84,7 @@ def loadParserModule(parserName):
     # distribute loaded functions
     if hasattr(targetModule, "line"):
         readLineFunctions[parserName] = targetModule.line
-    elif hasattr(parserModules[parserName], "file"):
+    elif hasattr(targetModule, "file"):
         readFileFunctions[parserName] = targetModule.file
         readLineFunctions[parserName] = False
     else:
