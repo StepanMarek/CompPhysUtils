@@ -18,6 +18,7 @@ if os.path.isdir(os.path.expanduser(__user_conf_dir+"/fit_types")):
 fitFunctions = {}
 guessFunctions = {}
 paramNames = {}
+fitModules = {}
 for i in range(len(roots)):
     for filename in modFilenames[i]:
         fitFuncName = filename.split(".")[0]
@@ -26,13 +27,20 @@ for i in range(len(roots)):
             continue
         spec = importlib.util.spec_from_file_location("compphysutils.graphics.fit_types."+fitFuncName, roots[i]+"/"+filename)
         mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        fitFunctions[fitFuncName] = mod.fit
-        paramNames[fitFuncName] = mod.paramNames
-        if hasattr(mod, "guess"):
-            guessFunctions[fitFuncName] = mod.guess
-        else:
-            guessFunctions[fitFuncName] = False
+        fitModules[fitFuncName] = {"spec" : spec, "module" : mod, "loaded" : False}
+
+def loadFitType(fitFuncName):
+    if not fitFuncName in fitModules:
+        raise ModuleNotFoundError("Fit module "+fitFuncName+" was not found in the search tree!")
+    fitModules[fitFuncName]["spec"].loader.exec_module(fitModules[fitFuncName]["module"])
+    targetModule = fitModules[fitFuncName]["module"]
+    fitFunctions[fitFuncName] = targetModule.fit
+    paramNames[fitFuncName] = targetModule.paramNames
+    if hasattr(targetModule, "guess"):
+        guessFunctions[fitFuncName] = targetModule.guess
+    else:
+        guessFunctions[fitFuncName] = False
+    fitModules[fitFuncName]["loaded"] = True
 
 def roundSignificantFigures(number, sigFigs, matchOrder=False):
     if not matchOrder:
@@ -60,6 +68,8 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
     # Behaviour changes depending on the number of columns
     # TODO : Do other possibilities (i.e. xerr and yerr and no error)
     # Find the indices for the required coordinates
+    if not fitModules[fitFunctionName]["loaded"]:
+        loadFitType(fitFunctionName)
     ixMin = 0
     if fitParams["xMin"]:
         while fitParams["xMin"] > dataset[0][ixMin]:

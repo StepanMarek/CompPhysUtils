@@ -1,4 +1,4 @@
-VERSION := 0.3.0
+VERSION := 0.4.0
 
 WHEELFILE := dist/compphysutils-$(VERSION)-py3-none-any.whl
 TARFILE := dist/compphysutils-$(VERSION).tar.gz
@@ -46,7 +46,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 BASESOURCE := src/compphysutils/__init__.py
 
 install: $(WHEELFILE)
-	pip3 install --force-reinstall $(WHEELFILE)
+	pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
 
 upload-test: $(WHEELFILE)
 	python -m twine upload --repository testpypi $(WHEELFILE) $(TARFILE)

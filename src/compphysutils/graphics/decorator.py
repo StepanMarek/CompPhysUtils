@@ -15,6 +15,7 @@ if os.path.isdir(os.path.expanduser(__user_conf_dir+"/decorate")):
     modFilenames.append(filenames)
 ## Import all commands
 decorations = {}
+decorationModules = {}
 for i in range(len(roots)):
     for filename in modFilenames[i]:
         commandName = filename.split(".")[0]
@@ -23,5 +24,4 @@ for i in range(len(roots)):
             continue
         spec = importlib.util.spec_from_file_location("compphysutils.graphics.decorate."+commandName, roots[i]+"/"+filename)
         mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        decorations[commandName] = mod.command
+        decorationModules[commandName] = {"spec" : spec, "module" : mod, "loaded" : False}
