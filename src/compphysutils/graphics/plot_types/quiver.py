@@ -13,6 +13,9 @@ ap.add_argument("--scale", default=1, type=float, help="Scale used for the matla
 ap.add_argument("--scaleUnits", default="xy", help="Scale units used for the matlab primitive. Default : xy")
 ap.add_argument("--units", default="xy", help="Units used for the matlab primitive. Default : xy")
 ap.add_argument("--pivot", default="tail", help="Pivot used for the matlab primitive. Default : tail")
+ap.add_argument("--headlength", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
+ap.add_argument("--headwidth", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
+ap.add_argument("--headaxislength", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
 
 def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
     args = ap.parse_args(plotOptions["plotArgString"])
@@ -48,48 +51,8 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
             scale_units=args.scaleUnits,
             units=args.units,
             pivot=args.pivot,
-            headlength=10,
-            headaxislength=10,
-            headwidth=10
+            headlength=args.headlength,
+            headaxislength=args.headaxislength,
+            headwidth=args.headwidth
         )
     return axisObj
-#def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
-#    # Datasets are cols,columns,rows organized
-#    if not datasetLabels:
-#        datasetLabels = [False] * len(datasets)
-#    # Parse arguments
-#    args = ap.parse_args(plotOptions["plotArgString"])
-#    # Now, determine stride
-#    if args.plane == "xy":
-#        # Keep a constant z
-#        if args.changeOrder == "xyz":
-#            # Simplest case - simply take consecutive points - equal to stride 1
-#            # Find start
-#            startIndex = args.loneIndex * args.gridsize[0] * args.gridsize[1]
-#            finalIndex = startIndex + args.gridsize[0] * args.gridsize[1]
-#            stride = 1
-#            # Extract the required fields
-#            for colIndex in range(len(datasets)):
-#                x = numpy.array(datasets[colIndex][0])
-#                y = numpy.array(datasets[colIndex][1])
-#                z = numpy.array(datasets[colIndex][2])
-#                curr_x = numpy.array(datasets[colIndex][0])
-#                curr_y = numpy.array(datasets[colIndex][1])
-#                curr_z = numpy.array(datasets[colIndex][2])
-#                x_plot = x[startIndex:finalIndex:stride]
-#                y_plot = y[startIndex:finalIndex:stride]
-#                curr_x_plot = curr_x[startIndex:finalIndex:stride]
-#                curr_y_plot = curr_y[startIndex:finalIndex:stride]
-#            # Plot the quiver
-#            zValue = z[startIndex]
-#            zValue = round(zValue, 2)
-#            axisObj.quiver(x_plot, y_plot, curr_x_plot, curr_y_plot,
-#                label="$z = "+str(zValue)+"$",
-#                color=next(plotOptions["colorCycle"]),
-#                linestyle=next(plotOptions["linestyleCycle"]),
-#                angles="xy",
-#                scale=0.3*max((max(curr_x_plot), max(curr_y_plot))),
-#                units="xy",
-#            )
-#    # Return the axis object
-#    return axisObj
