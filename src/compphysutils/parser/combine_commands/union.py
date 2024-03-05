@@ -10,6 +10,6 @@ def command(datasets, commandArgs):
     for i in range(ncols):
         newcols.append([])
         for datasetName in args.datasets_to_merge:
-            newcols[i] = newcols[i] + datasets[datasetName][i]
+            newcols[i] = newcols[i] + list(datasets[datasetName][i])
     datasets[args.new_name] = newcols
     return datasets

@@ -10,11 +10,12 @@ class ColsReference:
         self.args = self.argsReader.parse_args(parserArgs)
 
     def continueReading(self, line):
-        if line[0] == self.args.comment:
+        stripLine = line.strip()
+        if stripLine[0] == self.args.comment:
             return False
         # Not commented, read
         # TODO : Different var types
-        splitLine = line.split()
+        splitLine = stripLine.split()
         retVal = []
         for i in self.args.cols:
             retVal.append(float(splitLine[i]))
