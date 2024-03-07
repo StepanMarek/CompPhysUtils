@@ -32,6 +32,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/line.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/scatter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/errorbar.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/level.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/quiver.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/linear.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig

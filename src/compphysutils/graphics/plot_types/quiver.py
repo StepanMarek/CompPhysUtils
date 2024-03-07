@@ -16,6 +16,7 @@ ap.add_argument("--pivot", default="tail", help="Pivot used for the matlab primi
 ap.add_argument("--headlength", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
 ap.add_argument("--headwidth", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
 ap.add_argument("--headaxislength", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
+ap.add_argument("--stride", default=1, type=int, help="Optionally, stride the points in both directions to reduce the number of points.")
 
 def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
     args = ap.parse_args(plotOptions["plotArgString"])
@@ -43,6 +44,15 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
         if args.normalize:
             components = components / (numpy.sum(components ** 2, axis=0) ** 0.5)
         # Change default arrow style to resamble annotation arrows
+        if args.stride != 1:
+            print(coordinates.shape)
+            coordinates = numpy.lib.stride_tricks.as_strided(coordinates,
+                    shape=(coordinates.shape[0], coordinates.shape[1]//2, coordinates.shape[2]//2),
+                    strides=(coordinates.strides[0], coordinates.strides[1]*2, coordinates.strides[2]*2))
+            print(coordinates.shape)
+            components = numpy.lib.stride_tricks.as_strided(components,
+                    shape=(components.shape[0], components.shape[1]//2, components.shape[2]//2),
+                    strides=(components.strides[0], components.strides[1]*2, components.strides[2]*2))
         axisObj.quiver(*coordinates, *components,
             label=datasetLabels[datasetIndex],
             color=next(plotOptions["colorCycle"]),
