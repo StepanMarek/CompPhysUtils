@@ -1,6 +1,6 @@
 import os
 from .. import __user_conf_dir
-import importlib
+import importlib.util
 
 ## Search for default post-processing commands
 roots = []
