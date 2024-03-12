@@ -298,6 +298,9 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         # Plot another dataset sharing the same x axis but different y axis
         # Always, only a single twinx makes sense - provide no arguments
         fromConfig(cfg["plot"].get("twinx"), axes=axes.twinx(), figure=figure, datasets=datasets)
+    if cfg["plot"].get("twiny", False):
+        # same as twinx, but for shared y-axis
+        fromConfig(cfg["plot"].get("twiny"), axes=axes.twiny(), figure=figure, datasets=datasets)
     # If axes are provided, assume figure is printed somewhere else
     # TODO : Is this a reasonable assumption?
     if axesGiven:
