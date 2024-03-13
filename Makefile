@@ -24,6 +24,10 @@ PARSERSOURCE += src/compphysutils/parser/parsers/cols.py
 PARSERSOURCE += src/compphysutils/parser/parsers/csv.py
 PARSERSOURCE += src/compphysutils/parser/parsers/eiger.py
 PARSERSOURCE += src/compphysutils/parser/parsers/image.py
+PARSERSOURCE += src/compphysutils/parser/parsers/coord-xyz.py
+PARSERSOURCE += src/compphysutils/parser/parsers/coord-tm.py
+PARSERSOURCE += src/compphysutils/parser/parsers/coord-aims.py
+PARSERSOURCE += src/compphysutils/parser/parsers/coord-cub.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
@@ -33,9 +37,11 @@ GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/scatter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/errorbar.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/level.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/quiver.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/coord.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/linear.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
+GRAPHICSSOURCE += src/compphysutils/graphics/plotcoords
 GRAPHICSSOURCE += src/compphysutils/graphics/fitter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transformer.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transforms/log.py
@@ -55,5 +61,5 @@ upload-test: $(WHEELFILE)
 upload: $(WHEELFILE)
 	python -m twine upload --verbose $(WHEELFILE) $(TARFILE)
 
-$(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE)
+$(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE) MANIFEST.in
 	python -m build
