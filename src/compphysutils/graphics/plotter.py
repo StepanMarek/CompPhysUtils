@@ -164,7 +164,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             float(cfg["plot"].get("fig-width-inches", 6.4)),
             float(cfg["plot"].get("fig-height-inches", 4.8))
     )
-    plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "b")
+    plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "r g b c m y k")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")
     plotOptions["linestyleCycle"] = LinestyleIterator(plotOptions["linestyleCycle"])
