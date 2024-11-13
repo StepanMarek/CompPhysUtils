@@ -209,6 +209,20 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             fitLabels += [False] * (numFits - len(fitLabels))
         prevFitParams = []
         fitColorIterator = ColorIterator(cfg["plot"].get("fit-colorCycle", "tab:blue tab:orange tab:green tab:cyan"))
+        fitLinestyleIterator = LinestyleIterator(cfg["plot"].get("fit-linestyleCycle", ":"))
+        # Ready the ranges for fits - each fit requires a separate range
+        fitXMins = [False]*numFits
+        fitXMaxs = [False]*numFits
+        providedXMins = cfg["plot"].get("fit-xmin", False)
+        providedXMaxs = cfg["plot"].get("fit-xmax", False)
+        if providedXMins:
+            providedXMins = providedXMins.split("\n")
+            for i in range(len(providedXMins)):
+                fitXMins[i] = float(providedXMins[i])
+        if providedXMaxs:
+            providedXMaxs = providedXMaxs.split("\n")
+            for i in range(len(providedXMaxs)):
+                fitXMaxs[i] = float(providedXMaxs[i])
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
@@ -221,10 +235,11 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
                 showParams=cfg["plot"].getboolean("fit-show-params", True),
                 showError=cfg["plot"].getboolean("fit-show-error", True),
                 fitColorCycle=fitColorIterator,
+                fitLinestyleCycle=fitLinestyleIterator,
                 paramsPlacement=cfg["plot"].get("params-placement", False),
                 paramsOffset=len(prevFitParams),
-                xMin=float(cfg["plot"].get("fit-xmin", False)),
-                xMax=float(cfg["plot"].get("fit-xmax", False)),
+                xMin=fitXMins[fitIndex],
+                xMax=fitXMaxs[fitIndex],
                 dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)
                 ))
             fitIndex += 1
