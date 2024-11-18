@@ -92,6 +92,8 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         #axes.set_xticks(plotOptions["xticks"][0], labels=plotOptions["xticks"][1])
         axes.set_xticks(plotOptions["xticks"][0])
         axes.set_xticklabels(plotOptions["xticks"][1])
+        if plotOptions["xticks-rotate"]:
+            axes.tick_params(axis="x", labelrotation=90)
     if plotOptions["yticks"]:
         axes.set_yticks(plotOptions["yticks"][0])
         axes.set_yticklabels(plotOptions["yticks"][1])
@@ -189,6 +191,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
+        plotOptions[ticksName+"-rotate"] = cfg["plot"].get(ticksName+"-rotate", False)
     axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
