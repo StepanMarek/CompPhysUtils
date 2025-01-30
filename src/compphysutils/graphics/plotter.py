@@ -92,6 +92,8 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         #axes.set_xticks(plotOptions["xticks"][0], labels=plotOptions["xticks"][1])
         axes.set_xticks(plotOptions["xticks"][0])
         axes.set_xticklabels(plotOptions["xticks"][1])
+        if plotOptions["xticks-rotate"]:
+            axes.tick_params(axis="x", labelrotation=90)
     if plotOptions["yticks"]:
         axes.set_yticks(plotOptions["yticks"][0])
         axes.set_yticklabels(plotOptions["yticks"][1])
@@ -189,6 +191,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
+        plotOptions[ticksName+"-rotate"] = cfg["plot"].get(ticksName+"-rotate", False)
     axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
@@ -209,6 +212,20 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             fitLabels += [False] * (numFits - len(fitLabels))
         prevFitParams = []
         fitColorIterator = ColorIterator(cfg["plot"].get("fit-colorCycle", "tab:blue tab:orange tab:green tab:cyan"))
+        fitLinestyleIterator = LinestyleIterator(cfg["plot"].get("fit-linestyleCycle", ":"))
+        # Ready the ranges for fits - each fit requires a separate range
+        fitXMins = [False]*numFits
+        fitXMaxs = [False]*numFits
+        providedXMins = cfg["plot"].get("fit-xmin", False)
+        providedXMaxs = cfg["plot"].get("fit-xmax", False)
+        if providedXMins:
+            providedXMins = providedXMins.split("\n")
+            for i in range(len(providedXMins)):
+                fitXMins[i] = float(providedXMins[i])
+        if providedXMaxs:
+            providedXMaxs = providedXMaxs.split("\n")
+            for i in range(len(providedXMaxs)):
+                fitXMaxs[i] = float(providedXMaxs[i])
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
@@ -221,10 +238,11 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
                 showParams=cfg["plot"].getboolean("fit-show-params", True),
                 showError=cfg["plot"].getboolean("fit-show-error", True),
                 fitColorCycle=fitColorIterator,
+                fitLinestyleCycle=fitLinestyleIterator,
                 paramsPlacement=cfg["plot"].get("params-placement", False),
                 paramsOffset=len(prevFitParams),
-                xMin=float(cfg["plot"].get("fit-xmin", False)),
-                xMax=float(cfg["plot"].get("fit-xmax", False)),
+                xMin=fitXMins[fitIndex],
+                xMax=fitXMaxs[fitIndex],
                 dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)
                 ))
             fitIndex += 1
