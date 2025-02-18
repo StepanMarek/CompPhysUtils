@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import argparse
 from compphysutils.parser import readFile
 from compphysutils.graphics.plotter import plot
