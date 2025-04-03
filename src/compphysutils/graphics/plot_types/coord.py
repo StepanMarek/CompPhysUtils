@@ -13,7 +13,9 @@ colors = {
     "h"  : "#ffffff",
     "c"  : "#111111",
     "o"  : "#ff0000",
-    "n"  : "#0000ff"
+    "n"  : "#0000ff",
+    "s"  : "#ffeb00",
+    "mo" : "#006792"
 }
 
 radii = {
@@ -23,7 +25,9 @@ radii = {
     "h"  : 0.5,
     "c"  : 1.0,
     "o"  : 1.1,
-    "n"  : 1.1
+    "n"  : 1.1,
+    "s"  : 1.3,
+    "mo" : 1.3,
 }
 
 def plotSpheres(axes3d, position=numpy.array([[0.0],[0.0],[0.0]]), elements=False):

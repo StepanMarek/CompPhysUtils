@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from .. import __user_conf_dir
 from ..parser import parseDatasetConfig
-from ..parser import save 
+from ..parser import save, writeFile
 import configparser
 from ..parser.combine import runGroupData
 from .fitter import plotFit 
@@ -71,16 +71,16 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
     if not axes:
         axes = figure.gca()
     if plotType in plotTypes:
-        plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
+        axes = plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     elif plotType in plotModules:
         # Module is present but probably not loaded
         plotModules[plotType]["spec"].loader.exec_module(plotModules[plotType]["module"])
         plotModules[plotType]["loaded"] = True
         plotTypes[plotType] = plotModules[plotType]["module"].plot
-        plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
+        axes = plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     else:
         # Defaults to scatter
-        plotTypes["scatter"](datasets, axes, **plotOptions)
+        axes = plotTypes["scatter"](datasets, axes, **plotOptions)
     axes.set_xlabel(plotOptions["xlabel"])
     axes.set_ylabel(plotOptions["ylabel"])
     if plotOptions["xlim"]:
@@ -92,8 +92,15 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         #axes.set_xticks(plotOptions["xticks"][0], labels=plotOptions["xticks"][1])
         axes.set_xticks(plotOptions["xticks"][0])
         axes.set_xticklabels(plotOptions["xticks"][1])
-        if plotOptions["xticks-rotate"]:
-            axes.tick_params(axis="x", labelrotation=90)
+    if plotOptions["xticks-rotate"]:
+        axes.tick_params(axis="x", labelrotation=90)
+    # If requested, move ticks to top
+    axes.tick_params(axis="x",
+                     top=plotOptions["xticks-swap"],
+                     labeltop=plotOptions["xticks-swap"],
+                     bottom=not plotOptions["xticks-swap"],
+                     labelbottom=not plotOptions["xticks-swap"]
+                     )
     if plotOptions["yticks"]:
         axes.set_yticks(plotOptions["yticks"][0])
         axes.set_yticklabels(plotOptions["yticks"][1])
@@ -192,6 +199,8 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
         plotOptions[ticksName+"-rotate"] = cfg["plot"].get(ticksName+"-rotate", False)
+    # xticks on top if requested
+    plotOptions["xticks-swap"] = cfg["plot"].get("xticks-swap", False)
     axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
@@ -211,6 +220,10 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         if len(fitLabels) < numFits:
             fitLabels += [False] * (numFits - len(fitLabels))
         prevFitParams = []
+        prevFitErrors = []
+        fitParamLengths = []
+        currFitParams = []
+        currFitErrors = []
         fitColorIterator = ColorIterator(cfg["plot"].get("fit-colorCycle", "tab:blue tab:orange tab:green tab:cyan"))
         fitLinestyleIterator = LinestyleIterator(cfg["plot"].get("fit-linestyleCycle", ":"))
         # Ready the ranges for fits - each fit requires a separate range
@@ -229,7 +242,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
-            prevFitParams += list(plotFit(
+            currFitParams, currFitErrors = plotFit(
                 chosenDatasets[int(fitArgs[1])],
                 fitArgs[0],
                 axes,
@@ -243,9 +256,40 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
                 paramsOffset=len(prevFitParams),
                 xMin=fitXMins[fitIndex],
                 xMax=fitXMaxs[fitIndex],
-                dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)
-                ))
+                dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False),
+                fitIndex=fitIndex
+                )
             fitIndex += 1
+            prevFitParams += list(currFitParams)
+            prevFitErrors += list(currFitErrors)
+            fitParamLengths.append(len(currFitParams))
+        # Save fit params, if required
+        fitSaveName = cfg["plot"].get("fit-savepoint", False)
+        if fitSaveName:
+            fitSaveArgs = fitSaveName.split()
+            # No context name nor dataset name, only format and target filename (optional)
+            fitFormatName = fitSaveArgs[0]
+            fitFileName = "fit.dat"
+            fitParserArgs = False
+            if len(fitSaveArgs) > 1:
+                fitFileName = fitSaveArgs[1]
+            if len(fitSaveArgs) > 2:
+                fitParserArgs = " ".join(fitSaveArgs[2:])
+            # Regularize to dataset - take the first fit as determination
+            dataset = []
+            for j in range(fitParamLengths[0]):
+                dataset.append([])
+                # Append for both value and error
+                dataset.append([])
+            fitNumCols = fitParamLengths[0]
+            paramOffset = 0
+            for i in range(len(fitParamLengths)):
+                for j in range(fitNumCols):
+                    dataset[2*j].append(prevFitParams[paramOffset + j])
+                    dataset[2*j+1].append(prevFitErrors[paramOffset + j])
+                paramOffset += fitParamLengths[i]
+            # Dataset regularized, output
+            writeFile(fitFileName, fitFormatName, dataset, fitParserArgs)
     # Handle decorations for main axes
     if cfg["plot"].get("decorate", False):
         decorationCommands = cfg["plot"].get("decorate").split("\n")
