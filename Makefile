@@ -1,4 +1,4 @@
-VERSION := 0.4.1
+VERSION := 0.4.2
 
 WHEELFILE := dist/compphysutils-$(VERSION)-py3-none-any.whl
 TARFILE := dist/compphysutils-$(VERSION).tar.gz
