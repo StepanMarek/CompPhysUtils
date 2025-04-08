@@ -1,4 +1,4 @@
-VERSION := 0.4.1
+VERSION := 0.4.2
 
 WHEELFILE := dist/compphysutils-$(VERSION)-py3-none-any.whl
 TARFILE := dist/compphysutils-$(VERSION).tar.gz
@@ -42,6 +42,8 @@ GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/linear.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
 GRAPHICSSOURCE += src/compphysutils/graphics/plotcoords
+GRAPHICSSOURCE += src/compphysutils/graphics/plot3dcoords
+GRAPHICSSOURCE += src/compphysutils/graphics/atom_plot.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fitter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transformer.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transforms/log.py
