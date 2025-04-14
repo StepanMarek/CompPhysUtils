@@ -47,12 +47,12 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
         if args.stride != 1:
             print(coordinates.shape)
             coordinates = numpy.lib.stride_tricks.as_strided(coordinates,
-                    shape=(coordinates.shape[0], coordinates.shape[1]//2, coordinates.shape[2]//2),
-                    strides=(coordinates.strides[0], coordinates.strides[1]*2, coordinates.strides[2]*2))
+                    shape=(coordinates.shape[0], coordinates.shape[1]//args.stride, coordinates.shape[2]//args.stride),
+                    strides=(coordinates.strides[0], coordinates.strides[1]*args.stride, coordinates.strides[2]*args.stride))
             print(coordinates.shape)
             components = numpy.lib.stride_tricks.as_strided(components,
-                    shape=(components.shape[0], components.shape[1]//2, components.shape[2]//2),
-                    strides=(components.strides[0], components.strides[1]*2, components.strides[2]*2))
+                    shape=(components.shape[0], components.shape[1]//args.stride, components.shape[2]//args.stride),
+                    strides=(components.strides[0], components.strides[1]*args.stride, components.strides[2]*args.stride))
         axisObj.quiver(*coordinates, *components,
             label=datasetLabels[datasetIndex],
             color=next(plotOptions["colorCycle"]),
