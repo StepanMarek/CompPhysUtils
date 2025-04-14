@@ -10,7 +10,7 @@ argparser = argparse.ArgumentParser(prog="plot3dcoords", description="Plots the 
 argparser.add_argument("--format", "-f", dest="format", help="Name of the format of the coordinate file.")
 argparser.add_argument("--camera_pos", type=float, nargs=3, help="Initial position of the camera. Default : (0,0,10)", default=(0.0,0.0,10.0))
 argparser.add_argument("--triangles", nargs="*", default=False, help="Filenames containing column triangulation data for surfaces (isosurfaces) to be plotted.")
-argparser.add_argument("--sphere_res", default=10, type=int, help="Resolution of individual spheres - sets rings + sections. [default : 10]")
+argparser.add_argument("--sphere_res", default=30, type=int, help="Resolution of individual spheres - sets rings + sections. [default : 10]")
 argparser.add_argument("coordinate_file", help="Name of the coordinate file to be processed")
 argparser.add_argument("savefile", help="Name of the file into which to save the rendered coordinates")
 
