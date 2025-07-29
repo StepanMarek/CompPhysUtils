@@ -86,10 +86,13 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
         popt = guesses
         perr = guesses
     else:
-        if len(dataset) == 3:
-            popt, pcov = curve_fit(fitFunctions[fitFunctionName], dataset[0][ixMin:ixMax+1], dataset[1][ixMin:ixMax+1], sigma=dataset[2][ixMin:ixMax+1], p0=guesses)
-        else:
-            popt, pcov = curve_fit(fitFunctions[fitFunctionName], dataset[0][ixMin:ixMax+1], dataset[1][ixMin:ixMax+1], p0=guesses)
+        try:
+            if len(dataset) == 3:
+                popt, pcov = curve_fit(fitFunctions[fitFunctionName], dataset[0][ixMin:ixMax+1], dataset[1][ixMin:ixMax+1], sigma=dataset[2][ixMin:ixMax+1], p0=guesses)
+            else:
+                popt, pcov = curve_fit(fitFunctions[fitFunctionName], dataset[0][ixMin:ixMax+1], dataset[1][ixMin:ixMax+1], p0=guesses)
+        except RuntimeError:
+            raise RuntimeError(f'Did not manage to find params for fit {fitParams["fitIndex"]}')
         perr = []
         for i in range(len(pcov)):
             perr.append(pcov[i][i] ** 0.5)
@@ -102,9 +105,9 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
         xs.append(xMin + dx*i)
         ys.append(fitFunctions[fitFunctionName](xMin + dx*i, *popt))
     if fitParams["fitLabel"]:
-        axisObj.plot(xs,ys,label=fitParams["fitLabel"],color=next(fitParams["fitColorCycle"]))
+        axisObj.plot(xs,ys,label=fitParams["fitLabel"],color=next(fitParams["fitColorCycle"]),ls=next(fitParams["fitLinestyleCycle"]))
     else:
-        axisObj.plot(xs,ys,color=next(fitParams["fitColorCycle"]))
+        axisObj.plot(xs,ys,color=next(fitParams["fitColorCycle"]),ls=next(fitParams["fitLinestyleCycle"]))
     # Construct the param string
     if fitParams["showParams"]:
         pstring = ""
@@ -118,8 +121,8 @@ def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
         if fitParams["paramsPlacement"]:
             # Text anchor is the bottom left corner by default
             if fitParams["paramsPlacement"] == "tl":
-                axisObj.text(0.1, 0.9-0.05*(len(popt)-1)-0.05*(fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
+                axisObj.text(0.1, 0.9-0.07*(len(popt)-1)-0.07*(fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
         else:
             # Default to top left
-            axisObj.text(0.1, 0.9-0.05*(len(popt)-1)-0.05*(fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
-    return popt
+            axisObj.text(1.1, 0.9-0.07*(len(popt)-1)-0.07*(fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
+    return popt, perr

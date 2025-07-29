@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import argparse
+from compphysutils.parser import readFile
+from compphysutils.graphics.plotter import plot
+import matplotlib.pyplot as plt
+
+argparser = argparse.ArgumentParser(description="Plots the coordinates, using default parameters.")
+argparser.add_argument("--format", "-f", dest="format", help="Name of the format of the coordinate file.")
+argparser.add_argument("--view", help="View option broadcasted to coord plot : Camera position in angular coordinates in degrees (azimuthal,elevation,roll). Default : (0,0,0)", default="0,0,0")
+argparser.add_argument("--dpi", default=300, type=int, help="Resolution of the coord image")
+argparser.add_argument("coordinate_file", help="Name of the coordinate file to be processed")
+argparser.add_argument("savefile", help="Name of the file into which to save the rendered coordinates")
+
+args = argparser.parse_args()
+dataset = readFile(args.coordinate_file, args.format)
+# TODO : Variable figure size?
+plt.gcf().set_size_inches(4,4)
+# TODO : Axes limits
+plot([dataset], "coord", axes=plt.gca(), figure=plt.gcf(), plotArgString=["--view", args.view], xlabel=False, ylabel=False, xlim=False, ylim=False, xticks=False, yticks=False)
+# TODO : Variable DPI
+# TODO : Redo by default config?
+plt.savefig(args.savefile, bbox_inches="tight", dpi=args.dpi)

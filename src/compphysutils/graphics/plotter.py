@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from .. import __user_conf_dir
 from ..parser import parseDatasetConfig
-from ..parser import save 
+from ..parser import save, writeFile
 import configparser
 from ..parser.combine import runGroupData
 from .fitter import plotFit 
@@ -71,16 +71,16 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
     if not axes:
         axes = figure.gca()
     if plotType in plotTypes:
-        plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
+        axes = plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     elif plotType in plotModules:
         # Module is present but probably not loaded
         plotModules[plotType]["spec"].loader.exec_module(plotModules[plotType]["module"])
         plotModules[plotType]["loaded"] = True
         plotTypes[plotType] = plotModules[plotType]["module"].plot
-        plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
+        axes = plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     else:
         # Defaults to scatter
-        plotTypes["scatter"](datasets, axes, **plotOptions)
+        axes = plotTypes["scatter"](datasets, axes, **plotOptions)
     axes.set_xlabel(plotOptions["xlabel"])
     axes.set_ylabel(plotOptions["ylabel"])
     if plotOptions["xlim"]:
@@ -92,6 +92,15 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         #axes.set_xticks(plotOptions["xticks"][0], labels=plotOptions["xticks"][1])
         axes.set_xticks(plotOptions["xticks"][0])
         axes.set_xticklabels(plotOptions["xticks"][1])
+    if plotOptions["xticks-rotate"]:
+        axes.tick_params(axis="x", labelrotation=90)
+    # If requested, move ticks to top
+    axes.tick_params(axis="x",
+                     top=plotOptions["xticks-swap"],
+                     labeltop=plotOptions["xticks-swap"],
+                     bottom=not plotOptions["xticks-swap"],
+                     labelbottom=not plotOptions["xticks-swap"]
+                     )
     if plotOptions["yticks"]:
         axes.set_yticks(plotOptions["yticks"][0])
         axes.set_yticklabels(plotOptions["yticks"][1])
@@ -164,7 +173,7 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             float(cfg["plot"].get("fig-width-inches", 6.4)),
             float(cfg["plot"].get("fig-height-inches", 4.8))
     )
-    plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "b")
+    plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "r g b c m y k")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")
     plotOptions["linestyleCycle"] = LinestyleIterator(plotOptions["linestyleCycle"])
@@ -189,6 +198,9 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
+        plotOptions[ticksName+"-rotate"] = cfg["plot"].get(ticksName+"-rotate", False)
+    # xticks on top if requested
+    plotOptions["xticks-swap"] = cfg["plot"].get("xticks-swap", False)
     axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
@@ -208,11 +220,29 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         if len(fitLabels) < numFits:
             fitLabels += [False] * (numFits - len(fitLabels))
         prevFitParams = []
+        prevFitErrors = []
+        fitParamLengths = []
+        currFitParams = []
+        currFitErrors = []
         fitColorIterator = ColorIterator(cfg["plot"].get("fit-colorCycle", "tab:blue tab:orange tab:green tab:cyan"))
+        fitLinestyleIterator = LinestyleIterator(cfg["plot"].get("fit-linestyleCycle", ":"))
+        # Ready the ranges for fits - each fit requires a separate range
+        fitXMins = [False]*numFits
+        fitXMaxs = [False]*numFits
+        providedXMins = cfg["plot"].get("fit-xmin", False)
+        providedXMaxs = cfg["plot"].get("fit-xmax", False)
+        if providedXMins:
+            providedXMins = providedXMins.split("\n")
+            for i in range(len(providedXMins)):
+                fitXMins[i] = float(providedXMins[i])
+        if providedXMaxs:
+            providedXMaxs = providedXMaxs.split("\n")
+            for i in range(len(providedXMaxs)):
+                fitXMaxs[i] = float(providedXMaxs[i])
         for allFitArgs in cfg["plot"].get("fit").split("\n"):
             fitArgs = allFitArgs.split()
             # TODO : Fit args?
-            prevFitParams += list(plotFit(
+            currFitParams, currFitErrors = plotFit(
                 chosenDatasets[int(fitArgs[1])],
                 fitArgs[0],
                 axes,
@@ -221,13 +251,45 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
                 showParams=cfg["plot"].getboolean("fit-show-params", True),
                 showError=cfg["plot"].getboolean("fit-show-error", True),
                 fitColorCycle=fitColorIterator,
+                fitLinestyleCycle=fitLinestyleIterator,
                 paramsPlacement=cfg["plot"].get("params-placement", False),
                 paramsOffset=len(prevFitParams),
-                xMin=float(cfg["plot"].get("fit-xmin", False)),
-                xMax=float(cfg["plot"].get("fit-xmax", False)),
-                dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False)
-                ))
+                xMin=fitXMins[fitIndex],
+                xMax=fitXMaxs[fitIndex],
+                dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False),
+                fitIndex=fitIndex
+                )
             fitIndex += 1
+            prevFitParams += list(currFitParams)
+            prevFitErrors += list(currFitErrors)
+            fitParamLengths.append(len(currFitParams))
+        # Save fit params, if required
+        fitSaveName = cfg["plot"].get("fit-savepoint", False)
+        if fitSaveName:
+            fitSaveArgs = fitSaveName.split()
+            # No context name nor dataset name, only format and target filename (optional)
+            fitFormatName = fitSaveArgs[0]
+            fitFileName = "fit.dat"
+            fitParserArgs = False
+            if len(fitSaveArgs) > 1:
+                fitFileName = fitSaveArgs[1]
+            if len(fitSaveArgs) > 2:
+                fitParserArgs = " ".join(fitSaveArgs[2:])
+            # Regularize to dataset - take the first fit as determination
+            dataset = []
+            for j in range(fitParamLengths[0]):
+                dataset.append([])
+                # Append for both value and error
+                dataset.append([])
+            fitNumCols = fitParamLengths[0]
+            paramOffset = 0
+            for i in range(len(fitParamLengths)):
+                for j in range(fitNumCols):
+                    dataset[2*j].append(prevFitParams[paramOffset + j])
+                    dataset[2*j+1].append(prevFitErrors[paramOffset + j])
+                paramOffset += fitParamLengths[i]
+            # Dataset regularized, output
+            writeFile(fitFileName, fitFormatName, dataset, fitParserArgs)
     # Handle decorations for main axes
     if cfg["plot"].get("decorate", False):
         decorationCommands = cfg["plot"].get("decorate").split("\n")
@@ -298,6 +360,9 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         # Plot another dataset sharing the same x axis but different y axis
         # Always, only a single twinx makes sense - provide no arguments
         fromConfig(cfg["plot"].get("twinx"), axes=axes.twinx(), figure=figure, datasets=datasets)
+    if cfg["plot"].get("twiny", False):
+        # same as twinx, but for shared y-axis
+        fromConfig(cfg["plot"].get("twiny"), axes=axes.twiny(), figure=figure, datasets=datasets)
     # If axes are provided, assume figure is printed somewhere else
     # TODO : Is this a reasonable assumption?
     if axesGiven:

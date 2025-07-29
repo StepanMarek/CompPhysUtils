@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+import argparse
+from compphysutils.parser import readFile
+import pyray
+from compphysutils.graphics.atom_plot import atom_sizes, atom_colors
+import numpy
+from compphysutils.graphics.plotter import ColorIterator
+
+argparser = argparse.ArgumentParser(prog="plot3dcoords", description="Plots the coordinates and optionally isosurfaces using pyraylib.")
+argparser.add_argument("--format", "-f", dest="format", help="Name of the format of the coordinate file.")
+argparser.add_argument("--camera_pos", type=float, nargs=3, help="Initial position of the camera. Default : (0,0,10)", default=(0.0,0.0,10.0))
+argparser.add_argument("--triangles", nargs="*", default=False, help="Filenames containing column triangulation data for surfaces (isosurfaces) to be plotted.")
+argparser.add_argument("--sphere_res", default=30, type=int, help="Resolution of individual spheres - sets rings + sections. [default : 10]")
+argparser.add_argument("coordinate_file", help="Name of the coordinate file to be processed")
+argparser.add_argument("savefile", help="Name of the file into which to save the rendered coordinates")
+
+args = argparser.parse_args()
+dataset = readFile(args.coordinate_file, args.format)
+# Init window and start loading models
+pyray.init_window(1024,768, args.savefile)
+
+atom_models = []
+
+for atom_index in range(len(dataset[0])):
+    # TODO : Settable rings+sections
+    sphere_mesh = pyray.gen_mesh_sphere(atom_sizes[dataset[3][atom_index].upper()], args.sphere_res, args.sphere_res)
+    atom_models.append(pyray.load_model_from_mesh(sphere_mesh))
+
+surface_models = []
+if args.triangles:
+    for surface_index in range(len(args.triangles)):
+        triset = readFile(args.triangles[surface_index], "cols", "0 1 2 3 4 5 6 7 8")
+        vertices = numpy.zeros(9*len(triset[0]), dtype=numpy.float32)
+        for i in range(len(triset[0])):
+            for j in range(9):
+                vertices[9*i+j] = triset[j][i]
+        mesh = pyray.Mesh(3*len(triset[0]), len(triset[0]), vertices)
+        pyray.upload_mesh(mesh, True)
+        surface_models.append(pyray.load_model_from_mesh(mesh))
+
+# TODO : Allow for custom setting of surface colors
+surface_color = ColorIterator("255,0,0,120 0,0,255,120")
+
+camera = pyray.Camera3D()
+camera.position = args.camera_pos
+# TODO : Set other camera parameters from the command line
+camera.up = [0,1,0]
+camera.target = [0,0,0]
+camera.fovy = 90
+camera.projection = pyray.CAMERA_PERSPECTIVE
+
+# Models uploaded, start the render loop
+while not pyray.window_should_close():
+    pyray.begin_drawing()
+    pyray.clear_background(pyray.RAYWHITE)
+    pyray.begin_mode_3d(camera)
+    # TODO : This is more flexible, but a single model might be more performant for very large structures
+    for atom_index in range(len(dataset[0])):
+        # Draw the atom
+        pyray.draw_model(atom_models[atom_index],
+                         [dataset[0][atom_index],
+                          dataset[1][atom_index],
+                          dataset[2][atom_index]],
+                         1.0,
+                         atom_colors[dataset[3][atom_index].upper()]
+                         )
+    # Draw the surfaces
+    for surface_index in range(len(surface_models)):
+        pyray.draw_model(surface_models[surface_index],
+                         [0.0, 0.0, 0.0],
+                         1.0,
+                         list(map(int, next(surface_color))))
+    pyray.end_mode_3d()
+    pyray.end_drawing()
+    # Check for screenshot
+    if pyray.is_key_pressed(pyray.KEY_S):
+        pyray.take_screenshot(args.savefile)
+    # Updating camera
+    if pyray.is_mouse_button_down(pyray.MOUSE_BUTTON_LEFT) or pyray.get_mouse_wheel_move() != 0.0:
+        pyray.update_camera(camera, pyray.CAMERA_THIRD_PERSON)
+
+for atom_index in range(len(dataset[0])):
+    pyray.unload_model(atom_models[atom_index])
+# TODO : Fix the segfault on free
+#for surface_index in range(len(surface_models)):
+#    pyray.unload_model(surface_models[surface_index])
+pyray.close_window()

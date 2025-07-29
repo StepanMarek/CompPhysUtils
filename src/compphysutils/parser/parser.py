@@ -287,3 +287,30 @@ def parseDatasetConfig(configFilename):
             if "savepoint" in cfg[groupName]:
                 save(cfg[groupName].get("savepoint"), "post-process", datasets, datasetName)
     return datasets
+
+def parseRange(rangeString):
+    """
+    A helper routine that parses the python-like range to array of bounds.
+    Typical behaviour is
+
+    ':' -> [0,-1]
+    '10:' -> [10,-1]
+    ':20' -> [0,19]
+    '1:5' -> [1,4]
+
+    As a special case, also handles single element access
+
+    '5' -> [5]
+    """
+    splitRange = rangeString.split(":")
+    if len(splitRange) == 1:
+        return [int(splitRange[0])]
+    elif len(splitRange) == 2:
+        toReturn = [0,-1]
+        if splitRange[0] != "":
+            toReturn[0] = int(splitRange[0])
+        if splitRange[1] != "":
+            toReturn[1] = int(splitRange[1])
+        return toReturn
+    else:
+        raise ValueError("Cannot parse "+rangeString+" as python-like range.")
