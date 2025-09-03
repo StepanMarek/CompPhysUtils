@@ -1,0 +1,8 @@
+\begin{tikzpicture}
+\begin{axis}
+\addplot+[sharp plot] coordinates {
+(1,1) (2,4) (3,9) (4,16) };
+\addplot+[sharp plot] coordinates {
+(1,0) (2,1) (3,2) (4,3) };
+\end{axis}
+\end{tikzpicture}

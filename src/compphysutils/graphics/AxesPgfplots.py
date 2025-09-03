@@ -4,39 +4,53 @@ from Axes import Figure
 class FigurePgfplots(Figure):
 
     def tikzheader(self):
-        return "\\begin{tikzpicture}"
+        return "\\begin{tikzpicture}\n"
 
     def tikzfooter(self):
-        return "\\end{tikzpicture}"
+        return "\\end{tikzpicture}\n"
 
     def start(self):
-        print(self.tikzheader())
+        return self.tikzheader()
 
     def end(self):
-        print(self.tikzfooter())
+        return self.tikzfooter()
+
+    def save(self, name):
+        out = self.start()
+        for ax in self.axes:
+            out += ax.start()
+            out += ax.buffer
+            out += ax.end()
+        out += self.end()
+        # TODO : Lot of checks
+        with open(name, "w+") as file:
+            file.write(out)
 
 class AxesPgfplots(Axes):
 
+    def __init__(self):
+        self.buffer = ""
+
     def axesheader(self):
-        return "\\begin{axis}"
+        return "\\begin{axis}\n"
     def plotheader(self):
-        return "\\addplot+[sharp plot] coordinates {"
+        return "\\addplot+[sharp plot] coordinates {\n"
     def plotfooter(self):
-        return "};"
+        return "};\n"
     def axesfooter(self):
-        return "\\end{axis}"
+        return "\\end{axis}\n"
 
     def start(self):
-        print(self.axesheader())
+        return self.axesheader()
 
     def end(self):
-        print(self.axesfooter())
+        return self.axesfooter()
 
     def plot(self, x, y, label=False, color=False, linestyle=False):
-        print(self.plotheader())
+        self.buffer += self.plotheader()
         # TODO : Color, linestyle
         for i in range(len(x)):
             # TODO : Decide on a float format
-            print("({},{}) ".format(x[i], y[i]))
+            self.buffer += "({},{}) ".format(x[i], y[i])
         # TODO : labels
-        print(self.plotfooter())
+        self.buffer += self.plotfooter()
