@@ -23,11 +23,15 @@ class Axes():
     def __init__(self):
         self.xlabel = "x"
         self.ylabel = "y"
-        self.xlim = [0,1]
-        self.ylim = [0,1]
+        self.xlim = False
+        self.ylim = False
 
         self.xticks = False
+        self.xtick_labels = False
+        self.xtick_swap = False
         self.yticks = False
+        self.ytick_labels = False
+        self.ytick_swap = False
 
         self.xscale = "lin"
         self.yscale = "lin"
@@ -35,11 +39,21 @@ class Axes():
         # width of the x/y axis
         self.axes_width = 1.0
 
-        self.labels = []
+        # Axes labels
+        self.labels = ["",""]
+
+        # Show/hide legend
+        self.legend = True
+
+        # Legend position
+        self.legend_pos = False
 
     def plot(self, x, y, label=False, color=False, linestyle=False):
         """
         Adds a new dataset to the axes. Should be stored in an internal buffer
         and only written out on save/show called from the figure controlling figure
+
+        label here stands for dataset label for the legend
         """
         raise NotImplementedError("Plot not implemented in this backend")
+    
