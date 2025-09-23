@@ -86,8 +86,14 @@ class AxesPgfplots(Axes):
         out += "\n]\n"
         return out
 
-    def plotheader(self):
-        return "\\addplot+[sharp plot] coordinates {\n"
+    def plotheader(self, linestyle=False, color=False):
+        val = "\\addplot[sharp plot"
+        if linestyle:
+            val += ","+linestyle
+        if color:
+            val += ","+color
+        val += "] coordinates {\n"
+        return val
     def plotfooter(self):
         return "};\n"
     def axesfooter(self):
@@ -105,7 +111,7 @@ class AxesPgfplots(Axes):
                 self.legend_entries.append(label)
             else:
                 self.legend_entries = [label]
-        self.buffer += self.plotheader()
+        self.buffer += self.plotheader(linestyle=linestyle, color=color)
         # TODO : Color, linestyle
         for i in range(len(x)):
             # TODO : Decide on a float format
