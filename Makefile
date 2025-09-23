@@ -31,6 +31,7 @@ PARSERSOURCE += src/compphysutils/parser/parsers/coord-cub.py
 PARSERSOURCE += src/compphysutils/parser/combine_commands/translate.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
+GRAPHICSSOURCE := src/compphysutils/graphics/Figure.py
 GRAPHICSSOURCE := src/compphysutils/graphics/backends/__init__.py
 GRAPHICSSOURCE := src/compphysutils/graphics/backends/FigurePgfplots.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py

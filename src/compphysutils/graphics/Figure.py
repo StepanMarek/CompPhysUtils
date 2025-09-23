@@ -53,10 +53,17 @@ class Axes():
 
     def plot(self, x, y, label=False, color=False, linestyle=False):
         """
-        Adds a new dataset to the axes. Should be stored in an internal buffer
+        Adds a new dataset to the axes and plots it as a line graph.
+        Should be stored in an internal buffer
         and only written out on save/show called from the figure controlling figure
 
         label here stands for dataset label for the legend
         """
         raise NotImplementedError("Plot not implemented in this backend")
-    
+
+    def scatter(self, x, y, label=False, color=False, markerstyle=False, linestyle=False):
+        """
+        Similar to plot, but uses scatter graph instead of the line graph, optionally connects
+        the scatter points by a line.
+        """
+        raise NotImplementedError("Scatter not implemented in this backend")

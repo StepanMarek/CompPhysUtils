@@ -86,12 +86,14 @@ class AxesPgfplots(Axes):
         out += "\n]\n"
         return out
 
-    def plotheader(self, linestyle=False, color=False):
+    def plotheader(self, linestyle=False, color=False, markerstyle=False):
         val = "\\addplot[sharp plot"
         if linestyle:
             val += ","+linestyle
         if color:
             val += ","+color
+        if markerstyle:
+            val += ",mark="+markerstyle
         val += "] coordinates {\n"
         return val
     def plotfooter(self):
@@ -99,25 +101,43 @@ class AxesPgfplots(Axes):
     def axesfooter(self):
         return "\\end{axis}\n"
 
+    def scatterheader(self, color=False, markerstyle=False):
+        val = "\\addplot[only marks"
+        if color:
+            val += ","+color
+        if markerstyle:
+            val += ",mark="+markerstyle
+        val += "] coordinates {\n"
+        return val
+
+    def output_xy(self, x, y):
+        val = ""
+        for i in range(len(x)):
+            # TODO : Decide on a float format
+            val += "({},{}) ".format(x[i], y[i])
+        return val
+
     def start(self):
         return self.axesheader()
 
     def end(self):
         return self.axesfooter()
 
-    def plot(self, x, y, label=False, color=False, linestyle=False):
-        if label:
-            if self.legend_entries:
-                self.legend_entries.append(label)
-            else:
-                self.legend_entries = [label]
-        self.buffer += self.plotheader(linestyle=linestyle, color=color)
-        # TODO : Color, linestyle
-        for i in range(len(x)):
-            # TODO : Decide on a float format
-            self.buffer += "({},{}) ".format(x[i], y[i])
+    def plot(self, x, y, label=False, color=False, linestyle=False, markerstyle=False):
+        self.buffer += self.plotheader(linestyle=linestyle, color=color, markerstyle=markerstyle)
+        self.buffer += self.output_xy(x, y)
         self.buffer += self.plotfooter()
         if label:
             # TODO : Cannot separate the legend for single axis into several boxes
             # TODO : Also think about how to put legends from several axes into a single box
+            self.buffer += "\\addlegendentry{"+str(label)+"}"
+    
+    def scatter(self, x, y, label=False, color=False, markerstyle=False, linestyle=False):
+        if not linestyle:
+            self.buffer += self.scatterheader(color=color, markerstyle=markerstyle)
+        else:
+            self.buffer += self.plotheader(linestyle=linestyle, color=color, markerstyle=markerstyle)
+        self.buffer += self.output_xy(x, y)
+        self.buffer += self.plotfooter()
+        if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}"
