@@ -48,6 +48,9 @@ class Axes():
         # Legend position
         self.legend_pos = False
 
+        # Number of legend columns
+        self.legend_cols = 1
+
     def plot(self, x, y, label=False, color=False, linestyle=False):
         """
         Adds a new dataset to the axes. Should be stored in an internal buffer

@@ -1,9 +1,11 @@
 \begin{tikzpicture}
-\begin{axis}[
+\begin{axis}[,
+legend pos=south west,
+legend columns=2
 ]
 \addplot[sharp plot,dashed,red] coordinates {
 (1,1) (2,4) (3,9) (4,16) };
-\addplot[sharp plot,dotted,green] coordinates {
+\addlegendentry{$x^2$}\addplot[sharp plot,dotted,green] coordinates {
 (1,0) (2,1) (3,2) (4,3) };
-\end{axis}
+\addlegendentry{$x-1$}\end{axis}
 \end{tikzpicture}

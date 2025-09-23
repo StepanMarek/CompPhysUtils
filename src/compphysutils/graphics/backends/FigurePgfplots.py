@@ -59,13 +59,13 @@ class AxesPgfplots(Axes):
                 out += ",\nymin="+str(self.ylim[0])
             if self.ylim[1] or type(self.ylim[1]) != bool:
                 out += ",\nymax="+str(self.ylim[1])
-        # Legend entries
-        if self.legend and self.legend_entries:
-            out += ",\nlegend entries={"+",".join(self.legend_entries)+"}"
         # Legend position
-        if self.legend_pos:
+        if self.legend and self.legend_pos:
             # TODO: Separate position when provided
             out += ",\nlegend pos="+" ".join(map(lambda x: anchor_translator[x], self.legend_pos.split()[0:2]))
+        # Legend columns
+        if self.legend and self.legend_cols:
+            out += ",\nlegend columns="+str(self.legend_cols)
         # Tick axis positions
         if self.xtick_swap:
             out += ",\nxticklabel pos=upper"
@@ -116,5 +116,8 @@ class AxesPgfplots(Axes):
         for i in range(len(x)):
             # TODO : Decide on a float format
             self.buffer += "({},{}) ".format(x[i], y[i])
-        # TODO : labels
         self.buffer += self.plotfooter()
+        if label:
+            # TODO : Cannot separate the legend for single axis into several boxes
+            # TODO : Also think about how to put legends from several axes into a single box
+            self.buffer += "\\addlegendentry{"+str(label)+"}"
