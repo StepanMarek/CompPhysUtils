@@ -67,3 +67,9 @@ class Axes():
         the scatter points by a line.
         """
         raise NotImplementedError("Scatter not implemented in this backend")
+
+    def errorbar(self, x, y, xerr=False, yerr=False, label=False, color=False, markerstyle=False, linestyle=False):
+        """
+        Extension of the scatter plot to include (so far) symmetric error bars
+        """
+        raise NotImplementedError("Errorbar not implemented in this backend")

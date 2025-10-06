@@ -110,11 +110,51 @@ class AxesPgfplots(Axes):
         val += "] coordinates {\n"
         return val
 
-    def output_xy(self, x, y):
+    def errorbarheader(self, color=False, markerstyle=False, linestyle=False):
+        val = "\\addplot["
+        if linestyle:
+            val += "sharp plot"
+        else:
+            val += "only marks"
+        if color:
+            val += ","+color
+        if markerstyle:
+            val += ",mark="+markerstyle
+        val += ",error bars/.cd"
+        # TODO : More sophisticated error settings?
+        val += ",y dir=both,y explicit,x dir=both,x explicit"
+        val += "] coordinates {\n"
+        return val
+
+    def output_xy(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False):
         val = ""
-        for i in range(len(x)):
-            # TODO : Decide on a float format
-            val += "({},{}) ".format(x[i], y[i])
+        if xerr and yerr and xmerr and ymerr:
+            for i in range(len(x)):
+                # TODO : Decide on a float format
+                val += "({},{}) += ({},{}) -= ({},{})\n".format(x[i], y[i], xerr[i], yerr[i], xmerr[i], ymerr[i])
+        elif xerr and xmerr and yerr:
+            for i in range(len(x)):
+                # TODO : Decide on a float format
+                val += "({},{}) += ({},{}) -= ({},{})\n".format(x[i], y[i], xerr[i], yerr[i], xmerr[i], yerr[i])
+        elif xerr and ymerr and yerr:
+            for i in range(len(x)):
+                # TODO : Decide on a float format
+                val += "({},{}) += ({},{}) -= ({},{})\n".format(x[i], y[i], xerr[i], yerr[i], xerr[i], ymerr[i])
+        elif xerr and yerr:
+            for i in range(len(x)):
+                # TODO : Decide on a float format
+                val += "({},{}) +- ({},{})\n".format(x[i], y[i], xerr[i], yerr[i])
+        elif xerr:
+            for i in range(len(x)):
+                # TODO : Decide on a float format
+                val += "({},{}) +- ({},{})\n".format(x[i], y[i], xerr[i], 0)
+        elif yerr:
+            for i in range(len(x)):
+                # TODO : Decide on a float format
+                val += "({},{}) +- ({},{})\n".format(x[i], y[i], 0, yerr[i])
+        else:
+            for i in range(len(x)):
+                val += "({},{})\n".format(x[i], y[i])
         return val
 
     def start(self):
@@ -138,6 +178,13 @@ class AxesPgfplots(Axes):
         else:
             self.buffer += self.plotheader(linestyle=linestyle, color=color, markerstyle=markerstyle)
         self.buffer += self.output_xy(x, y)
+        self.buffer += self.plotfooter()
+        if label:
+            self.buffer += "\\addlegendentry{"+str(label)+"}"
+
+    def errorbar(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False, label=False, color=False, markerstyle=False, linestyle=False):
+        self.buffer += self.errorbarheader(color, markerstyle, linestyle)
+        self.buffer += self.output_xy(x, y, xerr=xerr, xmerr=xmerr, yerr=yerr, ymerr=ymerr)
         self.buffer += self.plotfooter()
         if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}"
