@@ -188,3 +188,17 @@ class AxesPgfplots(Axes):
         self.buffer += self.plotfooter()
         if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}"
+
+    def colormap(self, x, y, c, label=False, cmap=False):
+        """
+        Already created the mesh x y c
+        """
+        # TODO : Cmap, label
+        self.buffer += "\\addplot[patch,patch type=rectangle,shader=interp,point meta=explicit] coordinates {\n"
+        for i in range(len(x)-1):
+            for j in range(len(x[0])-1):
+                self.buffer += "({},{}) [{}]\n".format(x[i][j],y[i][j],c[i][j])
+                self.buffer += "({},{}) [{}]\n".format(x[i+1][j],y[i+1][j],c[i+1][j])
+                self.buffer += "({},{}) [{}]\n".format(x[i+1][j+1],y[i+1][j+1],c[i+1][j+1])
+                self.buffer += "({},{}) [{}]\n".format(x[i][j+1],y[i][j+1],c[i][j+1])
+        self.buffer += "};\n"

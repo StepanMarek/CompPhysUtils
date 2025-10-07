@@ -73,3 +73,9 @@ class Axes():
         Extension of the scatter plot to include (so far) symmetric error bars
         """
         raise NotImplementedError("Errorbar not implemented in this backend")
+
+    def colormap(self, x, y, c, label=False, cmap=False):
+        """
+        Colormap, using already mesh of x y c (two dimensional)
+        """
+        raise NotImplementedError("Colormap not implemented in this backend")
