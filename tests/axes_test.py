@@ -1,5 +1,10 @@
-from compphysutils.graphics import AxesPgfplots as Axes, FigurePgfplots as Figure
+from compphysutils.graphics.plotter import backendModules
 from numpy import sin
+
+pgf = backendModules["pgfplots"]
+pgf["spec"].loader.exec_module(pgf["module"])
+f = pgf["module"].Figure()
+a = pgf["module"].Axes()
 
 # Data
 n = 40
@@ -19,8 +24,6 @@ for i in range(n):
         y[i].append(j*dy + y0)
         c[i].append(sin(5*x[i][-1] + 5*y[i][-1]))
 
-f = Figure()
-a = Axes()
 a.colormap(x,y,c)
 a.xlim = [-0.5, 0.5]
 a.ylim = [-0.5, 0.5]

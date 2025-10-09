@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from .. import __user_conf_dir
 from ..parser import parseDatasetConfig
 from ..parser import save, writeFile
+from ..util import dynmod
 import configparser
 from ..parser.combine import runGroupData
 from .fitter import plotFit 
@@ -9,6 +10,28 @@ from .transformer import transforms,transformModules
 from .decorator import decorations,decorationModules
 import importlib
 import os
+
+# Search for backend types
+#roots = []
+#root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/backends"))
+#roots.append(root)
+#modFilenames = []
+#modFilenames.append(filenames)
+## TODO : User defined backends
+#backends = {}
+#backendModules = {}
+#for i in range(len(roots)):
+#    for filename in modFilenames[i]:
+#        # TODO : Do in other locations
+#        backendName, backendExt = os.path.splitext(filename)
+#        # Only load ".py" files
+#        if backendExt != ".py" or backendName[0:2] == "__":
+#            continue
+#        spec = importlib.util.spec_from_file_location("compphysutils.graphics.backends."+backendName, roots[i]+"/"+filename)
+#        mod = importlib.util.module_from_spec(spec)
+#        backendModules[backendName] = {"spec" : spec, "module" : mod, "loaded" : False}
+backendModules = dynmod([os.path.dirname(__file__)+"/backends"], [".py"])
+backends = {}
 
 # Search for default plot types
 roots = []
@@ -168,6 +191,19 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
                 chosenDatasets[i].append(datasets[colCoords[i][j]][int(colCoords[i][j+1])])
             except IndexError:
                 raise IndexError("Cannot create plot for coordinates "+colCoords[i][j]+" "+colCoords[i][j+1])
+    # Check for backend options, with default TODO : matplotlib
+    backendName = cfg["plot"].get("backend", "pgfplots")
+    if backendName not in backends:
+        if backendName not in backendModules:
+            raise NameError("Unknown backend name "+str(backendName))
+        else:
+            # Try to load and store
+            if not backendModules[backendName]["loaded"]:
+                backendModules[backendName]["spec"].loader.exec_module(backendModules[backendName]["module"])
+                backendModules[backendName]["loaded"] = True
+            backends[backendName] = backendModules[backendName]["module"]
+    # Now safe to assign backend
+    backend = backends[backendName]
     plotOptions = {}
     plotOptions["plotArgString"] = graphTypeSplit[1:]
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)

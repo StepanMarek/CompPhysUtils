@@ -31,9 +31,9 @@ PARSERSOURCE += src/compphysutils/parser/parsers/coord-cub.py
 PARSERSOURCE += src/compphysutils/parser/combine_commands/translate.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
-GRAPHICSSOURCE := src/compphysutils/graphics/Figure.py
-GRAPHICSSOURCE := src/compphysutils/graphics/backends/__init__.py
-GRAPHICSSOURCE := src/compphysutils/graphics/backends/FigurePgfplots.py
+GRAPHICSSOURCE += src/compphysutils/graphics/Figure.py
+GRAPHICSSOURCE += src/compphysutils/graphics/backends/__init__.py
+GRAPHICSSOURCE += src/compphysutils/graphics/backends/pgfplots.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/line.py
@@ -58,6 +58,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/decorate/image.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 
 BASESOURCE := src/compphysutils/__init__.py
+BASESOURCE += src/compphysutils/util.py
 
 install: $(WHEELFILE)
 	pip3 install --break-system-packages --force-reinstall $(WHEELFILE)

@@ -1,5 +1,4 @@
-from ..Figure import Figure
-from ..Figure import Axes
+from compphysutils.graphics import Figure as FigureBase, Axes as AxesBase
 
 anchor_translator = {
     "upper" : "north",
@@ -8,7 +7,7 @@ anchor_translator = {
     "left" : "west"
 }
 
-class FigurePgfplots(Figure):
+class Figure(FigureBase):
 
     def tikzheader(self):
         return "\\begin{tikzpicture}\n"
@@ -33,7 +32,7 @@ class FigurePgfplots(Figure):
         with open(name, "w+") as file:
             file.write(out)
 
-class AxesPgfplots(Axes):
+class Axes(AxesBase):
 
     def __init__(self):
         super().__init__()
