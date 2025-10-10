@@ -12,50 +12,12 @@ import importlib
 import os
 
 # Search for backend types
-#roots = []
-#root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/backends"))
-#roots.append(root)
-#modFilenames = []
-#modFilenames.append(filenames)
-## TODO : User defined backends
-#backends = {}
-#backendModules = {}
-#for i in range(len(roots)):
-#    for filename in modFilenames[i]:
-#        # TODO : Do in other locations
-#        backendName, backendExt = os.path.splitext(filename)
-#        # Only load ".py" files
-#        if backendExt != ".py" or backendName[0:2] == "__":
-#            continue
-#        spec = importlib.util.spec_from_file_location("compphysutils.graphics.backends."+backendName, roots[i]+"/"+filename)
-#        mod = importlib.util.module_from_spec(spec)
-#        backendModules[backendName] = {"spec" : spec, "module" : mod, "loaded" : False}
 backendModules = dynmod([os.path.dirname(__file__)+"/backends"], [".py"])
 backends = {}
 
 # Search for default plot types
-roots = []
-modFilenames = []
-root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/plot_types"))
-roots.append(root)
-modFilenames.append(filenames)
-# Search for custom plot types
-if os.path.isdir(os.path.expanduser(__user_conf_dir+"/plot_types")):
-    root, _, filenames = next(os.walk(os.path.expanduser(__user_conf_dir+"/plot_types")))
-    roots.append(root)
-    modFilenames.append(filenames)
-# Import all plot types
+plotModules = dynmod([os.path.dirname(__file__)+"/plot_types", __user_conf_dir+"/plot_types"], [".py"])
 plotTypes = {}
-plotModules = {}
-for i in range(len(roots)):
-    for filename in modFilenames[i]:
-        plotTypeName = filename.split(".")[0]
-        if plotTypeName[0:2] == "__":
-            # Skip __init__.py and similar commands
-            continue
-        spec = importlib.util.spec_from_file_location("compphysutils.graphics.plot_types."+plotTypeName, roots[i]+"/"+filename)
-        mod = importlib.util.module_from_spec(spec)
-        plotModules[plotTypeName] = {"spec" : spec, "module" : mod, "loaded" : False}
 
 class CyclicIterator:
     def __init__(self, cycle=[]):
