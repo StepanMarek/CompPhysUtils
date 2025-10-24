@@ -28,10 +28,10 @@ class Axes():
 
         self.xticks = False
         self.xtick_labels = False
-        self.xtick_swap = False
+        self.xticks_swap = False
         self.yticks = False
         self.ytick_labels = False
-        self.ytick_swap = False
+        self.yticks_swap = False
 
         self.xscale = "lin"
         self.yscale = "lin"

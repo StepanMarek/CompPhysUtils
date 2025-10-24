@@ -66,9 +66,9 @@ class Axes(AxesBase):
         if self.legend and self.legend_cols:
             out += ",\nlegend columns="+str(self.legend_cols)
         # Tick axis positions
-        if self.xtick_swap:
+        if self.xticks_swap:
             out += ",\nxticklabel pos=upper"
-        if self.ytick_swap:
+        if self.yticks_swap:
             out += ",\nyticklabel pos=upper"
         # Tick positions
         if self.xticks:
