@@ -92,6 +92,10 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
         axes.xticks_rotate = plotOptions["xticks-rotate"]
     if plotOptions["yticks-rotate"]:
         axes.xticks_rotate = plotOptions["yticks-rotate"]
+    if plotOptions["fig-width"]:
+        figure.width = plotOptions["fig-width"]
+    if plotOptions["fig-width"]:
+        figure.height = plotOptions["fig-height"]
     # If requested, move ticks to top
     axes.xticks_swap = plotOptions["xticks-swap"]
     axes.yticks_swap = plotOptions["yticks-swap"]
@@ -169,11 +173,11 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     #     plt.rcParams["font.size"] = int(cfg["plot"].get("font-size", 12))
     # if "mathfont" in cfg["plot"]:
     #     plt.rcParams["mathtext.fontset"] = cfg["plot"].get("mathfont", "cm")
-    # TODO : Implement for pgfplots
-    # figure.set_size_inches(
-    #         float(cfg["plot"].get("fig-width-inches", 6.4)),
-    #         float(cfg["plot"].get("fig-height-inches", 4.8))
-    # )
+    # Figure width - for pgfplots set via axis width
+    # Units are cm
+    # Default aspect ratio is 4/3
+    plotOptions["fig-width"] = cfg["plot"].get("fig-width", 16)
+    plotOptions["fig-height"] = cfg["plot"].get("fig-height", 12)
     plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "red green blue cyan magenta yellow black")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")

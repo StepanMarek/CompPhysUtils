@@ -30,7 +30,8 @@ class Figure(FigureBase):
     def save(self, name):
         out = self.start()
         for ax in self.axes:
-            out += ax.start()
+            # TODO : Redo via headers API
+            out += ax.start(width=self.width, height=self.height)
             out += ax.buffer
             out += ax.end()
         out += self.end()
@@ -45,12 +46,13 @@ class Axes(AxesBase):
         self.buffer = ""
         self.legend_entries = False
 
-    def axesheader(self):
-        out = "\\begin{axis}["
+    def axesheader(self, width=16, height=12):
+        out = "\\begin{axis}[width="+str(width)+"cm"
+        out += ",height="+str(height)+"cm"
         # Axis labels
         if self.labels:
             if self.labels[0]:
-                out += "\nxlabel={"+self.labels[0]+"}"
+                out += ",\nxlabel={"+self.labels[0]+"}"
             if self.labels[1]:
                 out += ",\nylabel={"+self.labels[1]+"}"
         # Limits
@@ -167,8 +169,8 @@ class Axes(AxesBase):
                 val += "({},{})\n".format(x[i], y[i])
         return val
 
-    def start(self):
-        return self.axesheader()
+    def start(self, width=16, height=12):
+        return self.axesheader(width, height)
 
     def end(self):
         return self.axesfooter()

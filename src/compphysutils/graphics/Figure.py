@@ -7,6 +7,9 @@ class Figure():
         self.axes = []
         # List of export formats supported by the backend
         self.allowed_formats = []
+        # Default dimensions - in cm - ratio 4/3
+        self.width = 16
+        self.height = 12
 
     def start(self):
         raise NotImplementedError("Start function for figure not implemented")
