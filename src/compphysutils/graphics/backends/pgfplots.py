@@ -9,6 +9,12 @@ anchor_translator = {
 
 class Figure(FigureBase):
 
+    def __init__(self):
+        super().__init__()
+        self.allowed_formats.append("pgf")
+        # TODO - tex format - standalone, compilable tex
+        # TODO - pdf format - when pdflatex/other tex engine is present, compile with it?
+
     def tikzheader(self):
         return "\\begin{tikzpicture}\n"
 
@@ -82,6 +88,11 @@ class Axes(AxesBase):
             out += ",\nxticklabels={"+",".join(self.xtick_labels)+"}"
         if self.ytick_labels:
             out += ",\nyticklabels={"+",".join(self.ytick_labels)+"}"
+        # Tick label rotation
+        if self.xticks_rotate:
+            out += ",\nx tick label style={rotate="+str(self.xticks_rotate)+"}"
+        if self.yticks_rotate:
+            out += ",\ny tick label style={rotate="+str(self.yticks_rotate)+"}"
         out += "\n]\n"
         return out
 

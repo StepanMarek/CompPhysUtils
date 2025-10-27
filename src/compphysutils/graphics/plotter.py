@@ -88,9 +88,10 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
     if plotOptions["yticks"]:
         axes.yticks = plotOptions["yticks"][0]
         axes.ytick_labels = plotOptions["yticks"][1]
-    # TODO : Implement rotation for pgfplots
-    # if plotOptions["xticks-rotate"]:
-    #     axes.tick_params(axis="x", labelrotation=90)
+    if plotOptions["xticks-rotate"]:
+        axes.xticks_rotate = plotOptions["xticks-rotate"]
+    if plotOptions["yticks-rotate"]:
+        axes.xticks_rotate = plotOptions["yticks-rotate"]
     # If requested, move ticks to top
     axes.xticks_swap = plotOptions["xticks-swap"]
     axes.yticks_swap = plotOptions["yticks-swap"]

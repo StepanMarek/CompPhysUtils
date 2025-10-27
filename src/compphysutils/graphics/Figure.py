@@ -5,6 +5,8 @@ class Figure():
     def __init__(self):
         # TODO : Design API for axes positioning
         self.axes = []
+        # List of export formats supported by the backend
+        self.allowed_formats = []
 
     def start(self):
         raise NotImplementedError("Start function for figure not implemented")
@@ -15,6 +17,7 @@ class Figure():
     def save(self, name):
         """
         Write out the figure to a file.
+        Extension should be determined by allowed_formats.
         """
         raise NotImplementedError("Save not implemented in this backend")
 
@@ -29,9 +32,11 @@ class Axes():
         self.xticks = False
         self.xtick_labels = False
         self.xticks_swap = False
+        self.xticks_rotate = 0.0
         self.yticks = False
         self.ytick_labels = False
         self.yticks_swap = False
+        self.yticks_rotate = 0.0
 
         self.xscale = "lin"
         self.yscale = "lin"
