@@ -78,6 +78,13 @@ class Axes(AxesBase):
                 self.add_header("height", str(height)+"cm")
             else:
                 self.add_header("height", str(height))
+        # Hide axes
+        if self.hide_axes == "both":
+            self.add_header("axis lines", "none")
+        elif self.hide_axes == "x":
+            self.add_header("axis x line", "none")
+        elif self.hide_axes == "y":
+            self.add_header("axis y line", "none")
         # Axes labels
         if self.labels[0]:
             self.add_header("xlabel", self.labels[0])

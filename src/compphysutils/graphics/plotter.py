@@ -204,6 +204,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
         plotOptions[ticksName+"-rotate"] = cfg["plot"].get(ticksName+"-rotate", False)
+        # TODO : Implement for pgfplots
         # Line width and length
         plotOptions[ticksName+"-length"] = cfg["plot"].getfloat(ticksName+"-length", 5.0)
         plotOptions[ticksName+"-width"] = cfg["plot"].getfloat(ticksName+"-width", 1.0)
@@ -214,9 +215,9 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     plotOptions["yticks-swap"] = cfg["plot"].get("yticks-swap", False)
     axes, figure = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
     # TODO : Implement for pgfplots
-    # # If the axes are hidden, hide them
-    # if cfg["plot"].get("hide-axes", False):
-    #     axes.set_axis_off()
+    # If the axes are hidden, hide them
+    if cfg["plot"].get("hide-axes", False):
+        axes.hide_axes = "both"
     # Change width of all axes
     # TODO : Implement for pgfplots
     # for place in ["top", "bottom", "left", "right"]:
