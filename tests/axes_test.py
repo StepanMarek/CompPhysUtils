@@ -7,7 +7,7 @@ f = pgf["module"].Figure()
 a = pgf["module"].Axes()
 
 # Data
-n = 40
+n = 20
 x = []
 y = []
 c = []
@@ -27,5 +27,9 @@ for i in range(n):
 a.colormap(x,y,c)
 a.xlim = [-0.5, 0.5]
 a.ylim = [-0.5, 0.5]
+a.xticks_rotate = 90
+a.yticks_rotate = 45
 f.axes.append(a)
+f.width=4
+f.height=3
 f.save("cmap.pgf")

@@ -45,98 +45,136 @@ class Axes(AxesBase):
         super().__init__()
         self.buffer = ""
         self.legend_entries = False
+        # Primitive headers - key is an identifier of the header, value can be either
+        # None or some value - in case of None, the header key is output without value
+        self.headers = {}
+        self.plot_headers = {}
 
-    def axesheader(self, width=16, height=12):
-        out = "\\begin{axis}[width="+str(width)+"cm"
-        out += ",height="+str(height)+"cm"
-        # Axis labels
-        if self.labels:
-            if self.labels[0]:
-                out += ",\nxlabel={"+self.labels[0]+"}"
-            if self.labels[1]:
-                out += ",\nylabel={"+self.labels[1]+"}"
+    def add_header(self, header, value=None):
+        self.headers[header] = value
+
+    def add_plot_header(self, header, value=None):
+        self.plot_headers[header] = value
+
+    def get_header_string(self, headers):
+        header_strings = []
+        for header in headers:
+            if headers[header] != None:
+                header_string = str(header)+"="+str(headers[header])
+            else:
+                header_string = str(header)
+            header_strings.append(header_string)
+        return ",\n".join(header_strings)
+
+    def axesheader(self, width="\\columnwidth", height=False):
+        # Axes size
+        if width:
+            if type(width) == float or type(width) == int:
+                self.add_header("width", str(width)+"cm")
+            else:
+                self.add_header("width", str(width))
+        if height:
+            if type(height) == float or type(height) == int:
+                self.add_header("height", str(height)+"cm")
+            else:
+                self.add_header("height", str(height))
+        # Axes labels
+        if self.labels[0]:
+            self.add_header("xlabel", self.labels[0])
+        if self.labels[1]:
+            self.add_header("ylabel", self.labels[1])
         # Limits
         if self.xlim:
             if self.xlim[0] or type(self.xlim[0]) != bool:
-                out += ",\nxmin="+str(self.xlim[0])
+                self.add_header("xmin", self.xlim[0])
             if self.xlim[1] or type(self.xlim[1]) != bool:
-                out += ",\nxmax="+str(self.xlim[1])
+                self.add_header("xmax", self.xlim[1])
         if self.ylim:
             if self.ylim[0] or type(self.ylim[0]) != bool:
-                out += ",\nymin="+str(self.ylim[0])
+                self.add_header("ymin", self.xlim[0])
             if self.ylim[1] or type(self.ylim[1]) != bool:
-                out += ",\nymax="+str(self.ylim[1])
+                self.add_header("ymax", self.xlim[1])
         # Legend position
         if self.legend and self.legend_pos:
             # TODO: Separate position when provided
-            out += ",\nlegend pos="+" ".join(map(lambda x: anchor_translator[x], self.legend_pos.split()[0:2]))
+            self.add_header("legend pos", " ".join(map(lambda x: anchor_translator[x], self.legend_pos.split()[0:2])))
         # Legend columns
         if self.legend and self.legend_cols:
-            out += ",\nlegend columns="+str(self.legend_cols)
+            self.add_header("legend columns", self.legend_cols)
         # Tick axis positions
         if self.xticks_swap:
-            out += ",\nxticklabel pos=upper"
+            self.add_header("xticklabel pos", "upper")
         if self.yticks_swap:
-            out += ",\nyticklabel pos=upper"
+            self.add_header("yticklabel pos", "upper")
         # Tick positions
         if self.xticks:
             # TODO : Tick pos float formatting?
-            out += ",\nxtick={"+",".join(map(str, self.xticks))+"}"
+            self.add_header("xtick", "{"+",".join(map(str, self.xticks))+"}")
         if self.yticks:
             # TODO : Tick pos float formatting?
-            out += ",\nytick={"+",".join(map(str, self.yticks))+"}"
+            self.add_header("ytick", "{"+",".join(map(str, self.yticks))+"}")
         # Tick labels
         if self.xtick_labels:
-            out += ",\nxticklabels={"+",".join(self.xtick_labels)+"}"
+            self.add_header("xticklabels", "{"+",".join(map(str, self.xtick_labels))+"}")
         if self.ytick_labels:
-            out += ",\nyticklabels={"+",".join(self.ytick_labels)+"}"
+            self.add_header("yticklabels", "{"+",".join(map(str, self.ytick_labels))+"}")
         # Tick label rotation
         if self.xticks_rotate:
-            out += ",\nx tick label style={rotate="+str(self.xticks_rotate)+"}"
+            self.add_header("x tick label style", "{rotate="+str(self.xticks_rotate)+"}")
         if self.yticks_rotate:
-            out += ",\ny tick label style={rotate="+str(self.yticks_rotate)+"}"
-        out += "\n]\n"
-        return out
+            self.add_header("y tick label style", "{rotate="+str(self.yticks_rotate)+"}")
+        return "\\begin{axis}[" + self.get_header_string(self.headers) + "\n]\n"
+
+    def generic_plot_headers(self, linestyle=False, color=False, markerstyle=False):
+        # TODO : Typechecks?
+        if linestyle:
+            self.add_plot_header(linestyle)
+        if color:
+            self.add_plot_header(color)
+        if markerstyle:
+            self.add_plot_header("mark", markerstyle)
+        return "\\addplot[" + self.get_header_string(self.plot_headers) + "\n] coordinates {\n"
 
     def plotheader(self, linestyle=False, color=False, markerstyle=False):
-        val = "\\addplot[sharp plot"
-        if linestyle:
-            val += ","+linestyle
-        if color:
-            val += ","+color
-        if markerstyle:
-            val += ",mark="+markerstyle
-        val += "] coordinates {\n"
-        return val
+        self.add_plot_header("sharp plot")
+        return self.generic_plot_headers(linestyle, color, markerstyle)
+
     def plotfooter(self):
         return "};\n"
+
     def axesfooter(self):
         return "\\end{axis}\n"
 
     def scatterheader(self, color=False, markerstyle=False):
-        val = "\\addplot[only marks"
-        if color:
-            val += ","+color
-        if markerstyle:
-            val += ",mark="+markerstyle
-        val += "] coordinates {\n"
-        return val
+        self.add_plot_header("only marks")
+        return self.generic_plot_headers(color=color, markerstyle=markerstyle)
 
     def errorbarheader(self, color=False, markerstyle=False, linestyle=False):
-        val = "\\addplot["
         if linestyle:
-            val += "sharp plot"
+            self.add_plot_header("sharp plot")
         else:
-            val += "only marks"
-        if color:
-            val += ","+color
-        if markerstyle:
-            val += ",mark="+markerstyle
-        val += ",error bars/.cd"
+            self.add_plot_header("only marks")
+        self.add_plot_header("error bars/.cd")
         # TODO : More sophisticated error settings?
-        val += ",y dir=both,y explicit,x dir=both,x explicit"
-        val += "] coordinates {\n"
-        return val
+        self.add_plot_header("y dir", "both")
+        self.add_plot_header("y explicit")
+        self.add_plot_header("x dir", "both")
+        self.add_plot_header("x explicit")
+        return self.generic_plot_headers(linestyle=linestyle, color=color, markerstyle=markerstyle)
+        # val = "\\addplot["
+        # if linestyle:
+        #     val += "sharp plot"
+        # else:
+        #     val += "only marks"
+        # if color:
+        #     val += ","+color
+        # if markerstyle:
+        #     val += ",mark="+markerstyle
+        # val += ",error bars/.cd"
+        # # TODO : More sophisticated error settings?
+        # val += ",y dir=both,y explicit,x dir=both,x explicit"
+        # val += "] coordinates {\n"
+        # return val
 
     def output_xy(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False):
         val = ""
@@ -206,7 +244,12 @@ class Axes(AxesBase):
         Already created the mesh x y c
         """
         # TODO : Cmap, label
-        self.buffer += "\\addplot[patch,patch type=rectangle,shader=interp,point meta=explicit] coordinates {\n"
+        self.add_plot_header("patch")
+        self.add_plot_header("patch type", "rectangle")
+        self.add_plot_header("shader", "interp")
+        self.add_plot_header("point meta", "explicit")
+        self.buffer += self.generic_plot_headers()
+        #self.buffer += "\\addplot[patch,patch type=rectangle,shader=interp,point meta=explicit] coordinates {\n"
         for i in range(len(x)-1):
             for j in range(len(x[0])-1):
                 self.buffer += "({},{}) [{}]\n".format(x[i][j],y[i][j],c[i][j])

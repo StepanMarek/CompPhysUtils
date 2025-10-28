@@ -27,8 +27,6 @@ class Figure():
 class Axes():
 
     def __init__(self):
-        self.xlabel = "x"
-        self.ylabel = "y"
         self.xlim = False
         self.ylim = False
 
@@ -41,6 +39,10 @@ class Axes():
         self.yticks_swap = False
         self.yticks_rotate = 0.0
 
+        # Can be set to "x", "y", "both" or False
+        # TODO : Make an enum?
+        self.hide_axes = False
+
         self.xscale = "lin"
         self.yscale = "lin"
 
@@ -48,7 +50,7 @@ class Axes():
         self.axes_width = 1.0
 
         # Axes labels
-        self.labels = ["",""]
+        self.labels = [False,False]
 
         # Show/hide legend
         self.legend = True
