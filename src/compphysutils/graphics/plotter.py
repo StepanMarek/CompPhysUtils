@@ -75,8 +75,8 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
         # Defaults to scatter
         axes = plotTypes["scatter"](datasets, axes, **plotOptions)
     # Axes specific options
-    axes.xlabel = plotOptions["xlabel"]
-    axes.ylabel = plotOptions["ylabel"]
+    axes.labels[0] = plotOptions["xlabel"]
+    axes.labels[1] = plotOptions["ylabel"]
     if plotOptions["xlim"]:
         axes.xlim = plotOptions["xlim"]
     if plotOptions["ylim"]:
