@@ -364,12 +364,12 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     if cfg["plot"].get("inset", False):
         insetLines = cfg["plot"].get("inset").split("\n")
         for i in range(len(insetLines)):
+            # Arguments are xpos, ypos, xwidth, ywidth
             insetArgs = insetLines[i].split()
-            # TODO : Implement inset for pgfplots
-        print("Inset not yet implemented")
-            # # Arguments are xpos, ypos, xwidth, ywidth
-            # insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
-            # fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets)
+            insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
+            # TODO : May not be needed in matplotlib, but needed in pgfplots
+            figure.axes.append(insetAxes)
+            fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets)
     if cfg["plot"].get("overlay", False):
         # Split by any whitespace
         overlayLines = cfg["plot"].get("overlay").split()

@@ -31,7 +31,8 @@ class Figure(FigureBase):
         out = self.start()
         for ax in self.axes:
             # TODO : Redo via headers API
-            out += ax.start(width=self.width, height=self.height)
+            # out += ax.start(width=self.width, height=self.height)
+            out += ax.start()
             out += ax.buffer
             out += ax.end()
         out += self.end()
@@ -49,6 +50,7 @@ class Axes(AxesBase):
         # None or some value - in case of None, the header key is output without value
         self.headers = {}
         self.plot_headers = {}
+        self.inset_id = 0
 
     def add_header(self, header, value=None):
         self.headers[header] = value
@@ -264,3 +266,18 @@ class Axes(AxesBase):
                 self.buffer += "({},{}) [{}]\n".format(x[i+1][j+1],y[i+1][j+1],c[i+1][j+1])
                 self.buffer += "({},{}) [{}]\n".format(x[i][j+1],y[i][j+1],c[i][j+1])
         self.buffer += "};\n"
+
+    def inset_axes(self, x, y, width, height):
+        """
+        Create the inset axes object
+         - add coordinate reference to this axes
+         - add at header to the new axes
+        """
+        new_axes = Axes()
+        self.buffer += "\\coordinate (insetref"+str(self.inset_id)") at (rel axis cs: "+str(x)+","+str(y)+");"
+        new_axes.add_header("at", "{(insetref"+str(self.inset_id)+")}")
+        new_axes.add_header("width", self.headers["width"]*width)
+        new_axes.add_header("height", self.headers["height"]*height)
+        self.inset_id += 1;
+        return new_axes
+        

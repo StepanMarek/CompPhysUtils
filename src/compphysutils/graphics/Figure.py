@@ -89,3 +89,9 @@ class Axes():
         Colormap, using already mesh of x y c (two dimensional)
         """
         raise NotImplementedError("Colormap not implemented in this backend")
+
+    def inset_axes(self, x, y, width, height):
+        """
+        Create the inset axes object
+        """
+        raise NotImplementedError("Insets not implemented in this backend")
