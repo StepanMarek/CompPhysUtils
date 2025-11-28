@@ -68,18 +68,16 @@ class Axes(AxesBase):
             header_strings.append(header_string)
         return ",\n".join(header_strings)
 
-    def axesheader(self, width="\\columnwidth", height=False):
+    def axesheader(self):
         # Axes size
-        if width:
-            if type(width) == float or type(width) == int:
-                self.add_header("width", str(width)+"cm")
-            else:
-                self.add_header("width", str(width))
-        if height:
-            if type(height) == float or type(height) == int:
-                self.add_header("height", str(height)+"cm")
-            else:
-                self.add_header("height", str(height))
+        if type(self.width) == float or type(self.width) == int:
+            self.add_header("width", str(self.width)+"cm")
+        else:
+            self.add_header("width", str(self.width))
+        if type(self.height) == float or type(self.height) == int:
+            self.add_header("height", str(self.height)+"cm")
+        else:
+            self.add_header("height", str(self.height))
         # Hide axes
         if self.hide_axes == "both":
             self.add_header("axis lines", "none")
@@ -216,8 +214,8 @@ class Axes(AxesBase):
                 val += "({},{})\n".format(x[i], y[i])
         return val
 
-    def start(self, width=16, height=12):
-        return self.axesheader(width, height)
+    def start(self):
+        return self.axesheader()
 
     def end(self):
         return self.axesfooter()
@@ -274,10 +272,18 @@ class Axes(AxesBase):
          - add at header to the new axes
         """
         new_axes = Axes()
-        self.buffer += "\\coordinate (insetref"+str(self.inset_id)") at (rel axis cs: "+str(x)+","+str(y)+");"
+        self.buffer += "\\coordinate (insetref"+str(self.inset_id)+") at (rel axis cs: "+str(x)+","+str(y)+");\n"
         new_axes.add_header("at", "{(insetref"+str(self.inset_id)+")}")
-        new_axes.add_header("width", self.headers["width"]*width)
-        new_axes.add_header("height", self.headers["height"]*height)
+        if type(self.width) == float or type(self.width) == int:
+            new_axes.width = self.width*width
+        else:
+            # String description assumed
+            new_axes.width = str(width)+self.width
+        if type(self.height) == float or type(self.height) == int:
+            new_axes.height = self.height*height
+        else:
+            # String description assumed
+            new_axes.height = str(height)+self.height
         self.inset_id += 1;
         return new_axes
         

@@ -39,6 +39,11 @@ class Axes():
         self.yticks_swap = False
         self.yticks_rotate = 0.0
 
+        # Axes width and height - separate from Figure width and height
+        # In cm
+        self.width = 16
+        self.height = 12
+
         # Can be set to "x", "y", "both" or False
         # TODO : Make an enum?
         self.hide_axes = False

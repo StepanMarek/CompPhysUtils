@@ -92,10 +92,15 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
         axes.xticks_rotate = plotOptions["xticks-rotate"]
     if plotOptions["yticks-rotate"]:
         axes.xticks_rotate = plotOptions["yticks-rotate"]
+    # TODO : Is it worth allowing for differing axes and figure dimensions?
     if plotOptions["fig-width"]:
         figure.width = plotOptions["fig-width"]
     if plotOptions["fig-width"]:
         figure.height = plotOptions["fig-height"]
+    if plotOptions["axes-width"]:
+        axes.width = plotOptions["axes-width"]
+    if plotOptions["axes-width"]:
+        axes.height = plotOptions["axes-height"]
     # If requested, move ticks to top
     axes.xticks_swap = plotOptions["xticks-swap"]
     axes.yticks_swap = plotOptions["yticks-swap"]
@@ -178,6 +183,13 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     # Default aspect ratio is 4/3
     plotOptions["fig-width"] = cfg["plot"].get("fig-width", 16)
     plotOptions["fig-height"] = cfg["plot"].get("fig-height", 12)
+    if not axesGiven:
+        # TODO : Should the axis settings be available on a per-axis basis? And exposed to user?
+        plotOptions["axes-width"] = plotOptions["fig-width"]
+        plotOptions["axes-height"] = plotOptions["fig-height"]
+    else:
+        plotOptions["axes-width"] = False
+        plotOptions["axes-height"] = False
     plotOptions["colorCycle"] = cfg["plot"].get("colorCycle", "red green blue cyan magenta yellow black")
     plotOptions["colorCycle"] = ColorIterator(plotOptions["colorCycle"])
     plotOptions["linestyleCycle"] = cfg["plot"].get("linestyleCycle", "solid")
@@ -366,7 +378,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
         for i in range(len(insetLines)):
             # Arguments are xpos, ypos, xwidth, ywidth
             insetArgs = insetLines[i].split()
-            insetAxes = axes.inset_axes(list(map(float, insetArgs[1:])))
+            insetAxes = axes.inset_axes(*map(float, insetArgs[1:]))
             # TODO : May not be needed in matplotlib, but needed in pgfplots
             figure.axes.append(insetAxes)
             fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets)
