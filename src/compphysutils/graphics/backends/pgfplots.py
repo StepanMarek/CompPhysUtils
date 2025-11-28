@@ -87,8 +87,17 @@ class Axes(AxesBase):
             self.add_header("axis y line", "none")
         # Axes labels
         if self.labels[0]:
+            # TODO : labelPos needed or not?
+            # if self.labelPos[0]:
+            #     self.add_header("xlabel style={align="+self.labelPos[0]+"}", self.labels[0])
+            # else:
+            #     self.add_header("xlabel", self.labels[0])
             self.add_header("xlabel", self.labels[0])
         if self.labels[1]:
+            # if self.labelPos[1]:
+            #     self.add_header("ylabel style={align="+self.labelPos[1]+"}", self.labels[1])
+            # else:
+            #     self.add_header("ylabel", self.labels[1])
             self.add_header("ylabel", self.labels[1])
         # Limits
         if self.xlim:
@@ -286,4 +295,21 @@ class Axes(AxesBase):
             new_axes.height = str(height)+self.height
         self.inset_id += 1;
         return new_axes
-        
+
+    def twinx(self):
+        """
+        Create twin axes sharing the x axis
+        """
+        new_axes = Axes()
+        if "at" in self.headers:
+            new_axes.add_header("at", self.headers["at"])
+        new_axes.width = self.width
+        new_axes.height = self.height
+        new_axes.add_header("axis x line", "none")
+        #new_axes.labelPos[1] = "right"
+        # TODO : Move tick labels to the right, disable ticks on the left and on the right for the original axes
+        #         - balance with tick-labels, correct rotation of text?
+        new_axes.add_header("ylabel style", "{at={(1.1,0.5)}}")
+        # TODO : does this count to inset id? Probably does not need to
+        #self.inset_id += 1
+        return new_axes

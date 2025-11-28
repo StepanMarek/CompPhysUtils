@@ -393,7 +393,10 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
         # Plot another dataset sharing the same x axis but different y axis
         # Always, only a single twinx makes sense - provide no arguments
         # TODO : Implement for pgfplots
-        print("Twinx not yet implemented")
+        twinxAxes = axes.twinx()
+        figure.axes.append(twinxAxes)
+        fromConfig(cfg["plot"].get("twinx"), axes=twinxAxes, figure=figure, datasets=datasets)
+        #print("Twinx not yet implemented")
         # fromConfig(cfg["plot"].get("twinx"), axes=axes.twinx(), figure=figure, datasets=datasets)
     if cfg["plot"].get("twiny", False):
         # same as twinx, but for shared y-axis

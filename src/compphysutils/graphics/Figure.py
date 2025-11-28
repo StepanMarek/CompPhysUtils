@@ -56,6 +56,8 @@ class Axes():
 
         # Axes labels
         self.labels = [False,False]
+        # TODO : Needed or not?
+        #self.labelPos = [False,False]
 
         # Show/hide legend
         self.legend = True
