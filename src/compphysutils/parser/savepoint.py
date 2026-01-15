@@ -36,9 +36,9 @@ def parseArgs(savepointArgString, context, defaultDatasetName=False):
     # Finally, determine parser args
     if filenameSeparatorIndex != -1:
         parserArgs = savepointArgs[parserArgsStartIndex:filenameSeparatorIndex]
+        result["parserArgs"] = " ".join(parserArgs)
     else:
-        parserArgs = savepointArgs[parserArgsStartIndex:]
-    result["parserArgs"] = parserArgs
+        result["parserArgs"] = ""
     return result
 
 def handleSavepoints(savepointGroup, context, defaultDatasetName=False):

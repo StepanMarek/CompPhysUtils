@@ -101,6 +101,24 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
                      bottom=not plotOptions["xticks-swap"],
                      labelbottom=not plotOptions["xticks-swap"]
                      )
+    # Tick length and width
+    for direction in ["x", "y"]:
+        # Common
+        axes.tick_params(axis=direction,
+                         which="both",
+                         direction=plotOptions[direction+"ticks-direction"],
+                         width=plotOptions[direction+"ticks-width"]
+                         )
+        # Major
+        axes.tick_params(axis=direction,
+                         which="major",
+                         length=plotOptions[direction+"ticks-length"]
+                         )
+        # Minor
+        axes.tick_params(axis=direction,
+                         which="minor",
+                         length=plotOptions[direction+"ticks-length"]*plotOptions[direction+"ticks-ratio"]
+                         )
     if plotOptions["yticks"]:
         axes.set_yticks(plotOptions["yticks"][0])
         axes.set_yticklabels(plotOptions["yticks"][1])
@@ -199,6 +217,11 @@ def fromConfig(configFileName, axes=False, figure=False, datasets={}):
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
         plotOptions[ticksName+"-rotate"] = cfg["plot"].get(ticksName+"-rotate", False)
+        # Line width and length
+        plotOptions[ticksName+"-length"] = cfg["plot"].getfloat(ticksName+"-length", 5.0)
+        plotOptions[ticksName+"-width"] = cfg["plot"].getfloat(ticksName+"-width", 1.0)
+        plotOptions[ticksName+"-direction"] = cfg["plot"].get(ticksName+"-direction", "out")
+        plotOptions[ticksName+"-ratio"] = cfg["plot"].getfloat(ticksName+"-ratio", 0.5)
     # xticks on top if requested
     plotOptions["xticks-swap"] = cfg["plot"].get("xticks-swap", False)
     axes = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)

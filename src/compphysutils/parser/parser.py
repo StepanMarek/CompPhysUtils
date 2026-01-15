@@ -6,6 +6,7 @@ import os
 import sys
 import importlib
 import re
+import gzip
 
 parserModules = {}
 # Check for custom parser modules
@@ -132,7 +133,7 @@ def loadParserModule(parserName):
     else:
         writeFooterFunctions[parserName] = False
 
-def readFile(filename, filetype, parserArgs=False):
+def readFile(filename, filetype, parserArgs=False, compress="none"):
     """
     Reads the file with given filetype parser and parserArgs
 
@@ -158,38 +159,45 @@ def readFile(filename, filetype, parserArgs=False):
     if readLineFunctions[filetype]:
         # read lines
         # requires text mode
-        with open(filename, "r") as f:
-            # Read headers, until False is produced
-            if readHeaderFunctions[filetype]:
-                for line in f:
-                    try:
-                        readHeaderFunctions[filetype](line, *readerObjects)
-                    except ValueError:
-                        # Value error signals that it is time to move to main content reading
-                        break
-            # Finished reading headers, read main content
-            dataset = []
+        # can include compression algorithm via compress optional argument
+        if compress == "none":
+            f = open(filename, "r")
+        elif compress == "gzip":
+            f = gzip.open(filename, "rt")
+        else:
+            raise ValueError("Unknown/unsupported compression type : "+str(compress))
+        # Read headers, until False is produced
+        if readHeaderFunctions[filetype]:
             for line in f:
                 try:
-                    datarow = readLineFunctions[filetype](line, *readerObjects)
-                    if datarow:
-                        # Either initiate dataset or append datarow
-                        if len(datarow) > len(dataset):
-                            for dataitem in datarow:
-                                dataset.append([dataitem])
-                        else:
-                            for i in range(len(datarow)):
-                                dataset[i].append(datarow[i])
-                    else:
-                        continue
+                    readHeaderFunctions[filetype](line, *readerObjects)
                 except ValueError:
-                    # Time to read footers
+                    # Value error signals that it is time to move to main content reading
                     break
-            # Finished reading main content, read footers
-            if readFooterFunctions[filetype]:
-                for line in f:
-                    readFooterFunctions[filetype](line, *readerObjects)
-            # Done
+        # Finished reading headers, read main content
+        dataset = []
+        for line in f:
+            try:
+                datarow = readLineFunctions[filetype](line, *readerObjects)
+                if datarow:
+                    # Either initiate dataset or append datarow
+                    if len(datarow) > len(dataset):
+                        for dataitem in datarow:
+                            dataset.append([dataitem])
+                    else:
+                        for i in range(len(datarow)):
+                            dataset[i].append(datarow[i])
+                else:
+                    continue
+            except ValueError:
+                # Time to read footers
+                break
+        # Finished reading main content, read footers
+        if readFooterFunctions[filetype]:
+            for line in f:
+                readFooterFunctions[filetype](line, *readerObjects)
+        # Done
+        f.close()
         return dataset
     else:
         # Read whole file in one go
@@ -258,10 +266,11 @@ def parseDatasetConfig(configFilename):
     for groupName in cfg.sections():
         if "dataset" in groupName:
             datasetName = groupName.split(".")[1]
+            compression = cfg[groupName].get("compress", "none")
             if "file" in cfg[groupName]:
                 # Create datasets from file
                 parserArgs = cfg[groupName].get("parser-args", False)
-                datasets[datasetName] = readFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserArgs=parserArgs)
+                datasets[datasetName] = readFile(cfg[groupName]["file"], cfg[groupName]["filetype"], parserArgs=parserArgs, compress=compression)
             elif "list" in cfg[groupName]:
                 # Create dataset from list, defaultly convert to float
                 # TODO : Should there be som interface to different convertors?
