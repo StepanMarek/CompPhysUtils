@@ -107,9 +107,9 @@ class Axes(AxesBase):
                 self.add_header("xmax", self.xlim[1])
         if self.ylim:
             if self.ylim[0] or type(self.ylim[0]) != bool:
-                self.add_header("ymin", self.xlim[0])
+                self.add_header("ymin", self.ylim[0])
             if self.ylim[1] or type(self.ylim[1]) != bool:
-                self.add_header("ymax", self.xlim[1])
+                self.add_header("ymax", self.ylim[1])
         # Legend position
         if self.legend and self.legend_pos:
             # TODO: Separate position when provided
