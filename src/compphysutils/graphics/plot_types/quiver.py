@@ -26,6 +26,15 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
     for datasetIndex in range(len(datasets)):
         # Check dimensionality
         dimensions = len(datasets[datasetIndex]) // 2
+        # TODO : just testing the most basic implementation for pgfplots
+        axisObj.quiver(datasets[datasetIndex][0],
+                       datasets[datasetIndex][1],
+                       datasets[datasetIndex][2],
+                       datasets[datasetIndex][3],
+                       color=next(plotOptions["colorCycle"]),
+                       label=datasetLabels[datasetIndex]
+                       )
+        continue
         # Ignore extra columns beyond the expected dimensions TODO : Change this/warn user?
         # Shape the fields
         coordinates = numpy.array(datasets[datasetIndex][0:dimensions]).reshape((dimensions, *args.boxSize))

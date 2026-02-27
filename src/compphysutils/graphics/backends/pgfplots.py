@@ -274,6 +274,21 @@ class Axes(AxesBase):
                 self.buffer += "({},{}) [{}]\n".format(x[i][j+1],y[i][j+1],c[i][j+1])
         self.buffer += "};\n"
 
+    def quiver(self, x, y, u, v, label=False, color=False):
+        """
+        Quiver graph
+        """
+        self.add_plot_header("quiver", "{u=\\thisrow{u},\nv=\\thisrow{v}}")
+        self.add_plot_header("-stealth")
+        # TODO : Different headers
+        # self.buffer += self.generic_plot_headers(color=color)
+        self.buffer +="\\addplot[" + self.get_header_string(self.plot_headers) + "\n] table {\n" 
+        self.buffer += "x y u v\n"
+        for i in range(len(x)):
+            self.buffer += " ".join((str(x[i]), str(y[i]), str(u[i]), str(v[i])))
+            self.buffer += "\n"
+        self.buffer += "};\n"
+
     def inset_axes(self, x, y, width, height):
         """
         Create the inset axes object

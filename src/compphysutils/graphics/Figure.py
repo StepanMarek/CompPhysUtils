@@ -97,6 +97,11 @@ class Axes():
         """
         raise NotImplementedError("Colormap not implemented in this backend")
 
+    def quiver(self, x, y, u, v, label=False, color=False):
+        """
+        Quiver, plotting arows at (x,y) with size (u,v)
+        """
+
     def inset_axes(self, x, y, width, height):
         """
         Create the inset axes object
