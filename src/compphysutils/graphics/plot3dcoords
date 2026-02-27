@@ -16,6 +16,44 @@ argparser.add_argument("--tri_colors", default=["255,0,0,120","0,0,255,120"], na
 argparser.add_argument("coordinate_file", help="Name of the coordinate file to be processed")
 argparser.add_argument("savefile", help="Name of the file into which to save the rendered coordinates")
 
+# Shaders
+vertexShader = """#version 330
+in vec3 vertexPosition;
+in vec4 vertexColor;
+in vec3 vertexNormal;
+
+smooth out vec4 fragColor;
+
+uniform mat4 mvp;
+
+uniform vec3 lightDirection;
+uniform float ambient;
+// Maximum cos for reflection
+// The intensity at the max is also reduced
+uniform float minCos;
+
+void main(){
+	// cos(angle) between normal and direction
+	float dotProduct = dot(normalize(lightDirection), normalize(vertexNormal));
+	// Intensity together with ambient
+	float intensity = clamp(ambient + (clamp(-dotProduct, minCos, 1.0)-minCos)/(1.0-minCos), 0.0, 1.0);
+
+	fragColor = vec4(intensity, intensity, intensity, 1.0) * vertexColor;
+	gl_Position = mvp * vec4(vertexPosition, 1.0);
+}
+"""
+fragmentShader = """#version 330
+smooth in vec4 fragColor;
+
+uniform vec4 colDiffuse;
+
+out vec4 finalColor;
+
+void main(){
+	finalColor = fragColor * colDiffuse;
+}
+"""
+
 args = argparser.parse_args()
 dataset = readFile(args.coordinate_file, args.format)
 # Init window and start loading models
@@ -23,6 +61,16 @@ pyray.init_window(1680,1050, args.savefile)
 
 atom_models = []
 center_coords = [0.0,0.0,0.0]
+shader = pyray.load_shader_from_memory(vertexShader, fragmentShader)
+
+light_dir_loc = pyray.get_shader_location(shader, "lightDirection")
+ambient_loc = pyray.get_shader_location(shader, "ambient")
+minCos_loc = pyray.get_shader_location(shader, "minCos")
+#TODO : Set in args
+pyray.set_shader_value(shader, light_dir_loc,pyray.Vector3(-1.0, 0.0, 0.0), pyray.SHADER_UNIFORM_VEC3)
+pyray.set_shader_value(shader, ambient_loc, pyray.ffi.new("float *", 0.5), pyray.SHADER_UNIFORM_FLOAT)
+pyray.set_shader_value(shader, minCos_loc, pyray.ffi.new("float *", 0.4), pyray.SHADER_UNIFORM_FLOAT)
+wires = False
 
 for atom_index in range(len(dataset[0])):
     # TODO : Settable rings+sections
@@ -30,7 +78,10 @@ for atom_index in range(len(dataset[0])):
     for i in range(3):
         center_coords[i] += dataset[i][atom_index]
     sphere_mesh = pyray.gen_mesh_sphere(atom_sizes[dataset[3][atom_index].upper()], args.sphere_res, args.sphere_res)
-    atom_models.append(pyray.load_model_from_mesh(sphere_mesh))
+    model = pyray.load_model_from_mesh(sphere_mesh)
+    model.materials[0].shader = shader
+    # Give shaders to the model
+    atom_models.append(model)
 
 for i in range(3):
     center_coords[i] = center_coords[i] / len(dataset[0])
@@ -40,12 +91,29 @@ if args.triangles:
     for surface_index in range(len(args.triangles)):
         triset = readFile(args.triangles[surface_index], "cols", "0 1 2 3 4 5 6 7 8")
         vertices = numpy.zeros(9*len(triset[0]), dtype=numpy.float32)
+        normals = numpy.zeros(9*len(triset[0]), dtype=numpy.float32)
         for i in range(len(triset[0])):
             for j in range(9):
                 vertices[9*i+j] = triset[j][i]
-        mesh = pyray.Mesh(3*len(triset[0]), len(triset[0]), vertices)
+        #    # Calculate the normal of the face
+        #    p1 = numpy.array([triset[0][i],triset[1][i],triset[2][i]])
+        #    p2 = numpy.array([triset[3][i],triset[4][i],triset[5][i]])
+        #    p3 = numpy.array([triset[6][i],triset[7][i],triset[8][i]])
+        #    vec1 = p2 - p1
+        #    vec2 = p3 - p1
+        #    norm = numpy.cross(vec1, vec2)
+        #    norm = norm / numpy.linalg.norm(norm)
+        #    # Save the normal to each vertex
+        #    for j in range(3):
+        #        normals[9*i+3*j] = norm[0]
+        #        normals[9*i+3*j+1] = norm[1]
+        #        normals[9*i+3*j+2] = norm[2]
+        mesh = pyray.Mesh(3*len(triset[0]), len(triset[0]), vertices, normals)
+        #mesh = pyray.Mesh(3*len(triset[0]), len(triset[0]), vertices)
         pyray.upload_mesh(mesh, True)
-        surface_models.append(pyray.load_model_from_mesh(mesh))
+        model = pyray.load_model_from_mesh(mesh)
+        model.materials[0].shader = shader
+        surface_models.append(model)
 
 # TODO : Allow for custom setting of surface colors
 surface_color = ColorIterator(" ".join(args.tri_colors))
@@ -76,14 +144,15 @@ while not pyray.window_should_close():
                          1.0,
                          atom_colors[dataset[3][atom_index].upper()]
                          )
-        # Draw the atom
-        pyray.draw_model_wires(atom_models[atom_index],
-                         [dataset[0][atom_index],
-                          dataset[1][atom_index],
-                          dataset[2][atom_index]],
-                         1.0,
-                         wire_color
-                         )
+        # # Draw the atom wires
+        if wires:
+            pyray.draw_model_wires(atom_models[atom_index],
+                             [dataset[0][atom_index],
+                              dataset[1][atom_index],
+                              dataset[2][atom_index]],
+                             1.0,
+                             wire_color
+                             )
     # Draw the surfaces
     for surface_index in range(len(surface_models)):
         pyray.draw_model(surface_models[surface_index],
