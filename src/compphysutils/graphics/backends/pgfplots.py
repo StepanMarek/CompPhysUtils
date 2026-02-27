@@ -310,9 +310,32 @@ class Axes(AxesBase):
         new_axes.add_header("axis y line", "right")
         new_axes.add_header("y axis line style", "{-}")
         new_axes.add_header("ytick align", "inside")
+        new_axes.xlim = self.xlim
         self.add_header("axis y line", "left")
         self.add_header("y axis line style", "{-}")
         self.add_header("ytick align", "inside")
+        # TODO : does this count to inset id? Probably does not need to
+        #self.inset_id += 1
+        return new_axes
+
+    def twiny(self):
+        """
+        Create twin axes sharing the y axis
+        """
+        new_axes = Axes()
+        if "at" in self.headers:
+            new_axes.add_header("at", self.headers["at"])
+        new_axes.width = self.width
+        new_axes.height = self.height
+        new_axes.add_header("axis y line", "none")
+        new_axes.add_header("xticklabel pos", "upper")
+        new_axes.add_header("axis x line", "top")
+        new_axes.add_header("x axis line style", "{-}")
+        new_axes.add_header("xtick align", "inside")
+        new_axes.ylim = self.ylim
+        self.add_header("axis x line", "bottom")
+        self.add_header("x axis line style", "{-}")
+        self.add_header("xtick align", "inside")
         # TODO : does this count to inset id? Probably does not need to
         #self.inset_id += 1
         return new_axes

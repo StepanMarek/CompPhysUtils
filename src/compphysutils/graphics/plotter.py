@@ -396,13 +396,12 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
         twinxAxes = axes.twinx()
         figure.axes.append(twinxAxes)
         fromConfig(cfg["plot"].get("twinx"), axes=twinxAxes, figure=figure, datasets=datasets)
-        #print("Twinx not yet implemented")
-        # fromConfig(cfg["plot"].get("twinx"), axes=axes.twinx(), figure=figure, datasets=datasets)
     if cfg["plot"].get("twiny", False):
         # same as twinx, but for shared y-axis
         # TODO : Implement for pgfplots
-        print("Twiny not yet implemented")
-        # fromConfig(cfg["plot"].get("twiny"), axes=axes.twiny(), figure=figure, datasets=datasets)
+        twinyAxes = axes.twiny()
+        figure.axes.append(twinyAxes)
+        fromConfig(cfg["plot"].get("twiny"), axes=twinyAxes, figure=figure, datasets=datasets)
     # If axes are provided, assume figure is printed somewhere else
     # TODO : Is this a reasonable assumption?
     if axesGiven:

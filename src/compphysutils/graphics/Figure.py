@@ -102,3 +102,15 @@ class Axes():
         Create the inset axes object
         """
         raise NotImplementedError("Insets not implemented in this backend")
+
+    def twinx(self):
+        """
+        Creates a twin axis sharing the x axis with current axis
+        """
+        raise NotImplementedError("twinx not implemented in this backend")
+
+    def twiny(self):
+        """
+        Creates a twin axis sharing the y axis with current axis
+        """
+        raise NotImplementedError("twiny not implemented in this backend")
