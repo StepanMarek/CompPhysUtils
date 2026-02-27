@@ -306,10 +306,13 @@ class Axes(AxesBase):
         new_axes.width = self.width
         new_axes.height = self.height
         new_axes.add_header("axis x line", "none")
-        #new_axes.labelPos[1] = "right"
-        # TODO : Move tick labels to the right, disable ticks on the left and on the right for the original axes
-        #         - balance with tick-labels, correct rotation of text?
-        new_axes.add_header("ylabel style", "{at={(1.1,0.5)}}")
+        new_axes.add_header("yticklabel pos", "right")
+        new_axes.add_header("axis y line", "right")
+        new_axes.add_header("y axis line style", "{-}")
+        new_axes.add_header("ytick align", "inside")
+        self.add_header("axis y line", "left")
+        self.add_header("y axis line style", "{-}")
+        self.add_header("ytick align", "inside")
         # TODO : does this count to inset id? Probably does not need to
         #self.inset_id += 1
         return new_axes
