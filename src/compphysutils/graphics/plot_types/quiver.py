@@ -17,6 +17,7 @@ ap.add_argument("--headlength", default=10, type=float, help="Headlength argumen
 ap.add_argument("--headwidth", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
 ap.add_argument("--headaxislength", default=10, type=float, help="Headlength argument passed to the matlab primitive. Default : 10")
 ap.add_argument("--stride", default=1, type=int, help="Optionally, stride the points in both directions to reduce the number of points.")
+ap.add_argument("--offsets", default=[0,0], type=int, nargs=2, help="Optionally, set the offsets for the striding - applied module stride. Default : 0 in both directions")
 
 def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
     args = ap.parse_args(plotOptions["plotArgString"])
@@ -36,7 +37,7 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
             components = numpy.moveaxis(components, args.constantIndex+1, 1)[:,args.planeIndex]
             if args.verbose:
                 # Output value of the coordinate
-                print("quiver : keeping coordinate "+str(args.constantIndex)+"->"+str(args.axisCompMap[args.constantIndex])+" constant at "+str(coordinates[args.axisCompMap[args.constantIndex]].flatten()[0]))
+                print("quiver : keeping coordinate "+str(args.constantIndex)+"->"+str(args.axisCompMap[args.constantIndex])+" constant at "+str(coordinates[args.axisCompMap[args.constantIndex]].flatten()[args.planeIndex]))
             # Delete the constant axis components
             coordinates = numpy.delete(coordinates, args.axisCompMap[args.constantIndex], axis=0)
             components = numpy.delete(components, args.axisCompMap[args.constantIndex], axis=0)
@@ -46,11 +47,13 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
         # Change default arrow style to resamble annotation arrows
         if args.stride != 1:
             print(coordinates.shape)
-            coordinates = numpy.lib.stride_tricks.as_strided(coordinates,
+            # Stride offsets
+            offsets = args.offsets
+            coordinates = numpy.lib.stride_tricks.as_strided(coordinates[:,offsets[0]%args.stride:,offsets[1]%args.stride:,...],
                     shape=(coordinates.shape[0], coordinates.shape[1]//args.stride, coordinates.shape[2]//args.stride),
                     strides=(coordinates.strides[0], coordinates.strides[1]*args.stride, coordinates.strides[2]*args.stride))
             print(coordinates.shape)
-            components = numpy.lib.stride_tricks.as_strided(components,
+            components = numpy.lib.stride_tricks.as_strided(components[:,offsets[0]%args.stride:,offsets[1]%args.stride:,...],
                     shape=(components.shape[0], components.shape[1]//args.stride, components.shape[2]//args.stride),
                     strides=(components.strides[0], components.strides[1]*args.stride, components.strides[2]*args.stride))
         axisObj.quiver(*coordinates, *components,
