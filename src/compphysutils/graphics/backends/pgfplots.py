@@ -7,6 +7,11 @@ anchor_translator = {
     "left" : "west"
 }
 
+float_format="{:12.4E}"
+"""
+Standardizes float output format
+"""
+
 class Figure(FigureBase):
 
     def __init__(self):
@@ -197,30 +202,30 @@ class Axes(AxesBase):
         if xerr and yerr and xmerr and ymerr:
             for i in range(len(x)):
                 # TODO : Decide on a float format
-                val += "({},{}) += ({},{}) -= ({},{})\n".format(x[i], y[i], xerr[i], yerr[i], xmerr[i], ymerr[i])
+                val += ("("+float_format+","+float_format+") += ("+float_format+","+float_format+") -= ("+float_format+","+float_format+")\n").format(x[i], y[i], xerr[i], yerr[i], xmerr[i], ymerr[i])
         elif xerr and xmerr and yerr:
             for i in range(len(x)):
                 # TODO : Decide on a float format
-                val += "({},{}) += ({},{}) -= ({},{})\n".format(x[i], y[i], xerr[i], yerr[i], xmerr[i], yerr[i])
+                val += ("("+float_format+","+float_format+") += ("+float_format+","+float_format+") -= ("+float_format+","+float_format+")\n").format(x[i], y[i], xerr[i], yerr[i], xmerr[i], yerr[i])
         elif xerr and ymerr and yerr:
             for i in range(len(x)):
                 # TODO : Decide on a float format
-                val += "({},{}) += ({},{}) -= ({},{})\n".format(x[i], y[i], xerr[i], yerr[i], xerr[i], ymerr[i])
+                val += ("("+float_format+","+float_format+") += ("+float_format+","+float_format+") -= ("+float_format+","+float_format+")\n").format(x[i], y[i], xerr[i], yerr[i], xerr[i], ymerr[i])
         elif xerr and yerr:
             for i in range(len(x)):
                 # TODO : Decide on a float format
-                val += "({},{}) +- ({},{})\n".format(x[i], y[i], xerr[i], yerr[i])
+                val += ("("+float_format+","+float_format+") +- ("+float_format+","+float_format+")\n").format(x[i], y[i], xerr[i], yerr[i])
         elif xerr:
             for i in range(len(x)):
                 # TODO : Decide on a float format
-                val += "({},{}) +- ({},{})\n".format(x[i], y[i], xerr[i], 0)
+                val += ("("+float_format+","+float_format+") +- ("+float_format+","+float_format+")\n").format(x[i], y[i], xerr[i], 0)
         elif yerr:
             for i in range(len(x)):
                 # TODO : Decide on a float format
-                val += "({},{}) +- ({},{})\n".format(x[i], y[i], 0, yerr[i])
+                val += ("("+float_format+","+float_format+") +- ("+float_format+","+float_format+")\n").format(x[i], y[i], 0, yerr[i])
         else:
             for i in range(len(x)):
-                val += "({},{})\n".format(x[i], y[i])
+                val += ("("+float_format+","+float_format+")\n").format(x[i], y[i])
         return val
 
     def start(self):
@@ -268,10 +273,10 @@ class Axes(AxesBase):
         #self.buffer += "\\addplot[patch,patch type=rectangle,shader=interp,point meta=explicit] coordinates {\n"
         for i in range(len(x)-1):
             for j in range(len(x[0])-1):
-                self.buffer += "({},{}) [{}]\n".format(x[i][j],y[i][j],c[i][j])
-                self.buffer += "({},{}) [{}]\n".format(x[i+1][j],y[i+1][j],c[i+1][j])
-                self.buffer += "({},{}) [{}]\n".format(x[i+1][j+1],y[i+1][j+1],c[i+1][j+1])
-                self.buffer += "({},{}) [{}]\n".format(x[i][j+1],y[i][j+1],c[i][j+1])
+                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i][j],y[i][j],c[i][j])
+                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i+1][j],y[i+1][j],c[i+1][j])
+                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i+1][j+1],y[i+1][j+1],c[i+1][j+1])
+                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i][j+1],y[i][j+1],c[i][j+1])
         self.buffer += "};\n"
 
     def quiver(self, x, y, u, v, label=False, color=False):
@@ -285,7 +290,7 @@ class Axes(AxesBase):
         self.buffer +="\\addplot[" + self.get_header_string(self.plot_headers) + "\n] table {\n" 
         self.buffer += "x y u v\n"
         for i in range(len(x)):
-            self.buffer += " ".join((str(x[i]), str(y[i]), str(u[i]), str(v[i])))
+            self.buffer += (float_format*4).format(x[i], y[i], u[i], v[i])
             self.buffer += "\n"
         self.buffer += "};\n"
 
