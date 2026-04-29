@@ -279,6 +279,29 @@ class Axes(AxesBase):
                 self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i][j+1],y[i][j+1],c[i][j+1])
         self.buffer += "};\n"
 
+    def level(self, xs, lineoffset=0, linelength=1.0, orientation="vertical", label=False, color=False, linestyle=False):
+        """
+        Creates the line graph -- only connection of draw lines, without \\addplot option
+        """
+        drawfinal = self.generic_plot_headers(linestyle=linestyle, color=color)
+        self.add_plot_header("forget plot")
+        drawcommand = self.generic_plot_headers(linestyle=linestyle, color=color)
+        # TODO : Vertical vs horizontal
+        for ix in range(len(xs)-1):
+            self.buffer += drawcommand + self.output_xy([lineoffset-linelength/2,lineoffset+linelength/2], [xs[ix], xs[ix]])
+            self.buffer += "};\n"
+        if len(xs) > 0:
+            # Only adding the legend to the last plot
+            if label:
+                self.buffer += drawfinal + self.output_xy([lineoffset-linelength/2,lineoffset+linelength/2], [xs[-1], xs[-1]])
+                self.buffer += "};\n"
+                self.buffer += "\\addlegendentry{"+str(label)+"}"
+            else:
+                self.buffer += drawcommand + self.output_xy([lineoffset-linelength/2,lineoffset+linelength/2], [x[ix], x[ix]])
+                self.buffer += "};\n"
+        # Clear headers
+        self.plot_headers = {}
+
     def quiver(self, x, y, u, v, label=False, color=False):
         """
         Quiver graph
