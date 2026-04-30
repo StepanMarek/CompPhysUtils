@@ -2,7 +2,7 @@ import argparse
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--base", default=10, type=int, help="Base of the log scale, default is 10.")
-ap.add_argument("--ms", default=50, type=float, help="Marker size")
+ap.add_argument("--ms", default=10, type=float, help="Marker size")
 
 def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
     # Default base is 10
@@ -18,5 +18,5 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
             axisObj.errorbar(datasets[dataIndex][0], datasets[dataIndex][1], yerr=datasets[dataIndex][2], capsize=4, lw=0, elinewidth=2, marker=next(plotOptions["markerstyleCycle"]), label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]), ms=args.ms)
         else:
             # No errorbars
-            axisObj.scatter(datasets[dataIndex][0], datasets[dataIndex][1], marker=next(plotOptions["markerstyleCycle"]), label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]), s=args.ms)
+            axisObj.scatter(datasets[dataIndex][0], datasets[dataIndex][1], markerstyle=next(plotOptions["markerstyleCycle"]), label=datasetLabels[dataIndex], color=next(plotOptions["colorCycle"]), markersize=args.ms)
     return axisObj

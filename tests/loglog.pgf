@@ -1,0 +1,24 @@
+\begin{tikzpicture}
+\begin{axis}[xmode=log,
+log basis x=10,
+ymode=log,
+log basis y=10,
+width=16cm,
+height=12cm,
+xlabel=$x$,
+ylabel=$x^3$,
+legend pos=north east,
+legend columns=1
+]
+\addplot[only marks,
+mark size=10,
+red,
+mark=x
+] coordinates {
+(  1.0000E+00,  1.0000E+00)
+(  2.0000E+00,  8.0000E+00)
+(  3.0000E+00,  2.7000E+01)
+(  4.0000E+00,  6.4000E+01)
+};
+\end{axis}
+\end{tikzpicture}

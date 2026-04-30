@@ -146,6 +146,16 @@ class Axes(AxesBase):
             self.add_header("y tick label style", "{rotate="+str(self.yticks_rotate)+"}")
         return "\\begin{axis}[" + self.get_header_string(self.headers) + "\n]\n"
 
+    def set_yscale(self, mode="linear", base=False):
+        self.add_header("ymode", mode)
+        if base:
+            self.add_header("log basis y", str(base))
+
+    def set_xscale(self, mode="linear", base=False):
+        self.add_header("xmode", mode)
+        if base:
+            self.add_header("log basis x", str(base))
+
     def generic_plot_headers(self, linestyle=False, color=False, markerstyle=False):
         # TODO : Typechecks?
         if linestyle:
@@ -165,10 +175,6 @@ class Axes(AxesBase):
 
     def axesfooter(self):
         return "\\end{axis}\n"
-
-    def scatterheader(self, color=False, markerstyle=False):
-        self.add_plot_header("only marks")
-        return self.generic_plot_headers(color=color, markerstyle=markerstyle)
 
     def errorbarheader(self, color=False, markerstyle=False, linestyle=False):
         if linestyle:
@@ -243,9 +249,12 @@ class Axes(AxesBase):
             # TODO : Also think about how to put legends from several axes into a single box
             self.buffer += "\\addlegendentry{"+str(label)+"}"
     
-    def scatter(self, x, y, label=False, color=False, markerstyle=False, linestyle=False):
+    def scatter(self, x, y, label=False, color=False, markerstyle=False, linestyle=False, markersize=False):
+        self.add_plot_header("only marks")
+        if markersize:
+            self.add_plot_header("mark size", markersize)
         if not linestyle:
-            self.buffer += self.scatterheader(color=color, markerstyle=markerstyle)
+            self.buffer += self.generic_plot_headers(color=color, markerstyle=markerstyle)
         else:
             self.buffer += self.plotheader(linestyle=linestyle, color=color, markerstyle=markerstyle)
         self.buffer += self.output_xy(x, y)
