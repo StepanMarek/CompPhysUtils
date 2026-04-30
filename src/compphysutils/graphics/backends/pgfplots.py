@@ -317,6 +317,35 @@ class Axes(AxesBase):
             self.buffer += "\n"
         self.buffer += "};\n"
 
+    def fill_between(self, x, low, high, color=False, label=False):
+        """
+        Plot that fills the area between two lines. If a single number is given for low, 
+        extend it as a constant across the range of x.
+        """
+        # TODO : Small random string to differentiate names?
+        # TODO : Could be some hash of input data, so that it does not change between runs
+        self.add_plot_header("name path", "fill_between_lower")
+        self.add_plot_header("sharp plot")
+        self.buffer += self.generic_plot_headers(color=color)
+        if len(low) < len(x):
+            # Assume single value
+            self.buffer += self.output_xy([x[0], x[-1]], [low[0], low[0]])
+        else:
+            # Full line
+            self.buffer += self.output_xy(x, low)
+        self.buffer += "};\n"
+        # Reset name, plot the upper bound
+        self.add_plot_header("name path", "fill_between_upper")
+        self.buffer += self.generic_plot_headers(color=color)
+        self.buffer += self.output_xy(x, high)
+        self.buffer += "};\n"
+        # Now, add the fill between plot
+        fill_color = color
+        if not fill_color:
+            fill_color = "gray"
+        self.buffer += "\\addplot[" + fill_color + "] fill between [of=fill_between_lower and fill_between_upper];\n"
+        self.buffer += "\\addlegendentry{"+str(label)+"}\n"
+
     def inset_axes(self, x, y, width, height):
         """
         Create the inset axes object
