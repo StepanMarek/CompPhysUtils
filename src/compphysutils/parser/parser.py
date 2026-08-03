@@ -20,7 +20,7 @@ root, _, filenames = next(os.walk(os.path.dirname(__file__)+"/parsers"))
 defaultParsers = list(map(lambda f: root+"/"+f, filenames))
 # Ideally, custom parsers should overwrite default parsers, not sure if this works
 # TODO : Check that this works
-rexp = re.compile(".*/(.*)\.py")
+rexp = re.compile(".*/(.*)\\.py")
 for parserFileName in (defaultParsers + customParsers):
     parserType = rexp.search(parserFileName).group(1)
     if parserType[0:2] == "__":
