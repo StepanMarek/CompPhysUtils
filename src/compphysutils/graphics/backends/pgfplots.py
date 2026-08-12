@@ -420,3 +420,23 @@ class Axes(AxesBase):
         # TODO : does this count to inset id? Probably does not need to
         #self.inset_id += 1
         return new_axes
+
+    def rect_patch(self, pos_vec, rect_vec, relative=False):
+        # Prepare the vertices
+        vertices = [(pos_vec[0], pos_vec[1])]
+        vertices.append((pos_vec[0] + rect_vec[0], pos_vec[1]))
+        vertices.append((pos_vec[0] + rect_vec[0], pos_vec[1] + rect_vec[1]))
+        vertices.append((pos_vec[0], pos_vec[1] + rect_vec[1]))
+        vertices.append((pos_vec[0], pos_vec[1]))
+        coord_sys = "axis cs"
+        if relative:
+            coord_sys = "rel axis cs"
+        # Now, construct the command itself
+        buffer = ("\\draw[solid] ("+coord_sys+":"+float_format+","+float_format+") --").format(vertices[0][0], vertices[0][1])
+        for i in range(1,4):
+            buffer += ("("+coord_sys+":"+float_format+","+float_format+") -- ").format(vertices[i][0], vertices[i][1])
+        buffer += ("("+coord_sys+":"+float_format+","+float_format+");").format(vertices[4][0], vertices[4][1])
+        return buffer
+
+    def add_patch(self, patch):
+        self.buffer += patch+"\n"

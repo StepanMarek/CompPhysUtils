@@ -317,18 +317,18 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     #             paramOffset += fitParamLengths[i]
     #         # Dataset regularized, output
     #         writeFile(fitFileName, fitFormatName, dataset, fitParserArgs)
-    # # Handle decorations for main axes
-    # if cfg["plot"].get("decorate", False):
-    #     decorationCommands = cfg["plot"].get("decorate").split("\n")
-    #     for decorationArgs in decorationCommands:
-    #         decorationSplit = decorationArgs.split()
-    #         if not decorationSplit[0] in decorationModules:
-    #             raise ModuleNotFoundError("Decoration module "+decorationSplit[0]+" not found!")
-    #         if not decorationModules[decorationSplit[0]]["loaded"]:
-    #             decorationModules[decorationSplit[0]]["spec"].loader.exec_module(decorationModules[decorationSplit[0]]["module"])
-    #             decorations[decorationSplit[0]] = decorationModules[decorationSplit[0]]["module"].command
-    #             decorationModules[decorationSplit[0]]["loaded"] = True
-    #         axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
+    # Handle decorations for main axes
+    if cfg["plot"].get("decorate", False):
+        decorationCommands = cfg["plot"].get("decorate").split("\n")
+        for decorationArgs in decorationCommands:
+            decorationSplit = decorationArgs.split()
+            if not decorationSplit[0] in decorationModules:
+                raise ModuleNotFoundError("Decoration module "+decorationSplit[0]+" not found!")
+            if not decorationModules[decorationSplit[0]]["loaded"]:
+                decorationModules[decorationSplit[0]]["spec"].loader.exec_module(decorationModules[decorationSplit[0]]["module"])
+                decorations[decorationSplit[0]] = decorationModules[decorationSplit[0]]["module"].command
+                decorationModules[decorationSplit[0]]["loaded"] = True
+            axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
     # TODO : Check that the legend is implemented correctly already on the Figure level
     # # Move the legend render here, even after decorations (which can also be annotated)
     axes.legend_pos = plotOptions["legend-pos"]

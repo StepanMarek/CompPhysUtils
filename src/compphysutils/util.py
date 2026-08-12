@@ -10,6 +10,8 @@ def dynmod(roots, exts):
     mods = {}
     for root in roots:
         exp_root = os.path.expanduser(root)
+        if not os.path.isdir(exp_root):
+            continue
         _, _, filenames = next(os.walk(exp_root))
         for filename in filenames:
             filebase, ext = os.path.splitext(filename)
