@@ -10,9 +10,6 @@ lineAP.add_argument("coord", type=float, default=0.0, help="Coordinate of the li
 
 def command(axes, datasets, argString):
     args = lineAP.parse_args(argString)
-    # Draw a line
-    if args.vert:
-        axes.axvline(args.coord, ls=args.style, c=args.color)
-    else:
-        axes.axhline(args.coord, ls=args.style, c=args.color)
+    # Draw a line, spanning the entire axes
+    axes.axline(args.coord, args.vert)
     return axes, datasets

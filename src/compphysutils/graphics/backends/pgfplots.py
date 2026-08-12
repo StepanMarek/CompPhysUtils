@@ -440,3 +440,14 @@ class Axes(AxesBase):
 
     def add_patch(self, patch):
         self.buffer += patch+"\n"
+
+    def axline(self, coord, vert=False):
+        # TODO : Axes coordinates?
+        # TODO : line color and style
+        # TODO : When more ticks are present, might need to store and only add to headers before actual render
+        if vert:
+            self.add_header("extra x ticks", "{"+float_format.format(coord)+"}")
+            self.add_header("extra x tick style", "{grid=major}")
+        else:
+            self.add_header("extra y ticks", "{"+float_format.format(coord)+"}")
+            self.add_header("extra y tick style", "{grid=major}")
