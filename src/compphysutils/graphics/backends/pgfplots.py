@@ -55,6 +55,8 @@ class Axes(AxesBase):
         # None or some value - in case of None, the header key is output without value
         self.headers = {}
         self.plot_headers = {}
+        self.extra_xtick_coords = []
+        self.extra_ytick_coords = []
         self.inset_id = 0
 
     def add_header(self, header, value=None):
@@ -144,6 +146,13 @@ class Axes(AxesBase):
             self.add_header("x tick label style", "{rotate="+str(self.xticks_rotate)+"}")
         if self.yticks_rotate:
             self.add_header("y tick label style", "{rotate="+str(self.yticks_rotate)+"}")
+        # Extra ticks
+        if len(self.extra_xtick_coords) > 0:
+            coordlist = ",".join(map(lambda x: float_format.format(x), self.extra_xtick_coords))
+            self.add_header("extra x ticks", "{"+coordlist+"}")
+        if len(self.extra_ytick_coords) > 0:
+            coordlist = ",".join(map(lambda x: float_format.format(x), self.extra_ytick_coords))
+            self.add_header("extra y ticks", "{"+coordlist+"}")
         return "\\begin{axis}[" + self.get_header_string(self.headers) + "\n]\n"
 
     def set_yscale(self, mode="linear", base=False):
@@ -441,13 +450,15 @@ class Axes(AxesBase):
     def add_patch(self, patch):
         self.buffer += patch+"\n"
 
-    def axline(self, coord, vert=False):
+    def axline(self, coord, vert=False, color="black", style="solid"):
         # TODO : Axes coordinates?
-        # TODO : line color and style
-        # TODO : When more ticks are present, might need to store and only add to headers before actual render
+        # Construct the style string
+        styleString = "{"+",".join([style, color])+"}"
         if vert:
-            self.add_header("extra x ticks", "{"+float_format.format(coord)+"}")
-            self.add_header("extra x tick style", "{grid=major}")
+            self.extra_xtick_coords.append(coord)
+            self.add_header("extra x tick style", "{grid=major,ticks=none,grid style="+styleString+"}")
+            self.add_header("extra x tick labels", "{}")
         else:
-            self.add_header("extra y ticks", "{"+float_format.format(coord)+"}")
-            self.add_header("extra y tick style", "{grid=major}")
+            self.extra_ytick_coords.append(coord)
+            self.add_header("extra y tick style", "{grid=major,ticks=none,grid style="+styleString+"}")
+            self.add_header("extra y tick labels", "{}")
