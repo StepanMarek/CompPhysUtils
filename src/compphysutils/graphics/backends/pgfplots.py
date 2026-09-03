@@ -278,7 +278,7 @@ class Axes(AxesBase):
         if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}"
 
-    def colormap(self, x, y, c, label=False, cmap=False):
+    def colormap(self, x, y, c, label=False, cmap=False, vmin=False, vmax=False, norm=False):
         """
         Already created the mesh x y c
         """
@@ -288,13 +288,12 @@ class Axes(AxesBase):
         self.add_plot_header("shader", "interp")
         self.add_plot_header("point meta", "explicit")
         self.buffer += self.generic_plot_headers()
-        #self.buffer += "\\addplot[patch,patch type=rectangle,shader=interp,point meta=explicit] coordinates {\n"
         for i in range(len(x)-1):
             for j in range(len(x[0])-1):
-                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i][j],y[i][j],c[i][j])
-                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i+1][j],y[i+1][j],c[i+1][j])
-                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i+1][j+1],y[i+1][j+1],c[i+1][j+1])
-                self.buffer += "("+float_format+","+float_format+") ["+float_format+"]\n".format(x[i][j+1],y[i][j+1],c[i][j+1])
+                self.buffer += ("("+float_format+","+float_format+") ["+float_format+"]\n").format(x[i][j],y[i][j],c[i][j])
+                self.buffer += ("("+float_format+","+float_format+") ["+float_format+"]\n").format(x[i+1][j],y[i+1][j],c[i+1][j])
+                self.buffer += ("("+float_format+","+float_format+") ["+float_format+"]\n").format(x[i+1][j+1],y[i+1][j+1],c[i+1][j+1])
+                self.buffer += ("("+float_format+","+float_format+") ["+float_format+"]\n").format(x[i][j+1],y[i][j+1],c[i][j+1])
         self.buffer += "};\n"
 
     def level(self, xs, lineoffset=0, linelength=1.0, orientation="vertical", label=False, color=False, linestyle=False):

@@ -43,6 +43,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/level.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/quiver.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/coord.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/loglog.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/colormap.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/linear.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
@@ -61,7 +62,8 @@ BASESOURCE := src/compphysutils/__init__.py
 BASESOURCE += src/compphysutils/util.py
 
 install: $(WHEELFILE)
-	pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
+	#pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
+	pip3 install --force-reinstall $(WHEELFILE)
 
 upload-test: $(WHEELFILE)
 	python -m twine upload --repository testpypi $(WHEELFILE) $(TARFILE)
