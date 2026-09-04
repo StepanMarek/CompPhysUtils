@@ -461,3 +461,13 @@ class Axes(AxesBase):
             self.extra_ytick_coords.append(coord)
             self.add_header("extra y tick style", "{grid=major,ticks=none,grid style="+styleString+"}")
             self.add_header("extra y tick labels", "{}")
+
+    def text(self, coord, text, transform="axes"):
+        transform_cs = {
+                "axes" : "rel axis cs",
+                "data" : "axis cs"
+        }
+        cs = transform_cs[transform]
+        text_buffer = r"\node at ("+cs+":"+",".join(map(lambda x: float_format.format(x), coord))+")"
+        text_buffer += " {"+text+"};\n"
+        self.buffer += text_buffer
