@@ -376,6 +376,25 @@ class Axes(AxesBase):
         self.buffer += "\\addplot[" + fill_color + "] fill between [of=fill_between_lower and fill_between_upper];\n"
         self.buffer += "\\addlegendentry{"+str(label)+"}\n"
 
+    def colorline(self, x, y, c, linestyle="solid", cmap=False, label=False):
+        # Header for colorbar -- TODO : Move to separate axes API
+        self.add_header("colorbar")
+        if cmap:
+            self.add_header("colormap name", cmap)
+        self.add_plot_header("point meta", "explicit")
+        self.add_plot_header("mesh")
+        self.add_plot_header("thick")
+        #self.buffer += self.plotheader(linestyle=linestyle)
+        self.buffer += self.generic_plot_headers()
+        for i in range(len(x)):
+            self.buffer += ("("+float_format+","+float_format+") ["+float_format+"]\n").format(x[i], y[i], c[i])
+        self.buffer += self.plotfooter()
+        if label:
+            # TODO : Cannot separate the legend for single axis into several boxes
+            # TODO : Also think about how to put legends from several axes into a single box
+            # TODO : Different logo in the legend for the mesh setup
+            self.buffer += "\\addlegendentry{"+str(label)+"}\n"
+
     def inset_axes(self, x, y, width, height):
         """
         Create the inset axes object
@@ -506,22 +525,3 @@ class Axes(AxesBase):
         text_buffer = r"\node at ("+cs+":"+",".join(map(lambda x: float_format.format(x), coord))+")"
         text_buffer += " {"+text+"};\n"
         self.buffer += text_buffer
-
-    def colorline(self, x, y, c, linestyle="solid", cmap=False, label=False):
-        # Header for colorbar -- TODO : Move to separate axes API
-        self.add_header("colorbar")
-        if cmap:
-            self.add_header("colormap name", cmap)
-        self.add_plot_header("point meta", "explicit")
-        self.add_plot_header("mesh")
-        self.add_plot_header("thick")
-        #self.buffer += self.plotheader(linestyle=linestyle)
-        self.buffer += self.generic_plot_headers()
-        for i in range(len(x)):
-            self.buffer += ("("+float_format+","+float_format+") ["+float_format+"]\n").format(x[i], y[i], c[i])
-        self.buffer += self.plotfooter()
-        if label:
-            # TODO : Cannot separate the legend for single axis into several boxes
-            # TODO : Also think about how to put legends from several axes into a single box
-            # TODO : Different logo in the legend for the mesh setup
-            self.buffer += "\\addlegendentry{"+str(label)+"}\n"

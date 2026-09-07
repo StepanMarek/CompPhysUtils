@@ -97,10 +97,29 @@ class Axes():
         """
         raise NotImplementedError("Colormap not implemented in this backend")
 
+    def level(self, xs, lineoffset=0, linelength=1.0, orientation="vertical", label=False, color=False, linestyle=False):
+        """
+        One-dimensional data, visualised by stacked lines
+        """
+        raise NotImplementedError("Level not implemented in this backend")
+
     def quiver(self, x, y, u, v, label=False, color=False):
         """
         Quiver, plotting arows at (x,y) with size (u,v)
         """
+        raise NotImplementedError("Quiver not implemented in this backend")
+
+    def fill_between(self, x, low, high, color=False, label=False):
+        """
+        Fills the area between two lines, with coordinates given by x and values by low and high
+        """
+        raise NotImplementedError("Fill between not implemented in this backend")
+
+    def colorline(self, x, y, c, linestyle="solid", cmap=False, label=False):
+        """
+        Plots 3d data by adding color data to the line plot
+        """
+        raise NotImplementedError("Colorline not implemented in this backend")
 
     def inset_axes(self, x, y, width, height):
         """
@@ -119,3 +138,33 @@ class Axes():
         Creates a twin axis sharing the y axis with current axis
         """
         raise NotImplementedError("twiny not implemented in this backend")
+
+    def arrow(self, start=(0.0,0.0), end=(0.0,0.0), transform="data", linestyle="solid", width=1, color="black"):
+        """
+        Annotates the axes with an arrow
+        """
+        raise NotImplementedError("Arrow not implemented in this backend")
+
+    def axline(self, coord, vert=False, color="black", style="solid"):
+        """
+        Plots an additional line parallel to one of the axes
+        """
+        raise NotImplementedError("Axline not implemented in this backend")
+
+    def text(self, coord, text, transform="axes"):
+        """
+        Annotates the axes with a text
+        """
+        raise NotImplementedError("text not implemented in this backend")
+
+    def add_patch(self, patch):
+        """
+        Add a previously defined patch -- simple annotation object
+        """
+        raise NotImplementedError("add_patch not implemented in this backend")
+
+    def rect_patch(self, pos_vec, rect_vec, relative=False):
+        """
+        Prepares the rectangle patch
+        """
+        raise NotImplementedError("rect_patch not implemented in this backend")
