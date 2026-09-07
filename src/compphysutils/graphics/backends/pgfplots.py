@@ -12,6 +12,14 @@ float_format="{:12.4E}"
 Standardizes float output format
 """
 
+transform_cs = {
+        "axes" : "rel axis cs",
+        "data" : "axis cs"
+}
+"""
+Standard coord transforms
+"""
+
 class Figure(FigureBase):
 
     def __init__(self):
@@ -58,6 +66,8 @@ class Axes(AxesBase):
         self.extra_xtick_coords = []
         self.extra_ytick_coords = []
         self.inset_id = 0
+        # Loading of extra tikz libs
+        self.extra_libs = []
 
     def add_header(self, header, value=None):
         self.headers[header] = value
@@ -153,7 +163,10 @@ class Axes(AxesBase):
         if len(self.extra_ytick_coords) > 0:
             coordlist = ",".join(map(lambda x: float_format.format(x), self.extra_ytick_coords))
             self.add_header("extra y ticks", "{"+coordlist+"}")
-        return "\\begin{axis}[" + self.get_header_string(self.headers) + "\n]\n"
+        # Extra libs
+        extra_libs = ",".join(self.extra_libs)
+        output = r"\usetikzlibrary{"+extra_libs+"}\n"
+        return output+"\\begin{axis}[" + self.get_header_string(self.headers) + "\n]\n"
 
     def set_yscale(self, mode="linear", base=False):
         self.add_header("ymode", mode)
@@ -429,6 +442,32 @@ class Axes(AxesBase):
         #self.inset_id += 1
         return new_axes
 
+    def arrow(self, start, end, color="black", width=None, transform="data"):
+        """
+        Draws an arrow from start to end.
+        - start, end: lists/tuples of (x, y)
+        - relative: True for relative axes coordinates, False for data coordinates
+        """
+        coord_sys = transform_cs[transform]
+
+        options = []
+        if color:
+            options.append(color)
+        if width:
+            # Using pt for line width in TikZ
+            options.append(f"line width={width}pt")
+        options.append(r"-{Latex}")
+        if not ("arrows.meta" in self.extra_libs):
+            self.extra_libs.append("arrows.meta")
+
+        options_str = ",".join(options)
+
+        cmd = ("\\draw[{}] ({}:"+float_format+","+float_format+") -- ({}:"+float_format+","+float_format+");").format(
+            options_str, coord_sys, start[0], start[1], coord_sys, end[0], end[1]
+        )
+
+        self.add_patch(cmd)
+
     def rect_patch(self, pos_vec, rect_vec, relative=False):
         # Prepare the vertices
         vertices = [(pos_vec[0], pos_vec[1])]
@@ -463,10 +502,6 @@ class Axes(AxesBase):
             self.add_header("extra y tick labels", "{}")
 
     def text(self, coord, text, transform="axes"):
-        transform_cs = {
-                "axes" : "rel axis cs",
-                "data" : "axis cs"
-        }
         cs = transform_cs[transform]
         text_buffer = r"\node at ("+cs+":"+",".join(map(lambda x: float_format.format(x), coord))+")"
         text_buffer += " {"+text+"};\n"

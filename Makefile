@@ -56,6 +56,8 @@ GRAPHICSSOURCE += src/compphysutils/graphics/transforms/log.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorator.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/line.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/image.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorate/text.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorate/arrow.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 
 BASESOURCE := src/compphysutils/__init__.py
