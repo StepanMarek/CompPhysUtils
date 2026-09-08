@@ -26,7 +26,8 @@ class Figure():
 
 class Axes():
 
-    def __init__(self):
+    def __init__(self, figure):
+        # Axes are added to the figure in this method
         self.xlim = False
         self.ylim = False
 

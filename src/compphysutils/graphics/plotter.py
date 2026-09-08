@@ -61,8 +61,7 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
         if not backend in backends:
             # Panic - the backend should have been already created
             raise ValueError("Backend "+str(backend)+" not loaded!")
-        axes = backends[backend].Axes()
-        figure.axes.append(axes)
+        axes = backends[backend].Axes(figure)
     if plotType in plotTypes:
         axes = plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     elif plotType in plotModules:

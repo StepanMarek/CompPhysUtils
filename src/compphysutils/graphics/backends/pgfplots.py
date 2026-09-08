@@ -55,8 +55,8 @@ class Figure(FigureBase):
 
 class Axes(AxesBase):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, figure):
+        super().__init__(figure)
         self.buffer = ""
         self.legend_entries = False
         # Primitive headers - key is an identifier of the header, value can be either
@@ -68,6 +68,7 @@ class Axes(AxesBase):
         self.inset_id = 0
         # Loading of extra tikz libs
         self.extra_libs = []
+        figure.axes.append(self)
 
     def add_header(self, header, value=None):
         self.headers[header] = value

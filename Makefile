@@ -34,6 +34,7 @@ GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/Figure.py
 GRAPHICSSOURCE += src/compphysutils/graphics/backends/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/backends/pgfplots.py
+GRAPHICSSOURCE += src/compphysutils/graphics/backends/matplotlib.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/line.py
