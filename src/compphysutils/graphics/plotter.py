@@ -103,6 +103,9 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
     # If requested, move ticks to top
     axes.xticks_swap = plotOptions["xticks-swap"]
     axes.yticks_swap = plotOptions["yticks-swap"]
+    # Legend
+    if "legend" in plotOptions:
+        axes.legend = plotOptions["legend"]
     return axes, figure
 
 def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets={}):

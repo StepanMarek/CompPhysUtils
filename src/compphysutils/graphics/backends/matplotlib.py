@@ -21,11 +21,25 @@ class Axes(AxesBase):
         figure.axes.append(self)
 
     def save(self):
+        # Axis limits
+        if self.xlim:
+            if self.xlim[0] or type(self.xlim[0]) != bool:
+                self._axes.set_xlim(left=self.xlim[0])
+            if self.xlim[1] or type(self.xlim[1]) != bool:
+                self._axes.set_xlim(left=self.xlim[1])
+        if self.ylim:
+            if self.ylim[0] or type(self.ylim[0]) != bool:
+                self._axes.set_ylim(left=self.ylim[0])
+            if self.ylim[1] or type(self.ylim[1]) != bool:
+                self._axes.set_ylim(left=self.ylim[1])
+        # Axis labels
         if self.labels[0]:
             self._axes.set_xlabel(self.labels[0])
         if self.labels[1]:
             self._axes.set_ylabel(self.labels[1])
-        self._axes.legend()
+        # Legend
+        if self.legend:
+             self._axes.legend()
 
     def plot(self, x, y, label=False, color=False, linestyle=False):
         self._axes.plot(x, y, label=label, color=color, linestyle=linestyle)
