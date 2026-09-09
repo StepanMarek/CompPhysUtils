@@ -41,12 +41,12 @@ class Axes(AxesBase):
             if self.xlim[0] or type(self.xlim[0]) != bool:
                 self._axes.set_xlim(left=self.xlim[0])
             if self.xlim[1] or type(self.xlim[1]) != bool:
-                self._axes.set_xlim(left=self.xlim[1])
+                self._axes.set_xlim(right=self.xlim[1])
         if self.ylim:
             if self.ylim[0] or type(self.ylim[0]) != bool:
-                self._axes.set_ylim(left=self.ylim[0])
+                self._axes.set_ylim(bottom=self.ylim[0])
             if self.ylim[1] or type(self.ylim[1]) != bool:
-                self._axes.set_ylim(left=self.ylim[1])
+                self._axes.set_ylim(top=self.ylim[1])
         # Ticks
         # xticks
         if self.xticks:
@@ -109,7 +109,6 @@ class Axes(AxesBase):
             legend_kwargs["ncols"] = int(self.legend_cols)
         if self.legend:
             self._axes.legend(**legend_kwargs)
-        # TODO : Legend cols, legend pos
 
     def set_xscale(self, scale, base=10):
         self._axes.set_xscale(scale, base=base)
