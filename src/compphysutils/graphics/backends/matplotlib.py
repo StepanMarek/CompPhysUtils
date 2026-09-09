@@ -32,6 +32,27 @@ class Axes(AxesBase):
                 self._axes.set_ylim(left=self.ylim[0])
             if self.ylim[1] or type(self.ylim[1]) != bool:
                 self._axes.set_ylim(left=self.ylim[1])
+        # Ticks
+        # xticks
+        if self.xticks:
+            if self.xtick_labels:
+                self._axes.set_xticks(self.xticks, self.xtick_labels)
+            else:
+                self._axes.set_xticks(self.xticks)
+        if self.xticks_swap:
+            self._axes.tick_params(axis="x", top=True, bottom=False, labeltop=True, labelbottom=False)
+        if self.xticks_rotate != 0.0:
+            self._axes.tick_params(axis="x", labelrotation=self.xticks_rotate, labelrotation_mode="xtick")
+        # yticks
+        if self.yticks:
+            if self.ytick_labels:
+                self._axes.set_yticks(self.yticks, self.ytick_labels)
+            else:
+                self._axes.set_yticks(self.yticks)
+        if self.yticks_swap:
+            self._axes.tick_params(axis="y", top=True, bottom=False, labeltop=True, labelbottom=False)
+        if self.yticks_rotate != 0.0:
+            self._axes.tick_params(axis="y", labelrotation=self.yticks_rotate, labelrotation_mode="ytick")
         # Axis labels
         if self.labels[0]:
             self._axes.set_xlabel(self.labels[0])

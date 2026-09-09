@@ -90,7 +90,7 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
     if plotOptions["xticks-rotate"]:
         axes.xticks_rotate = plotOptions["xticks-rotate"]
     if plotOptions["yticks-rotate"]:
-        axes.xticks_rotate = plotOptions["yticks-rotate"]
+        axes.yticks_rotate = plotOptions["yticks-rotate"]
     # TODO : Is it worth allowing for differing axes and figure dimensions?
     if plotOptions["fig-width"]:
         figure.width = plotOptions["fig-width"]
@@ -217,7 +217,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
         elif cfg["plot"].get("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
-        plotOptions[ticksName+"-rotate"] = cfg["plot"].get(ticksName+"-rotate", False)
+        plotOptions[ticksName+"-rotate"] = cfg["plot"].getfloat(ticksName+"-rotate", 0.0)
         # TODO : Implement for pgfplots
         # Line width and length
         plotOptions[ticksName+"-length"] = cfg["plot"].getfloat(ticksName+"-length", 5.0)
