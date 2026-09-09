@@ -10,6 +10,18 @@ class Figure(FigureBase):
         self._figure = matplotlib.figure.Figure()
 
     def save(self, name):
+        # Figure width is governed by width in the first axes
+        # DEBUG : Decide on figure vs. axes width
+        # Inches conversion
+        self._figure.set_figwidth(self.width / 2.54)
+        self._figure.set_figheight(self.height / 2.54)
+        #if len(self.axes) > 0:
+        #    if self.axes[0].width:
+        #        # Value passed must be in inches, stored value in cm
+        #        self._figure.set_figwidth(self.axes[0].width / 2.54)
+        #    if self.axes[0].height:
+        #        # Value passed must be in inches, stored value in cm
+        #        self._figure.set_figheight(self.axes[0].height / 2.54)
         for i in range(len(self.axes)):
             self.axes[i].save()
         self._figure.savefig(name)
@@ -53,7 +65,7 @@ class Axes(AxesBase):
             self._axes.tick_params(axis="y", left=False, right=True, labelleft=False, labelright=True)
         if self.yticks_rotate != 0.0:
             self._axes.tick_params(axis="y", labelrotation=self.yticks_rotate, labelrotation_mode="ytick")
-        # width and height
+        # width and height set in figure
         # Axis labels
         if self.labels[0]:
             self._axes.set_xlabel(self.labels[0])

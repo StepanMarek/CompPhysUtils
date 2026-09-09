@@ -183,8 +183,8 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     # Figure width - for pgfplots set via axis width
     # Units are cm
     # Default aspect ratio is 4/3
-    plotOptions["fig-width"] = cfg["plot"].get("fig-width", 16)
-    plotOptions["fig-height"] = cfg["plot"].get("fig-height", 12)
+    plotOptions["fig-width"] = cfg["plot"].getfloat("fig-width", 16)
+    plotOptions["fig-height"] = cfg["plot"].getfloat("fig-height", 12)
     if not axesGiven:
         # TODO : Should the axis settings be available on a per-axis basis? And exposed to user?
         plotOptions["axes-width"] = plotOptions["fig-width"]
