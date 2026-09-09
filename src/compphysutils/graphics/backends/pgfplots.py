@@ -1,10 +1,26 @@
 from compphysutils.graphics import Figure as FigureBase, Axes as AxesBase
 
 anchor_translator = {
-    "upper" : "north",
-    "lower" : "south",
-    "right" : "east",
-    "left" : "west"
+    "upper left" : "north west",
+    "upper center" : "north",
+    "upper right" : "north east",
+    "center left" : "west",
+    "center" : "base",
+    "center right" : "east",
+    "lower left" : "south west",
+    "lower center" : "south",
+    "lower right" : "south east"
+}
+coord_translator = {
+    "upper left" : (0,1),
+    "upper center" : (0.5,1),
+    "upper right" : (1,1),
+    "center left" : (0,0.5),
+    "center" : (0.5,0.5),
+    "center right" : (1,0.5),
+    "lower left" : (0,0),
+    "lower center" : (0.5,0),
+    "lower right" : (1,0)
 }
 
 float_format="{:12.4E}"
@@ -131,7 +147,32 @@ class Axes(AxesBase):
         # Legend position
         if self.legend and self.legend_pos:
             # TODO: Separate position when provided
-            self.add_header("legend pos", " ".join(map(lambda x: anchor_translator[x], self.legend_pos.split()[0:2])))
+            pos_args = self.legend_pos.split()
+            # First two arguments need to be translated to anchor
+            # If only one argument given
+            anchor = "base"
+            coords = [0.5, 0.5]
+            if len(pos_args) == 1:
+                # Only one option, but run through the translator for completeness
+                anchor = anchor_translator[pos_args[0]]
+            elif len(pos_args) == 2:
+                # Must be description without coordinates
+                basename = " ".join(pos_args) 
+                anchor = anchor_translator[basename]
+                # Depending on the anchor, determine the coords
+                coords = coord_translator[basename]
+            elif len(pos_args) == 3:
+                # Must be center + coords
+                anchor = anchor_translator[pos_args[0]]
+                coords[0] = float(pos_args[1])
+                coords[1] = float(pos_args[2])
+            else:
+                # Full spec
+                anchor = " ".join(pos_args[0:2])
+                anchor = anchor_translator[anchor]
+                coords[0] = float(pos_args[2])
+                coords[1] = float(pos_args[3])
+            self.add_header("legend style", "{at={("+",".join(map(str, coords))+")},anchor="+anchor+"}")
         # Legend columns
         if self.legend and self.legend_cols:
             self.add_header("legend columns", self.legend_cols)

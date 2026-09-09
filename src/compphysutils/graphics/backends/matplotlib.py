@@ -33,6 +33,9 @@ class Axes(AxesBase):
         figure.axes.append(self)
 
     def save(self):
+        """
+        Sets the various axes options
+        """
         # Axis limits
         if self.xlim:
             if self.xlim[0] or type(self.xlim[0]) != bool:
@@ -84,8 +87,27 @@ class Axes(AxesBase):
         if self.labels[1]:
             self._axes.set_ylabel(self.labels[1])
         # Legend
+        legend_kwargs = {}
+        if self.legend_pos:
+            # translate
+            pos_args = self.legend_pos.split()
+            if len(pos_args) == 1:
+                # just forward loc
+                legend_kwargs["loc"] = pos_args[0]
+            elif  len(pos_args) == 2:
+                # just forward loc
+                legend_kwargs["loc"] = " ".join(pos_args)
+            elif len(pos_args) == 3:
+                # Two coords, one loc
+                legend_kwargs["loc"] = pos_args[0]
+                legend_kwargs["bbox_to_anchor"] = (float(pos_args[1]), float(pos_args[2]))
+            else:
+                # Full spec
+                legend_kwargs["loc"] = " ".join(pos_args[0:2])
+                legend_kwargs["bbox_to_anchor"] = (float(pos_args[2]), float(pos_args[3]))
         if self.legend:
-             self._axes.legend()
+            self._axes.legend(**legend_kwargs)
+        # TODO : Legend cols, legend pos
 
     def set_xscale(self, scale, base=10):
         self._axes.set_xscale(scale, base=base)
