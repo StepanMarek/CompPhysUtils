@@ -147,6 +147,9 @@ class Axes(AxesBase):
         if self.yticks:
             # TODO : Tick pos float formatting?
             self.add_header("ytick", "{"+",".join(map(str, self.yticks))+"}")
+        # axes linewidth
+        if self.axes_linewidth:
+            self.add_header("line width", str(self.axes_linewidth)+"pt")
         # Tick labels
         if self.xtick_labels:
             self.add_header("xticklabels", "{"+",".join(map(str, self.xtick_labels))+"}")

@@ -87,6 +87,9 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
     if plotOptions["yticks"]:
         axes.yticks = plotOptions["yticks"][0]
         axes.ytick_labels = plotOptions["yticks"][1]
+    # If requested, move ticks to top
+    axes.xticks_swap = plotOptions["xticks-swap"]
+    axes.yticks_swap = plotOptions["yticks-swap"]
     if plotOptions["xticks-rotate"]:
         axes.xticks_rotate = plotOptions["xticks-rotate"]
     if plotOptions["yticks-rotate"]:
@@ -100,9 +103,8 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplo
         axes.width = plotOptions["axes-width"]
     if plotOptions["axes-width"]:
         axes.height = plotOptions["axes-height"]
-    # If requested, move ticks to top
-    axes.xticks_swap = plotOptions["xticks-swap"]
-    axes.yticks_swap = plotOptions["yticks-swap"]
+    if plotOptions["axes-linewidth"]:
+        axes.axes_linewidth = plotOptions["axes-linewidth"]
     # Legend
     if "legend" in plotOptions:
         axes.legend = plotOptions["legend"]
@@ -200,7 +202,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     plotOptions["markerstyleCycle"] = LinestyleIterator(plotOptions["markerstyleCycle"])
     plotOptions["xlabel"] = cfg["plot"].get("xlabel", None)
     plotOptions["ylabel"] = cfg["plot"].get("ylabel", None)
-    plotOptions["axis-width"] = cfg["plot"].get("axis-width", 1);
+    plotOptions["axes-linewidth"] = cfg["plot"].get("axes-linewidth", 1);
     plotOptions["figfile"] = cfg["plot"].get("figfile", False)
     # Dataset labels
     plotOptions["datasetLabels"] = cfg["plot"].get("labels", False)
@@ -231,10 +233,6 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
         axes.hide_axes = "both"
-    # Change width of all axes
-    # TODO : Implement for pgfplots
-    # for place in ["top", "bottom", "left", "right"]:
-    #     axes.spines[place].set_linewidth(plotOptions["axis-width"]);
     # TODO : Reimplement fitter as standalone module of compphysutils, backend independent
     # # If fit is present, handle it
     # fitIndex = 0

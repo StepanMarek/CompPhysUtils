@@ -74,6 +74,10 @@ class Axes(AxesBase):
         elif self.hide_axes == "y":
             self._axes.yaxis.set_axis_off()
         # axis scaling handled in separate functions
+        # axes line width
+        if self.axes_linewidth:
+            for spine in ["top", "bottom", "left", "right"]:
+                self._axes.spines[spine].set_linewidth(self.axes_linewidth)
         # Axis labels
         if self.labels[0]:
             self._axes.set_xlabel(self.labels[0])

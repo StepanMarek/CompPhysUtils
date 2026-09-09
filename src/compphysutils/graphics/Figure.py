@@ -53,7 +53,7 @@ class Axes():
         self.yscale = "lin"
 
         # width of the x/y axis
-        self.axes_width = 1.0
+        self.axes_linewidth = 1.0
 
         # Axes labels
         self.labels = [False,False]
