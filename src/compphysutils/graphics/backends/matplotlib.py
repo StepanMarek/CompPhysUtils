@@ -66,6 +66,14 @@ class Axes(AxesBase):
         if self.yticks_rotate != 0.0:
             self._axes.tick_params(axis="y", labelrotation=self.yticks_rotate, labelrotation_mode="ytick")
         # width and height set in figure
+        # Hiding axes
+        if self.hide_axes == "both":
+            self._axes.set_axis_off()
+        elif self.hide_axes == "x":
+            self._axes.xaxis.set_axis_off()
+        elif self.hide_axes == "y":
+            self._axes.yaxis.set_axis_off()
+        # axis scaling handled in separate functions
         # Axis labels
         if self.labels[0]:
             self._axes.set_xlabel(self.labels[0])
@@ -75,9 +83,15 @@ class Axes(AxesBase):
         if self.legend:
              self._axes.legend()
 
+    def set_xscale(self, scale, base=10):
+        self._axes.set_xscale(scale, base=base)
+
+    def set_yscale(self, scale, base=10):
+        self._axes.set_yscale(scale, base=base)
+
     def plot(self, x, y, label=False, color=False, linestyle=False):
         self._axes.plot(x, y, label=label, color=color, linestyle=linestyle)
 
-    def scatter(self, x, y, label=False, color=False, markerstyle=False, linestyle="-"):
+    def scatter(self, x, y, label=False, color=False, markerstyle=False, markersize=1.0, linestyle="-"):
         self._axes.scatter(x, y,
-                           label=label, c=color, marker=markerstyle, linestyle=linestyle)
+                           label=label, c=color, marker=markerstyle, s=markersize, linestyle=linestyle)

@@ -79,7 +79,7 @@ class Axes():
         """
         raise NotImplementedError("Plot not implemented in this backend")
 
-    def scatter(self, x, y, label=False, color=False, markerstyle=False, linestyle=False):
+    def scatter(self, x, y, label=False, color=False, markerstyle=False, linestyle=False, markersize=False):
         """
         Similar to plot, but uses scatter graph instead of the line graph, optionally connects
         the scatter points by a line.

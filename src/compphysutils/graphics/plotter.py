@@ -228,7 +228,6 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     plotOptions["xticks-swap"] = cfg["plot"].get("xticks-swap", False)
     plotOptions["yticks-swap"] = cfg["plot"].get("yticks-swap", False)
     axes, figure = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
-    # TODO : Implement for pgfplots
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
         axes.hide_axes = "both"

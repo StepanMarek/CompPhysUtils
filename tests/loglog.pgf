@@ -1,8 +1,9 @@
 \begin{tikzpicture}
+\usetikzlibrary{}
 \begin{axis}[xmode=log,
-log basis x=10,
+log basis x=3,
 ymode=log,
-log basis y=10,
+log basis y=3,
 width=16cm,
 height=12cm,
 xlabel=$x$,
