@@ -50,9 +50,10 @@ class Axes(AxesBase):
             else:
                 self._axes.set_yticks(self.yticks)
         if self.yticks_swap:
-            self._axes.tick_params(axis="y", top=True, bottom=False, labeltop=True, labelbottom=False)
+            self._axes.tick_params(axis="y", left=False, right=True, labelleft=False, labelright=True)
         if self.yticks_rotate != 0.0:
             self._axes.tick_params(axis="y", labelrotation=self.yticks_rotate, labelrotation_mode="ytick")
+        # width and height
         # Axis labels
         if self.labels[0]:
             self._axes.set_xlabel(self.labels[0])
