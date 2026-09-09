@@ -105,6 +105,8 @@ class Axes(AxesBase):
                 # Full spec
                 legend_kwargs["loc"] = " ".join(pos_args[0:2])
                 legend_kwargs["bbox_to_anchor"] = (float(pos_args[2]), float(pos_args[3]))
+        if self.legend_cols:
+            legend_kwargs["ncols"] = int(self.legend_cols)
         if self.legend:
             self._axes.legend(**legend_kwargs)
         # TODO : Legend cols, legend pos

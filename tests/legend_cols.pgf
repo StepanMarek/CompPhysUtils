@@ -1,0 +1,31 @@
+\begin{tikzpicture}
+\usetikzlibrary{}
+\begin{axis}[width=16cm,
+height=12cm,
+xlabel=$x$,
+ylabel=$y$,
+legend style={at={(0.95,0.95)},anchor=north east},
+legend columns=2,
+line width=1pt
+]
+\addplot[sharp plot,
+solid,
+red
+] coordinates {
+(  1.0000E+00,  2.0000E+00)
+(  2.0000E+00,  4.0000E+00)
+(  3.0000E+00,  8.0000E+00)
+(  4.0000E+00,  1.6000E+01)
+};
+\addlegendentry{$2^x$}\addplot[sharp plot,
+solid,
+red,
+green
+] coordinates {
+(  1.0000E+00,  1.0000E+00)
+(  2.0000E+00,  4.0000E+00)
+(  3.0000E+00,  9.0000E+00)
+(  4.0000E+00,  1.6000E+01)
+};
+\addlegendentry{$x^2$}\end{axis}
+\end{tikzpicture}

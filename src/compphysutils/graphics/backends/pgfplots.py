@@ -12,15 +12,15 @@ anchor_translator = {
     "lower right" : "south east"
 }
 coord_translator = {
-    "upper left" : (0,1),
-    "upper center" : (0.5,1),
-    "upper right" : (1,1),
-    "center left" : (0,0.5),
+    "upper left" : (0.05,0.95),
+    "upper center" : (0.5,0.95),
+    "upper right" : (0.95,0.95),
+    "center left" : (0.05,0.5),
     "center" : (0.5,0.5),
-    "center right" : (1,0.5),
-    "lower left" : (0,0),
-    "lower center" : (0.5,0),
-    "lower right" : (1,0)
+    "center right" : (0.95,0.5),
+    "lower left" : (0.05,0.05),
+    "lower center" : (0.5,0.05),
+    "lower right" : (0.95,0.05)
 }
 
 float_format="{:12.4E}"

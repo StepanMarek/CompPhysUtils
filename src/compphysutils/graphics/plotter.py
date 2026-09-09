@@ -166,7 +166,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     plotOptions["plotArgString"] = graphTypeSplit[1:]
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
     plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "upper right")
-    plotOptions["legend-cols"] = list(map(int, cfg["plot"].get("legend-cols", "1").split("\n")))
+    plotOptions["legend-cols"] = cfg["plot"].getint("legend-cols", 1)
     if "xlim" in cfg["plot"]:
         plotOptions["xlim"] = list(map(float, cfg["plot"].get("xlim").split()))
     else:
@@ -328,48 +328,9 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
                 decorations[decorationSplit[0]] = decorationModules[decorationSplit[0]]["module"].command
                 decorationModules[decorationSplit[0]]["loaded"] = True
             axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
-    # TODO : Check that the legend is implemented correctly already on the Figure level
-    # # Move the legend render here, even after decorations (which can also be annotated)
+    # Legend options -- TODO : check whether here is good
     axes.legend_pos = plotOptions["legend-pos"]
-    # if plotOptions["legend"]:
-    #     if len(plotOptions["legend-pos"]) == 1:
-    #         # Apply the same location and number of columns for each legend
-    #         legendArgs = plotOptions["legend-pos"][0].split()
-    #         if len(legendArgs) == 4:
-    #             axes.legend(loc=" ".join(legendArgs[:-2]), ncol=plotOptions["legend-cols"][0], bbox_to_anchor=tuple(map(float, legendArgs[-2:])))
-    #         else:
-    #             axes.legend(loc=plotOptions["legend-pos"][0], ncol=plotOptions["legend-cols"][0])
-    #     else:
-    #         # Split the legend - now need that the number of lines and legend entries are the same
-    #         handles, labels = axes.get_legend_handles_labels()
-    #         # First, organize line handles into list with the same positions - use dictionary
-    #         legendsOrganized = {}
-    #         currentLocation = 0
-    #         for i in range(len(handles)):
-    #             if plotOptions["legend-pos"][i] in legendsOrganized:
-    #                 legendsOrganized[plotOptions["legend-pos"][i]]["handles"].append(handles[i])
-    #             else:
-    #                 # Create new descriptor object
-    #                 legendsOrganized[plotOptions["legend-pos"][i]] = {}
-    #                 legendsOrganized[plotOptions["legend-pos"][i]]["handles"] = [handles[i]]
-    #                 if currentLocation < len(plotOptions["legend-cols"]):
-    #                     legendsOrganized[plotOptions["legend-pos"][i]]["cols"] = plotOptions["legend-cols"][currentLocation]
-    #                     currentLocation += 1
-    #                 else:
-    #                     legendsOrganized[plotOptions["legend-pos"][i]]["cols"] = 1
-    #         legendArtists = []
-    #         for legendLoc in legendsOrganized:
-    #             if len(legendLoc.split()) <= 2:
-    #                 # Only loc is provided
-    #                 legendArtists.append(axes.legend(handles=legendsOrganized[legendLoc]["handles"], loc=legendLoc, ncol=legendsOrganized[legendLoc]["cols"]))
-    #             else:
-    #                 # Loc and bbox are provided
-    #                 legendLocOnly = " ".join(legendLoc.split()[:-2])
-    #                 legendBBOXOnly = tuple(map(float, legendLoc.split()[-2:]))
-    #                 legendArtists.append(axes.legend(handles=legendsOrganized[legendLoc]["handles"], loc=legendLocOnly, bbox_to_anchor=legendBBOXOnly, ncol=legendsOrganized[legendLoc]["cols"]))
-    #         # Finally, add overwritten artists back to the axes
-    #         for i in range(len(legendArtists)-1):
-    #             axes.add_artist(legendArtists[i])
+    axes.legend_cols = plotOptions["legend-cols"]
 
     # If an inset directive is present, add an inset to the current axes
     if cfg["plot"].get("inset", False):
