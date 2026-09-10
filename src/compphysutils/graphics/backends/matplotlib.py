@@ -122,3 +122,13 @@ class Axes(AxesBase):
     def scatter(self, x, y, label=False, color=False, markerstyle=False, markersize=1.0, linestyle="-"):
         self._axes.scatter(x, y,
                            label=label, c=color, marker=markerstyle, s=markersize, linestyle=linestyle)
+
+    def errorbar(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False, label=False, color=False, markerstyle=False, linestyle=False,
+                 elinewidth=2, capsize=4, linewidth=0):
+        # TODO : Asymmetric errorbars
+        linestyle = linestyle if linestyle else None
+        markerstyle = markerstyle if markerstyle else None
+        color = color if color else None
+        label = label if label else None
+        self._axes.errorbar(x, y, xerr, yerr, color=color, linestyle=linestyle, marker=markerstyle, label=label,
+                            elinewidth=elinewidth, capsize=capsize, linewidth=linewidth)

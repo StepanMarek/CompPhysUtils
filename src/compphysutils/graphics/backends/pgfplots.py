@@ -223,7 +223,7 @@ class Axes(AxesBase):
         if base:
             self.add_header("log basis x", str(base))
 
-    def generic_plot_headers(self, linestyle=False, color=False, markerstyle=False):
+    def generic_plot_headers(self, linestyle=False, color=False, markerstyle=False, linewidth=False):
         # TODO : Typechecks?
         if linestyle:
             self.add_plot_header(linestyle)
@@ -231,6 +231,8 @@ class Axes(AxesBase):
             self.add_plot_header(color)
         if markerstyle:
             self.add_plot_header("mark", markerstyle)
+        if not (type(linewidth) == bool and (not linewidth)):
+            self.add_plot_header("line width", str(linewidth)+"pt")
         return "\\addplot[" + self.get_header_string(self.plot_headers) + "\n] coordinates {\n"
 
     def plotheader(self, linestyle=False, color=False, markerstyle=False):
@@ -243,32 +245,36 @@ class Axes(AxesBase):
     def axesfooter(self):
         return "\\end{axis}\n"
 
-    def errorbarheader(self, color=False, markerstyle=False, linestyle=False):
-        if linestyle:
+    def errorbarheader(self, color=False, markerstyle=False, linestyle=False, elinewidth=False, capsize=False, linewidth=0):
+        if linestyle or linewidth:
             self.add_plot_header("sharp plot")
         else:
             self.add_plot_header("only marks")
+            # In this case, set line width to default line width, for good rendering of line-markers
+            linewidth=1
+        # Due to peculiar syntax, generic headers must be placed before error bar headers
+        if linestyle:
+            self.add_plot_header(linestyle)
+        if color:
+            self.add_plot_header(color)
+        if markerstyle:
+            self.add_plot_header("mark", markerstyle)
+        if not (type(linewidth) == bool and (not linewidth)):
+            self.add_plot_header("line width", str(linewidth)+"pt")
         self.add_plot_header("error bars/.cd")
-        # TODO : More sophisticated error settings?
         self.add_plot_header("y dir", "both")
         self.add_plot_header("y explicit")
         self.add_plot_header("x dir", "both")
         self.add_plot_header("x explicit")
-        return self.generic_plot_headers(linestyle=linestyle, color=color, markerstyle=markerstyle)
-        # val = "\\addplot["
-        # if linestyle:
-        #     val += "sharp plot"
-        # else:
-        #     val += "only marks"
-        # if color:
-        #     val += ","+color
-        # if markerstyle:
-        #     val += ",mark="+markerstyle
-        # val += ",error bars/.cd"
-        # # TODO : More sophisticated error settings?
-        # val += ",y dir=both,y explicit,x dir=both,x explicit"
-        # val += "] coordinates {\n"
-        # return val
+        if not (type(elinewidth) == bool and (not elinewidth)):
+            self.add_plot_header("error bar style", "{line width="+str(elinewidth)+"pt}")
+        if not (type(capsize) == bool and (not capsize)):
+            # Has to include default rotation
+            opts = ["rotate=90", "mark size="+str(capsize)]
+            if not (type(elinewidth) == bool and (not elinewidth)):
+                opts.append("line width="+str(elinewidth)+"pt")
+            self.add_plot_header("error mark options", "{"+",".join(opts)+"}")
+        return "\\addplot[" + self.get_header_string(self.plot_headers) +"\n] coordinates {\n"
 
     def output_xy(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False):
         val = ""
@@ -329,8 +335,9 @@ class Axes(AxesBase):
         if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}"
 
-    def errorbar(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False, label=False, color=False, markerstyle=False, linestyle=False):
-        self.buffer += self.errorbarheader(color, markerstyle, linestyle)
+    def errorbar(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False, label=False, color=False, markerstyle=False, linestyle=False,
+                 elinewidth=2, capsize=4, linewidth=0):
+        self.buffer += self.errorbarheader(color, markerstyle, linestyle, elinewidth=elinewidth, capsize=capsize, linewidth=linewidth)
         self.buffer += self.output_xy(x, y, xerr=xerr, xmerr=xmerr, yerr=yerr, ymerr=ymerr)
         self.buffer += self.plotfooter()
         if label:

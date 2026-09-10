@@ -86,7 +86,8 @@ class Axes():
         """
         raise NotImplementedError("Scatter not implemented in this backend")
 
-    def errorbar(self, x, y, xerr=False, yerr=False, label=False, color=False, markerstyle=False, linestyle=False):
+    def errorbar(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False, label=False, color=False, markerstyle=False, linestyle=False,
+                 elinewidth=2, capsize=4, linewidth=0):
         """
         Extension of the scatter plot to include (so far) symmetric error bars
         """

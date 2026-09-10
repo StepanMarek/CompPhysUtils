@@ -17,9 +17,9 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
                              xerr=datasets[dataIndex][1],
                              yerr=datasets[dataIndex][3],
                              capsize=4,
-                             lw=args.lineWidth,
+                             linewidth=args.lineWidth,
                              elinewidth=args.elineWidth,
-                             marker=next(plotOptions["markerstyleCycle"]),
+                             markerstyle=next(plotOptions["markerstyleCycle"]),
                              label=datasetLabels[dataIndex],
                              color=next(plotOptions["colorCycle"]))
         else:
@@ -29,9 +29,9 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
                                  datasets[dataIndex][1],
                                  xerr=datasets[dataIndex][2],
                                  capsize=4,
-                                 lw=args.lineWidth,
+                                 linewidth=args.lineWidth,
                                  elinewidth=args.elineWidth,
-                                 marker=next(plotOptions["markerstyleCycle"]),
+                                 markerstyle=next(plotOptions["markerstyleCycle"]),
                                  label=datasetLabels[dataIndex],
                                  color=next(plotOptions["colorCycle"]))
             else:
@@ -39,9 +39,9 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
                                  datasets[dataIndex][1],
                                  yerr=datasets[dataIndex][2],
                                  capsize=4,
-                                 lw=args.lineWidth,
+                                 linewidth=args.lineWidth,
                                  elinewidth=args.elineWidth,
-                                 marker=next(plotOptions["markerstyleCycle"]),
+                                 markerstyle=next(plotOptions["markerstyleCycle"]),
                                  label=datasetLabels[dataIndex],
                                  color=next(plotOptions["colorCycle"]))
     return axisObj
