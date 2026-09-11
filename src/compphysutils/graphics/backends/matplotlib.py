@@ -139,3 +139,15 @@ class Axes(AxesBase):
             "lin" : "linear"
         }
         self._axes.pcolormesh(x, y, c, label=label, cmap=cmap, shading="gouraud", norm=norm_translator[norm], vmin=vmin, vmax=vmax)
+
+    def colorline(self, x, y, c, linestyle="solid", cmap=None, label=None):
+        # Construct a line collection
+        segments = []
+        colors = []
+        for i in range(len(x)-1):
+            segments.append([])
+            segments[-1].append([x[i],y[i]])
+            segments[-1].append([x[i+1],y[i+1]])
+            # Interpolate the color
+            colors.append(0.5 * (c[i] + c[i+1]))
+        self._axes.add_collection(matplotlib.collections.LineCollection(segments, array=colors))
