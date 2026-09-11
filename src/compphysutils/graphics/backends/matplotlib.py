@@ -132,3 +132,10 @@ class Axes(AxesBase):
         label = label if label else None
         self._axes.errorbar(x, y, xerr, yerr, color=color, linestyle=linestyle, marker=markerstyle, label=label,
                             elinewidth=elinewidth, capsize=capsize, linewidth=linewidth)
+
+    def colormap(self, x, y, c, label=None, cmap=None, norm=None, vmin=None, vmax=None):
+        # Use pcolormesh, probably better than imshow, in principle also allows for quadriliterals instead of rectangles
+        norm_translator = {
+            "lin" : "linear"
+        }
+        self._axes.pcolormesh(x, y, c, label=label, cmap=cmap, shading="gouraud", norm=norm_translator[norm], vmin=vmin, vmax=vmax)

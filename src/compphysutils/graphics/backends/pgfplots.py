@@ -343,7 +343,7 @@ class Axes(AxesBase):
         if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}"
 
-    def colormap(self, x, y, c, label=False, cmap=False, vmin=False, vmax=False, norm=False):
+    def colormap(self, x, y, c, label=False, cmap=False, vmin=False, vmax=False, norm=False, refines=0):
         """
         Already created the mesh x y c
         """
@@ -352,7 +352,9 @@ class Axes(AxesBase):
         self.add_plot_header("patch type", "rectangle")
         self.add_plot_header("shader", "interp")
         self.add_plot_header("point meta", "explicit")
+        self.add_plot_header("patch refines", str(refines))
         self.buffer += self.generic_plot_headers()
+        # Assumes already shaped xyc mesh data
         for i in range(len(x)-1):
             for j in range(len(x[0])-1):
                 self.buffer += ("("+float_format+","+float_format+") ["+float_format+"]\n").format(x[i][j],y[i][j],c[i][j])
