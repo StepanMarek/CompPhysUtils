@@ -28,12 +28,19 @@ class Figure(FigureBase):
 
 class Axes(AxesBase):
 
-    def __init__(self, figure):
+    def __init__(self, figure=False, axes_obj=False):
         super().__init__(figure)
-        self._axes = figure._figure.add_subplot(1,1,1)
+        if not axes_obj:
+            if not figure:
+                raise ValueError("Need to pass axis object or figure to Axes with matplotlib backend")
+            else:
+                self._axes = figure._figure.add_subplot(1,1,1)
+        else:
+            self._axes = axes_obj
         # Cumulative for labels -- to disable legend warnings
         self.legend_labels = False
-        figure.axes.append(self)
+        if figure:
+            figure.axes.append(self)
 
     def save(self):
         """
@@ -173,3 +180,8 @@ class Axes(AxesBase):
     def fill_between(self, x, low, high, color=None, label=None):
         self._axes.fill_between(x, high, low, color=color, label=label)
         self.legend_labels = self.legend_labels or bool(label)
+
+    def inset_axes(self, x, y, width, height):
+        new_axes_obj = self._axes.inset_axes([x,y,width,height])
+        new_axes = Axes(axes_obj=new_axes_obj)
+        return new_axes

@@ -71,7 +71,7 @@ class Figure(FigureBase):
 
 class Axes(AxesBase):
 
-    def __init__(self, figure):
+    def __init__(self, figure=False):
         super().__init__(figure)
         self.buffer = ""
         self.legend_entries = False
@@ -84,7 +84,8 @@ class Axes(AxesBase):
         self.inset_id = 0
         # Loading of extra tikz libs
         self.extra_libs = []
-        figure.axes.append(self)
+        if figure:
+            figure.axes.append(self)
 
     def add_header(self, header, value=None):
         self.headers[header] = value
