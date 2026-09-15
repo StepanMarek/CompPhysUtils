@@ -99,6 +99,12 @@ class Axes():
         """
         raise NotImplementedError("Colormap not implemented in this backend")
 
+    def colorline(self, x, y, c, linestyle="solid", cmap=False, label=False):
+        """
+        Plots 3d data by adding color data to the line plot
+        """
+        raise NotImplementedError("Colorline not implemented in this backend")
+
     def level(self, xs, lineoffset=0, linelength=1.0, orientation="vertical", label=False, color=False, linestyle=False):
         """
         One-dimensional data, visualised by stacked lines
@@ -116,12 +122,6 @@ class Axes():
         Fills the area between two lines, with coordinates given by x and values by low and high
         """
         raise NotImplementedError("Fill between not implemented in this backend")
-
-    def colorline(self, x, y, c, linestyle="solid", cmap=False, label=False):
-        """
-        Plots 3d data by adding color data to the line plot
-        """
-        raise NotImplementedError("Colorline not implemented in this backend")
 
     def inset_axes(self, x, y, width, height):
         """

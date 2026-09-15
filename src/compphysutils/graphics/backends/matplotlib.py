@@ -169,3 +169,7 @@ class Axes(AxesBase):
         # TODO : uv vs xy angles?
         self._axes.quiver(x, y, u, v, label=label, color=color, angles="xy", scale_units="xy", scale=1)
         self.legend_labels = self.legend_labels or bool(label)
+
+    def fill_between(self, x, low, high, color=None, label=None):
+        self._axes.fill_between(x, high, low, color=color, label=label)
+        self.legend_labels = self.legend_labels or bool(label)

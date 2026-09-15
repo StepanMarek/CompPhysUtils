@@ -1,10 +1,12 @@
 \begin{tikzpicture}
+\usetikzlibrary{}
 \begin{axis}[width=16cm,
 height=12cm,
 xlabel=$c$,
 ylabel=$y$,
-legend pos=north east,
-legend columns=1
+legend style={at={(0.95,0.95)},anchor=north east},
+legend columns=1,
+line width=1pt
 ]
 \addplot[name path=fill_between_lower,
 sharp plot,

@@ -437,7 +437,9 @@ class Axes(AxesBase):
         if not fill_color:
             fill_color = "gray"
         self.buffer += "\\addplot[" + fill_color + "] fill between [of=fill_between_lower and fill_between_upper];\n"
-        self.buffer += "\\addlegendentry{"+str(label)+"}\n"
+        print(label)
+        if label:
+            self.buffer += "\\addlegendentry{"+str(label)+"}\n"
 
     def colorline(self, x, y, c, linestyle="solid", cmap=False, label=False):
         # Header for colorbar -- TODO : Move to separate axes API
