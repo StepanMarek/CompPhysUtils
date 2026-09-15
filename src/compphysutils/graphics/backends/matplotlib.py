@@ -185,3 +185,13 @@ class Axes(AxesBase):
         new_axes_obj = self._axes.inset_axes([x,y,width,height])
         new_axes = Axes(axes_obj=new_axes_obj)
         return new_axes
+
+    def twinx(self):
+        new_axes_obj = self._axes.twinx()
+        new_axes = Axes(axes_obj=new_axes_obj)
+        return new_axes
+
+    def twiny(self):
+        new_axes_obj = self._axes.twiny()
+        new_axes = Axes(axes_obj=new_axes_obj)
+        return new_axes

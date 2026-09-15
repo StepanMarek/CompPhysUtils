@@ -497,6 +497,7 @@ class Axes(AxesBase):
         new_axes.add_header("axis y line", "right")
         new_axes.add_header("y axis line style", "{-}")
         new_axes.add_header("ytick align", "inside")
+        # TODO : Handle the case when ylim not explicitly set
         new_axes.xlim = self.xlim
         self.add_header("axis y line", "left")
         self.add_header("y axis line style", "{-}")
@@ -519,6 +520,7 @@ class Axes(AxesBase):
         new_axes.add_header("axis x line", "top")
         new_axes.add_header("x axis line style", "{-}")
         new_axes.add_header("xtick align", "inside")
+        # TODO : Handle the case when ylim not explicitly set
         new_axes.ylim = self.ylim
         self.add_header("axis x line", "bottom")
         self.add_header("x axis line style", "{-}")
