@@ -370,18 +370,23 @@ class Axes(AxesBase):
         drawfinal = self.generic_plot_headers(linestyle=linestyle, color=color)
         self.add_plot_header("forget plot")
         drawcommand = self.generic_plot_headers(linestyle=linestyle, color=color)
-        # TODO : Vertical vs horizontal
         for ix in range(len(xs)-1):
-            self.buffer += drawcommand + self.output_xy([lineoffset-linelength/2,lineoffset+linelength/2], [xs[ix], xs[ix]])
+            line = [[lineoffset-linelength/2,lineoffset+linelength/2], [xs[ix], xs[ix]]]
+            if orientation == "horizontal":
+                line.reverse()
+            self.buffer += drawcommand + self.output_xy(*line)
             self.buffer += "};\n"
         if len(xs) > 0:
             # Only adding the legend to the last plot
+            line = [[lineoffset-linelength/2,lineoffset+linelength/2], [xs[-1], xs[-1]]]
+            if orientation == "horizontal":
+                line.reverse()
             if label:
-                self.buffer += drawfinal + self.output_xy([lineoffset-linelength/2,lineoffset+linelength/2], [xs[-1], xs[-1]])
+                self.buffer += drawfinal + self.output_xy(*line)
                 self.buffer += "};\n"
                 self.buffer += "\\addlegendentry{"+str(label)+"}"
             else:
-                self.buffer += drawcommand + self.output_xy([lineoffset-linelength/2,lineoffset+linelength/2], [x[ix], x[ix]])
+                self.buffer += drawcommand + self.output_xy(*line)
                 self.buffer += "};\n"
         # Clear headers
         self.plot_headers = {}

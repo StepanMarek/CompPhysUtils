@@ -160,6 +160,10 @@ class Axes(AxesBase):
         self._axes.add_collection(matplotlib.collections.LineCollection(segments, array=colors))
         # TODO : Labels
 
+    def level(self, xs, lineoffset=0, linelength=1.0, orientation="vertical", label=None, color=None, linestyle=None):
+        eplot = self._axes.eventplot(xs, orientation=orientation, linelengths=linelength, lineoffsets=lineoffset, label=label, color=color, linestyles=linestyle)
+        self.legend_labels = self.legend_labels or bool(label)
+
     def quiver(self, x, y, u, v, label=None, color=None):
         # Call the quiver function
         # TODO : uv vs xy angles?
