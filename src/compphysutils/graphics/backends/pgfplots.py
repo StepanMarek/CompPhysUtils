@@ -392,6 +392,8 @@ class Axes(AxesBase):
         """
         self.add_plot_header("quiver", "{u=\\thisrow{u},\nv=\\thisrow{v}}")
         self.add_plot_header("-stealth")
+        if color:
+            self.add_plot_header(color)
         # TODO : Different headers
         # self.buffer += self.generic_plot_headers(color=color)
         self.buffer +="\\addplot[" + self.get_header_string(self.plot_headers) + "\n] table {\n" 
@@ -400,6 +402,8 @@ class Axes(AxesBase):
             self.buffer += (float_format*4).format(x[i], y[i], u[i], v[i])
             self.buffer += "\n"
         self.buffer += "};\n"
+        if label:
+            self.buffer += r"\addlegendentry{"+str(label)+"}\n"
 
     def fill_between(self, x, low, high, color=False, label=False):
         """

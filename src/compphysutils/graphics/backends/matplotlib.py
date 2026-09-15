@@ -27,9 +27,12 @@ class Figure(FigureBase):
         self._figure.savefig(name)
 
 class Axes(AxesBase):
+
     def __init__(self, figure):
         super().__init__(figure)
         self._axes = figure._figure.add_subplot(1,1,1)
+        # Cumulative for labels -- to disable legend warnings
+        self.legend_labels = False
         figure.axes.append(self)
 
     def save(self):
@@ -107,7 +110,7 @@ class Axes(AxesBase):
                 legend_kwargs["bbox_to_anchor"] = (float(pos_args[2]), float(pos_args[3]))
         if self.legend_cols:
             legend_kwargs["ncols"] = int(self.legend_cols)
-        if self.legend:
+        if self.legend and self.legend_labels:
             self._axes.legend(**legend_kwargs)
 
     def set_xscale(self, scale, base=10):
@@ -118,10 +121,12 @@ class Axes(AxesBase):
 
     def plot(self, x, y, label=False, color=False, linestyle=False):
         self._axes.plot(x, y, label=label, color=color, linestyle=linestyle)
+        self.legend_labels = self.legend_labels or bool(label)
 
     def scatter(self, x, y, label=False, color=False, markerstyle=False, markersize=1.0, linestyle="-"):
         self._axes.scatter(x, y,
                            label=label, c=color, marker=markerstyle, s=markersize, linestyle=linestyle)
+        self.legend_labels = self.legend_labels or bool(label)
 
     def errorbar(self, x, y, xerr=False, xmerr=False, yerr=False, ymerr=False, label=False, color=False, markerstyle=False, linestyle=False,
                  elinewidth=2, capsize=4, linewidth=0):
@@ -132,6 +137,7 @@ class Axes(AxesBase):
         label = label if label else None
         self._axes.errorbar(x, y, xerr, yerr, color=color, linestyle=linestyle, marker=markerstyle, label=label,
                             elinewidth=elinewidth, capsize=capsize, linewidth=linewidth)
+        self.legend_labels = self.legend_labels or bool(label)
 
     def colormap(self, x, y, c, label=None, cmap=None, norm=None, vmin=None, vmax=None):
         # Use pcolormesh, probably better than imshow, in principle also allows for quadriliterals instead of rectangles
@@ -139,6 +145,7 @@ class Axes(AxesBase):
             "lin" : "linear"
         }
         self._axes.pcolormesh(x, y, c, label=label, cmap=cmap, shading="gouraud", norm=norm_translator[norm], vmin=vmin, vmax=vmax)
+        self.legend_labels = self.legend_labels or bool(label)
 
     def colorline(self, x, y, c, linestyle="solid", cmap=None, label=None):
         # Construct a line collection
@@ -151,3 +158,10 @@ class Axes(AxesBase):
             # Interpolate the color
             colors.append(0.5 * (c[i] + c[i+1]))
         self._axes.add_collection(matplotlib.collections.LineCollection(segments, array=colors))
+        # TODO : Labels
+
+    def quiver(self, x, y, u, v, label=None, color=None):
+        # Call the quiver function
+        # TODO : uv vs xy angles?
+        self._axes.quiver(x, y, u, v, label=label, color=color, angles="xy", scale_units="xy", scale=1)
+        self.legend_labels = self.legend_labels or bool(label)
