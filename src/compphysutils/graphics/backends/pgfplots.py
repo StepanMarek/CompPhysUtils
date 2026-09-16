@@ -127,13 +127,13 @@ class Axes(AxesBase):
             #     self.add_header("xlabel style={align="+self.labelPos[0]+"}", self.labels[0])
             # else:
             #     self.add_header("xlabel", self.labels[0])
-            self.add_header("xlabel", self.labels[0])
+            self.add_header("xlabel", "{"+self.labels[0]+"}")
         if self.labels[1]:
             # if self.labelPos[1]:
             #     self.add_header("ylabel style={align="+self.labelPos[1]+"}", self.labels[1])
             # else:
             #     self.add_header("ylabel", self.labels[1])
-            self.add_header("ylabel", self.labels[1])
+            self.add_header("ylabel", "{"+self.labels[1]+"}")
         # Limits
         if self.xlim:
             if self.xlim[0] or type(self.xlim[0]) != bool:
