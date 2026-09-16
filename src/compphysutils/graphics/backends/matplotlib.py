@@ -1,6 +1,11 @@
 from compphysutils.graphics import Figure as FigureBase, Axes as AxesBase
 import matplotlib
 
+annotate_cs = {
+    "data" : "data",
+    "axes" : "axes fraction"
+}
+
 class Figure(FigureBase):
     def __init__(self):
         super().__init__()
@@ -197,10 +202,6 @@ class Axes(AxesBase):
         return new_axes
 
     def arrow(self, start=(0.0,0.0), end=(0.0,0.0), transform="data", linestyle="solid", width=1, color="black"):
-        annotate_cs = {
-            "data" : "data",
-            "axes" : "axes fraction"
-        }
         self._axes.annotate("", xy=end, xytext=start, xycoords=annotate_cs[transform], textcoords=annotate_cs[transform],
                             arrowprops={"width" : width, "color" : color, "linestyle" : linestyle})
 
@@ -209,3 +210,6 @@ class Axes(AxesBase):
             self._axes.axvline(coord, color=color, linestyle=style)
         else:
             self._axes.axhline(coord, color=color, linestyle=style)
+
+    def text(self, coord, text, transform="axes"):
+        self._axes.annotate(text, xy=coord, xycoords=annotate_cs[transform])
