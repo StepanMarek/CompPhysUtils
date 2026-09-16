@@ -213,3 +213,14 @@ class Axes(AxesBase):
 
     def text(self, coord, text, transform="axes"):
         self._axes.annotate(text, xy=coord, xycoords=annotate_cs[transform])
+
+    def rect_patch(self, pos_vec, rect_vec, relative=False):
+        transform=self._axes.transData
+        if relative:
+            transform=self._axes.transAxes
+        rect = matplotlib.patches.Rectangle(xy=pos_vec, width=rect_vec[0], height=rect_vec[1], transform=transform,
+                                            edgecolor="black", fill=False)
+        return rect
+
+    def add_patch(self, patch):
+        self._axes.add_patch(patch)

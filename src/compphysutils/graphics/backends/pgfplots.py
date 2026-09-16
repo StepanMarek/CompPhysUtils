@@ -438,7 +438,6 @@ class Axes(AxesBase):
         if not fill_color:
             fill_color = "gray"
         self.buffer += "\\addplot[" + fill_color + "] fill between [of=fill_between_lower and fill_between_upper];\n"
-        print(label)
         if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}\n"
 
