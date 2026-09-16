@@ -203,3 +203,9 @@ class Axes(AxesBase):
         }
         self._axes.annotate("", xy=end, xytext=start, xycoords=annotate_cs[transform], textcoords=annotate_cs[transform],
                             arrowprops={"width" : width, "color" : color, "linestyle" : linestyle})
+
+    def axline(self, coord, vert=False, color="black", style="solid"):
+        if vert:
+            self._axes.axvline(coord, color=color, linestyle=style)
+        else:
+            self._axes.axhline(coord, color=color, linestyle=style)
