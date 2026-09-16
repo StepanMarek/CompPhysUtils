@@ -1,0 +1,17 @@
+\begin{tikzpicture}
+\begin{axis}[width=16cm,
+height=12cm,
+legend pos=north east,
+legend columns=1
+]
+\addplot[quiver={u=\thisrow{u},
+v=\thisrow{v}},
+-stealth
+] table {
+x y u v
+  1.0000E+00  0.0000E+00  1.0000E+00  0.0000E+00
+  0.0000E+00  1.0000E+00  0.0000E+00  1.0000E+00
+  1.0000E+00  1.0000E+00  1.0000E+00  1.0000E+00
+};
+\end{axis}
+\end{tikzpicture}

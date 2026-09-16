@@ -10,8 +10,8 @@ def plot(datasets, axisObj, datasetLabels=False, **plotOptions):
     args = ap.parse_args(plotOptions["plotArgString"])
     for dataIndex in range(len(datasets)):
         if len(datasets[dataIndex]) == 3:
-            axisObj.fill_between(datasets[dataIndex][0], datasets[dataIndex][1], datasets[dataIndex][2], color=next(plotOptions["colorCycle"]))
+            axisObj.fill_between(datasets[dataIndex][0], datasets[dataIndex][1], datasets[dataIndex][2], color=next(plotOptions["colorCycle"]), label=datasetLabels[dataIndex])
         else:
             # Fill between given value
-            axisObj.fill_between(datasets[dataIndex][0], args.fillBound, datasets[dataIndex][1], color=next(plotOptions["colorCycle"]))
+            axisObj.fill_between(datasets[dataIndex][0], args.fillBound, datasets[dataIndex][1], color=next(plotOptions["colorCycle"]), label=datasetLabels[dataIndex])
     return axisObj

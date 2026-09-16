@@ -1,0 +1,25 @@
+\begin{tikzpicture}
+\usetikzlibrary{}
+\begin{axis}[width=16cm,
+height=12cm,
+line width=1pt
+]
+\addplot[only marks,
+red,
+mark=x,
+line width=1pt,
+error bars/.cd,
+y dir=both,
+y explicit,
+x dir=both,
+x explicit,
+error bar style={line width=1.0pt},
+error mark options={rotate=90,mark size=4,line width=1.0pt}
+] coordinates {
+(  1.0000E+00,  0.0000E+00) +- (  2.0000E-01,  1.0000E-01)
+(  2.0000E+00,  1.0000E+00) +- (  1.0000E-01,  1.0000E-01)
+(  3.0000E+00,  0.0000E+00) +- (  1.0000E-01,  1.0000E-01)
+(  4.0000E+00, -3.0000E+00) +- (  2.0000E-01,  3.0000E-01)
+};
+\end{axis}
+\end{tikzpicture}

@@ -7,9 +7,9 @@ AP.add_argument("text", nargs="*", help="Text to be added at given coordinates."
 
 def command(axes, datasets, argString):
     args = AP.parse_args(argString)
-    # Draw the text
+    transform = "data"
     if args.axes:
-        axes.text(args.coords[0], args.coords[1], " ".join(args.text), transform=axes.transAxes)
-    else:
-        axes.text(args.coords[0], args.coords[1], " ".join(args.text))
+        transform = "axes"
+    # Draw the text
+    axes.text(args.coords, " ".join(args.text), transform=transform)
     return axes, datasets

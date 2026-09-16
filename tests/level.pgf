@@ -1,0 +1,64 @@
+\begin{tikzpicture}
+\usetikzlibrary{}
+\begin{axis}[width=16cm,
+height=12cm,
+legend style={at={(0.95,0.95)},anchor=north east},
+legend columns=1,
+line width=1pt
+]
+\addplot[solid,
+red,
+forget plot
+] coordinates {
+(  1.0000E+00, -5.0000E-01)
+(  1.0000E+00,  5.0000E-01)
+};
+\addplot[solid,
+red,
+forget plot
+] coordinates {
+(  2.0000E+00, -5.0000E-01)
+(  2.0000E+00,  5.0000E-01)
+};
+\addplot[solid,
+red,
+forget plot
+] coordinates {
+(  3.0000E+00, -5.0000E-01)
+(  3.0000E+00,  5.0000E-01)
+};
+\addplot[solid,
+red
+] coordinates {
+(  4.0000E+00, -5.0000E-01)
+(  4.0000E+00,  5.0000E-01)
+};
+\addlegendentry{Linear}\addplot[solid,
+green,
+forget plot
+] coordinates {
+(  5.0000E-01,  1.5000E+00)
+(  5.0000E-01,  2.5000E+00)
+};
+\addplot[solid,
+green,
+forget plot
+] coordinates {
+(  2.0000E+00,  1.5000E+00)
+(  2.0000E+00,  2.5000E+00)
+};
+\addplot[solid,
+green,
+forget plot
+] coordinates {
+(  4.5000E+00,  1.5000E+00)
+(  4.5000E+00,  2.5000E+00)
+};
+\addplot[solid,
+green
+] coordinates {
+(  8.0000E+00,  1.5000E+00)
+(  8.0000E+00,  2.5000E+00)
+};
+\addlegendentry{Quadratic}\end{axis}
+\end{tikzpicture}

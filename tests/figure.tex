@@ -1,0 +1,19 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{multicol}
+\usepackage{pgfplots}
+
+\pgfplotsset{compat=1.18,width=\columnwidth}
+\usepgfplotslibrary{patchplots} % Needed for patch refines
+\usepgfplotslibrary{fillbetween}
+
+\begin{document}
+
+\begin{multicols}{2}
+
+\input{rect_patch.pgf}
+
+\end{multicols}
+
+\end{document}

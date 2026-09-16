@@ -31,6 +31,10 @@ PARSERSOURCE += src/compphysutils/parser/parsers/coord-cub.py
 PARSERSOURCE += src/compphysutils/parser/combine_commands/translate.py
 
 GRAPHICSSOURCE := src/compphysutils/graphics/__init__.py
+GRAPHICSSOURCE += src/compphysutils/graphics/Figure.py
+GRAPHICSSOURCE += src/compphysutils/graphics/backends/__init__.py
+GRAPHICSSOURCE += src/compphysutils/graphics/backends/pgfplots.py
+GRAPHICSSOURCE += src/compphysutils/graphics/backends/matplotlib.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/line.py
@@ -40,6 +44,7 @@ GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/level.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/quiver.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/coord.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/loglog.py
+GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/colormap.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/__init__.py
 GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/linear.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
@@ -52,12 +57,16 @@ GRAPHICSSOURCE += src/compphysutils/graphics/transforms/log.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorator.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/line.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/image.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorate/text.py
+GRAPHICSSOURCE += src/compphysutils/graphics/decorate/arrow.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 
 BASESOURCE := src/compphysutils/__init__.py
+BASESOURCE += src/compphysutils/util.py
 
 install: $(WHEELFILE)
-	pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
+	#pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
+	pip3 install --force-reinstall $(WHEELFILE)
 
 upload-test: $(WHEELFILE)
 	python -m twine upload --repository testpypi $(WHEELFILE) $(TARFILE)

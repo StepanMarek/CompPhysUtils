@@ -1,0 +1,20 @@
+\begin{tikzpicture}
+\usetikzlibrary{}
+\begin{axis}[colorbar,
+colormap name=hot,
+width=16cm,
+height=12cm,
+line width=1pt
+]
+\addplot[point meta=explicit,
+mesh,
+thick
+] coordinates {
+( -2.0000E+00,  4.0000E+00) [  4.0000E+00]
+( -1.0000E+00,  1.0000E+00) [  1.0000E+00]
+(  0.0000E+00,  0.0000E+00) [  0.0000E+00]
+(  1.0000E+00,  1.0000E+00) [  1.0000E+00]
+(  2.0000E+00,  4.0000E+00) [  4.0000E+00]
+};
+\end{axis}
+\end{tikzpicture}

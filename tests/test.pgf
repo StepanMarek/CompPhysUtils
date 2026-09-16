@@ -1,0 +1,19 @@
+\begin{tikzpicture}
+\begin{axis}[,
+legend pos=north west,
+legend columns=2
+]
+\addplot[sharp plot,solid,red,mark=square*] coordinates {
+(1,1)
+(2,4)
+(3,9)
+(4,16)
+};
+\addlegendentry{$x^2$}\addplot[only marks,green,error bars/.cd,y dir=both,y explicit,x dir=both,x explicit] coordinates {
+(1,0) +- (0,0.1)
+(2,1) +- (0,0.2)
+(3,2) +- (0,0.3)
+(4,3) +- (0,0.4)
+};
+\addlegendentry{$x-1$}\end{axis}
+\end{tikzpicture}

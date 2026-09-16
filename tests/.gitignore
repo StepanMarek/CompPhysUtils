@@ -1,0 +1,6 @@
+*.png
+*.pdf
+# Allow pgf files for regression testing - only in the pgfplots backend
+#*.pgf
+*.aux
+*.log
