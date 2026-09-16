@@ -195,3 +195,11 @@ class Axes(AxesBase):
         new_axes_obj = self._axes.twiny()
         new_axes = Axes(axes_obj=new_axes_obj)
         return new_axes
+
+    def arrow(self, start=(0.0,0.0), end=(0.0,0.0), transform="data", linestyle="solid", width=1, color="black"):
+        annotate_cs = {
+            "data" : "data",
+            "axes" : "axes fraction"
+        }
+        self._axes.annotate("", xy=end, xytext=start, xycoords=annotate_cs[transform], textcoords=annotate_cs[transform],
+                            arrowprops={"width" : width, "color" : color, "linestyle" : linestyle})
