@@ -35,3 +35,35 @@ def modcheck(mod, member):
             return val
     # No such member found
     return False
+
+class CyclicIterator:
+    def __init__(self, cycle=[]):
+        self.singleCycle = cycle
+        self.cycleLen = len(cycle)
+        self.currentIndex = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        returnVal = self.singleCycle[self.currentIndex % self.cycleLen]
+        self.currentIndex += 1
+        return returnVal
+
+class ColorIterator(CyclicIterator):
+    def __init__(self, singleCycle="b"):
+        # Change the format if necessary
+        listOfColors = singleCycle.split()
+        for i in range(len(listOfColors)):
+            if listOfColors[i].find(",") >= 0:
+                listOfColors[i] = tuple(map(float, listOfColors[i].split(",")))
+        super().__init__(listOfColors)
+
+class LinestyleIterator(CyclicIterator):
+    def __init__(self, singleCycle="-"):
+        super().__init__(singleCycle.split())
+
+class MarkerstyleIterator(CyclicIterator):
+    def __init__(self, singleCycle="o"):
+        super().__init__(singleCycle.split())
+

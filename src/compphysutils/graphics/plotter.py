@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 from .. import __user_conf_dir
 from ..parser import parseDatasetConfig
 from ..parser import save, writeFile
-from ..util import dynmod
+from ..util import dynmod, ColorIterator, CyclicIterator, LinestyleIterator, MarkerstyleIterator
 import configparser
 from ..parser.combine import runGroupData
-from .fitter import plotFit 
+from ..fitting.fitter import from_config as fit_from_config 
 from .transformer import transforms,transformModules
 from .decorator import decorations,decorationModules
 import importlib
@@ -18,37 +18,6 @@ backends = {}
 # Search for default plot types
 plotModules = dynmod([os.path.dirname(__file__)+"/plot_types", __user_conf_dir+"/plot_types"], [".py"])
 plotTypes = {}
-
-class CyclicIterator:
-    def __init__(self, cycle=[]):
-        self.singleCycle = cycle
-        self.cycleLen = len(cycle)
-        self.currentIndex = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        returnVal = self.singleCycle[self.currentIndex % self.cycleLen]
-        self.currentIndex += 1
-        return returnVal
-
-class ColorIterator(CyclicIterator):
-    def __init__(self, singleCycle="b"):
-        # Change the format if necessary
-        listOfColors = singleCycle.split()
-        for i in range(len(listOfColors)):
-            if listOfColors[i].find(",") >= 0:
-                listOfColors[i] = tuple(map(float, listOfColors[i].split(",")))
-        super().__init__(listOfColors)
-
-class LinestyleIterator(CyclicIterator):
-    def __init__(self, singleCycle="-"):
-        super().__init__(singleCycle.split())
-
-class MarkerstyleIterator(CyclicIterator):
-    def __init__(self, singleCycle="o"):
-        super().__init__(singleCycle.split())
 
 def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplots", **plotOptions):
     if not figure:
@@ -233,89 +202,18 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     # If the axes are hidden, hide them
     if cfg["plot"].get("hide-axes", False):
         axes.hide_axes = "both"
-    # TODO : Reimplement fitter as standalone module of compphysutils, backend independent
-    # # If fit is present, handle it
-    # fitIndex = 0
-    # if cfg["plot"].get("fit", False):
-    #     fitLabels = cfg["plot"].get("fit-labels", False)
-    #     numFits = len(cfg["plot"].get("fit").split("\n"))
-    #     if not fitLabels:
-    #         fitLabels = [False] * numFits
-    #     else:
-    #         fitLabels = fitLabels.split("\n")
-    #     if len(fitLabels) < numFits:
-    #         fitLabels += [False] * (numFits - len(fitLabels))
-    #     prevFitParams = []
-    #     prevFitErrors = []
-    #     fitParamLengths = []
-    #     currFitParams = []
-    #     currFitErrors = []
-    #     fitColorIterator = ColorIterator(cfg["plot"].get("fit-colorCycle", "tab:blue tab:orange tab:green tab:cyan"))
-    #     fitLinestyleIterator = LinestyleIterator(cfg["plot"].get("fit-linestyleCycle", ":"))
-    #     # Ready the ranges for fits - each fit requires a separate range
-    #     fitXMins = [False]*numFits
-    #     fitXMaxs = [False]*numFits
-    #     providedXMins = cfg["plot"].get("fit-xmin", False)
-    #     providedXMaxs = cfg["plot"].get("fit-xmax", False)
-    #     if providedXMins:
-    #         providedXMins = providedXMins.split("\n")
-    #         for i in range(len(providedXMins)):
-    #             fitXMins[i] = float(providedXMins[i])
-    #     if providedXMaxs:
-    #         providedXMaxs = providedXMaxs.split("\n")
-    #         for i in range(len(providedXMaxs)):
-    #             fitXMaxs[i] = float(providedXMaxs[i])
-    #     for allFitArgs in cfg["plot"].get("fit").split("\n"):
-    #         fitArgs = allFitArgs.split()
-    #         # TODO : Fit args?
-    #         currFitParams, currFitErrors = plotFit(
-    #             chosenDatasets[int(fitArgs[1])],
-    #             fitArgs[0],
-    #             axes,
-    #             fitPoints=int(cfg["plot"].get("fit-points", 100)),
-    #             fitLabel=fitLabels[fitIndex],
-    #             showParams=cfg["plot"].getboolean("fit-show-params", True),
-    #             showError=cfg["plot"].getboolean("fit-show-error", True),
-    #             fitColorCycle=fitColorIterator,
-    #             fitLinestyleCycle=fitLinestyleIterator,
-    #             paramsPlacement=cfg["plot"].get("params-placement", False),
-    #             paramsOffset=len(prevFitParams),
-    #             xMin=fitXMins[fitIndex],
-    #             xMax=fitXMaxs[fitIndex],
-    #             dirtyRun=cfg["plot"].getboolean("fit-dirty-run", False),
-    #             fitIndex=fitIndex
-    #             )
-    #         fitIndex += 1
-    #         prevFitParams += list(currFitParams)
-    #         prevFitErrors += list(currFitErrors)
-    #         fitParamLengths.append(len(currFitParams))
-    #     # Save fit params, if required
-    #     fitSaveName = cfg["plot"].get("fit-savepoint", False)
-    #     if fitSaveName:
-    #         fitSaveArgs = fitSaveName.split()
-    #         # No context name nor dataset name, only format and target filename (optional)
-    #         fitFormatName = fitSaveArgs[0]
-    #         fitFileName = "fit.dat"
-    #         fitParserArgs = False
-    #         if len(fitSaveArgs) > 1:
-    #             fitFileName = fitSaveArgs[1]
-    #         if len(fitSaveArgs) > 2:
-    #             fitParserArgs = " ".join(fitSaveArgs[2:])
-    #         # Regularize to dataset - take the first fit as determination
-    #         dataset = []
-    #         for j in range(fitParamLengths[0]):
-    #             dataset.append([])
-    #             # Append for both value and error
-    #             dataset.append([])
-    #         fitNumCols = fitParamLengths[0]
-    #         paramOffset = 0
-    #         for i in range(len(fitParamLengths)):
-    #             for j in range(fitNumCols):
-    #                 dataset[2*j].append(prevFitParams[paramOffset + j])
-    #                 dataset[2*j+1].append(prevFitErrors[paramOffset + j])
-    #             paramOffset += fitParamLengths[i]
-    #         # Dataset regularized, output
-    #         writeFile(fitFileName, fitFormatName, dataset, fitParserArgs)
+
+    # TODO : Is this a good place for fitting?
+    fit_results = fit_from_config(configFileName, datasets)
+    for i in range(len(fit_results)):
+        # TODO : Styles
+        # TODO : Fit param position
+        # TODO : Direct link to axes might not be the best way -- should or should not go through plot()?
+        axes.plot(fit_results[i]["interpolation"][0], fit_results[i]["interpolation"][1],
+                  label=fit_results[i]["label"], color=fit_results[i]["color"], linestyle="dotted")
+        fit_offset = i * 0.04 * len(fit_results[i]["text"].split("\n"))
+        axes.text((0.05, 0.8 - fit_offset), fit_results[i]["text"])
+
     # Handle decorations for main axes
     if cfg["plot"].get("decorate", False):
         decorationCommands = cfg["plot"].get("decorate").split("\n")

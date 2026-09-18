@@ -343,6 +343,8 @@ class Axes(AxesBase):
         self.buffer += self.plotfooter()
         if label:
             self.buffer += "\\addlegendentry{"+str(label)+"}"
+        # Clear headers
+        self.plot_headers = {}
 
     def colormap(self, x, y, c, label=False, cmap=False, vmin=False, vmax=False, norm=False, refines=0):
         """
@@ -589,6 +591,6 @@ class Axes(AxesBase):
 
     def text(self, coord, text, transform="axes"):
         cs = transform_cs[transform]
-        text_buffer = r"\node at ("+cs+":"+",".join(map(lambda x: float_format.format(x), coord))+")"
+        text_buffer = r"\node [anchor=south west] at ("+cs+":"+",".join(map(lambda x: float_format.format(x), coord))+")"
         text_buffer += " {"+text+"};\n"
         self.buffer += text_buffer

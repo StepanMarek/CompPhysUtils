@@ -150,7 +150,7 @@ class Axes(AxesBase):
         markerstyle = markerstyle if markerstyle else None
         color = color if color else None
         label = label if label else None
-        self._axes.errorbar(x, y, xerr, yerr, color=color, linestyle=linestyle, marker=markerstyle, label=label,
+        self._axes.errorbar(x, y, yerr=yerr, xerr=xerr, color=color, linestyle=linestyle, marker=markerstyle, label=label,
                             elinewidth=elinewidth, capsize=capsize, linewidth=linewidth)
         self.legend_labels = self.legend_labels or bool(label)
 

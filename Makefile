@@ -45,8 +45,6 @@ GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/quiver.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/coord.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/loglog.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plot_types/colormap.py
-GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/__init__.py
-GRAPHICSSOURCE += src/compphysutils/graphics/fit_types/linear.py
 GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
 GRAPHICSSOURCE += src/compphysutils/graphics/plotcoords
 GRAPHICSSOURCE += src/compphysutils/graphics/plot3dcoords
@@ -61,6 +59,11 @@ GRAPHICSSOURCE += src/compphysutils/graphics/decorate/text.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/arrow.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 
+FITTINGSOURCE := src/compphysutils/fitting/__init__.py
+FITTINGSOURCE += src/compphysutils/fitting/fitter.py
+FITTINGSOURCE += src/compphysutils/graphics/fit_types/__init__.py
+FITTINGSOURCE += src/compphysutils/graphics/fit_types/linear.py
+
 BASESOURCE := src/compphysutils/__init__.py
 BASESOURCE += src/compphysutils/util.py
 
@@ -74,5 +77,5 @@ upload-test: $(WHEELFILE)
 upload: $(WHEELFILE)
 	python -m twine upload --verbose $(WHEELFILE) $(TARFILE)
 
-$(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE) MANIFEST.in
+$(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE) $(FITTINGSOURCE) MANIFEST.in
 	python -m build
