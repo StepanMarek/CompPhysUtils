@@ -49,7 +49,6 @@ GRAPHICSSOURCE += src/compphysutils/graphics/plotconfig
 GRAPHICSSOURCE += src/compphysutils/graphics/plotcoords
 GRAPHICSSOURCE += src/compphysutils/graphics/plot3dcoords
 GRAPHICSSOURCE += src/compphysutils/graphics/atom_plot.py
-GRAPHICSSOURCE += src/compphysutils/graphics/fitter.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transformer.py
 GRAPHICSSOURCE += src/compphysutils/graphics/transforms/log.py
 GRAPHICSSOURCE += src/compphysutils/graphics/decorator.py
@@ -61,8 +60,8 @@ GRAPHICSSOURCE += src/compphysutils/graphics/decorate/__init__.py
 
 FITTINGSOURCE := src/compphysutils/fitting/__init__.py
 FITTINGSOURCE += src/compphysutils/fitting/fitter.py
-FITTINGSOURCE += src/compphysutils/graphics/fit_types/__init__.py
-FITTINGSOURCE += src/compphysutils/graphics/fit_types/linear.py
+FITTINGSOURCE += src/compphysutils/fitting/fit_types/__init__.py
+FITTINGSOURCE += src/compphysutils/fitting/fit_types/linear.py
 
 BASESOURCE := src/compphysutils/__init__.py
 BASESOURCE += src/compphysutils/util.py

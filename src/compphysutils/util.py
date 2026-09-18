@@ -50,6 +50,9 @@ class CyclicIterator:
         self.currentIndex += 1
         return returnVal
 
+    def reset(self):
+        self.currentIndex = 0
+
 class ColorIterator(CyclicIterator):
     def __init__(self, singleCycle="b"):
         # Change the format if necessary

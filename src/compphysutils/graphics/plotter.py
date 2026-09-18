@@ -15,22 +15,25 @@ import os
 backendModules = dynmod([os.path.dirname(__file__)+"/backends"], [".py"])
 backends = {}
 
+# Names of the backends preferred for given extension
+# TODO : Allow user to overwrite this or not?
+preferred_backends = {
+    ".png" : "matplotlib",
+    ".pdf" : "matplotlib",
+    ".svg" : "matplotlib",
+    ".pgf" : "pgfplots",
+    ".tex" : "pgfplots"
+}
+
 # Search for default plot types
 plotModules = dynmod([os.path.dirname(__file__)+"/plot_types", __user_conf_dir+"/plot_types"], [".py"])
 plotTypes = {}
 
-def plot(datasets, plotType="scatter", axes=False, figure=False, backend="pgfplots", **plotOptions):
+def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
     if not figure:
-        if not backend in backends:
-            # Panic - the backend should have been already created
-            raise ValueError("Backend "+str(backend)+" not loaded!")
-        else:
-            figure = backends[backend].Figure()
+        figure = backends[plotOptions["backend"]].Figure()
     if not axes:
-        if not backend in backends:
-            # Panic - the backend should have been already created
-            raise ValueError("Backend "+str(backend)+" not loaded!")
-        axes = backends[backend].Axes(figure)
+        axes = backends[plotOptions["backend"]].Axes(figure)
     if plotType in plotTypes:
         axes = plotTypes[plotType](datasets, axes, figure=figure, **plotOptions)
     elif plotType in plotModules:
@@ -85,6 +88,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
         axesGiven = True
     cfg = configparser.ConfigParser()
     cfg.read(configFileName)
+    # Run processing up to combine_commands
     datasets.update(runGroupData(cfg, datasets, configFileName))
     # Now, run any transform commands
     if "transform" in cfg["plot"]:
@@ -103,6 +107,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     if "savepoint" in cfg["plot"]:
         save(cfg["plot"].get("savepoint"), "transform", datasets)
     # Now, datasets are complete, and we can read the plot group
+    # Start by processing all options/settings, which do not require us to have a specific backend setup
     # Also include options that are set directly via type - should be reserved for options that are not usable for many plot types
     graphTypeSplit = cfg["plot"].get("type", "scatter").split()
     graphType = graphTypeSplit[0]
@@ -122,16 +127,6 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
             except IndexError:
                 raise IndexError("Cannot create plot for coordinates "+colCoords[i][j]+" "+colCoords[i][j+1])
     plotOptions = {}
-    # Check for backend options, with default TODO : matplotlib
-    plotOptions["backend"] = cfg["plot"].get("backend", "pgfplots")
-    if not plotOptions["backend"] in backends:
-        if plotOptions["backend"] in backendModules:
-            # Try to dynload
-            backendModules[plotOptions["backend"]]["spec"].loader.exec_module(backendModules[plotOptions["backend"]]["module"])
-            backendModules[plotOptions["backend"]]["loaded"] = True
-            backends[plotOptions["backend"]] = backendModules[plotOptions["backend"]]["module"]
-        else:
-            raise ModuleNotFoundError("Backend module "+str(plotOptions["backend"])+" not found!")
     plotOptions["plotArgString"] = graphTypeSplit[1:]
     plotOptions["legend"] = cfg["plot"].getboolean("legend", True)
     plotOptions["legend-pos"] = cfg["plot"].get("legend-pos", "upper right")
@@ -184,9 +179,9 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     # Arguments supplied are the dataset name, convert it to a dataset that is then plotted
     for ticksName in ["xticks", "yticks"]:
         plotOptions[ticksName] = cfg["plot"].get(ticksName, False)
-        if plotOptions[ticksName] and (not cfg["plot"].get("hide-"+ticksName, False)):
+        if plotOptions[ticksName] and (not cfg["plot"].getboolean("hide-"+ticksName, False)):
             plotOptions[ticksName] = datasets[plotOptions[ticksName]]
-        elif cfg["plot"].get("hide-"+ticksName, False):
+        elif cfg["plot"].getboolean("hide-"+ticksName, False):
             plotOptions[ticksName] = [[],[]]
         plotOptions[ticksName+"-rotate"] = cfg["plot"].getfloat(ticksName+"-rotate", 0.0)
         # TODO : Implement for pgfplots
@@ -195,26 +190,12 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
         plotOptions[ticksName+"-width"] = cfg["plot"].getfloat(ticksName+"-width", 1.0)
         plotOptions[ticksName+"-direction"] = cfg["plot"].get(ticksName+"-direction", "out")
         plotOptions[ticksName+"-ratio"] = cfg["plot"].getfloat(ticksName+"-ratio", 0.5)
-    # xticks on top if requested
-    plotOptions["xticks-swap"] = cfg["plot"].get("xticks-swap", False)
-    plotOptions["yticks-swap"] = cfg["plot"].get("yticks-swap", False)
-    axes, figure = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
-    # If the axes are hidden, hide them
-    if cfg["plot"].get("hide-axes", False):
-        axes.hide_axes = "both"
-
-    # TODO : Is this a good place for fitting?
+        # ticks on top/right if requested
+        plotOptions[ticksName+"-swap"] = cfg["plot"].getboolean(ticksName+"-swap", False)
+    # Fitting : Is this a good place for fitting?
     fit_results = fit_from_config(configFileName, datasets)
-    for i in range(len(fit_results)):
-        # TODO : Styles
-        # TODO : Fit param position
-        # TODO : Direct link to axes might not be the best way -- should or should not go through plot()?
-        axes.plot(fit_results[i]["interpolation"][0], fit_results[i]["interpolation"][1],
-                  label=fit_results[i]["label"], color=fit_results[i]["color"], linestyle="dotted")
-        fit_offset = i * 0.04 * len(fit_results[i]["text"].split("\n"))
-        axes.text((0.05, 0.8 - fit_offset), fit_results[i]["text"])
-
-    # Handle decorations for main axes
+    # Prepare decoration commands, but do not execute them yet
+    decorationCommands = []
     if cfg["plot"].get("decorate", False):
         decorationCommands = cfg["plot"].get("decorate").split("\n")
         for decorationArgs in decorationCommands:
@@ -225,52 +206,111 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
                 decorationModules[decorationSplit[0]]["spec"].loader.exec_module(decorationModules[decorationSplit[0]]["module"])
                 decorations[decorationSplit[0]] = decorationModules[decorationSplit[0]]["module"].command
                 decorationModules[decorationSplit[0]]["loaded"] = True
-            axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
-    # Legend options -- TODO : check whether here is good
-    axes.legend_pos = plotOptions["legend-pos"]
-    axes.legend_cols = plotOptions["legend-cols"]
+    # Check for backend options, with default TODO : matplotlib
+    plotOptions["backend"] = cfg["plot"].get("backend", False)
+    config_filebase, _ = os.path.splitext(configFileName)
+    # If figfile is not specified, choose default filename
+    # Since default backend is pgfplots, default filename is *.pgf file
+    if not axesGiven:
+        fig_filenames = cfg["plot"].get("figfile", f"{config_filebase}.pgf").split()
+        if not plotOptions["backend"]:
+            # Try to guess the correct backend for each figfile based on preferred extension
+            backend_types, backend_figfiles = guess_backends(fig_filenames)
+        else:
+            # Explicit backend specification means all figfiles with one backend
+            # TODO : Alternatively, also allow for per-figure backend specification?
+            backend_types = [plotOptions["backend"]]
+            backend_figfiles = [fig_filenames]
+    else:
+        # One given from upper figure
+        backend_types = [backend]
+        backend_figfiles = []
+    for backend_index in range(len(backend_types)):
+        if not axesGiven:
+            # Top level figure -- reset for every backend
+            axes=False
+            figure=False
+            plotOptions["colorCycle"].reset()
+            plotOptions["linestyleCycle"].reset()
+            plotOptions["markerstyleCycle"].reset()
+        plotOptions["backend"] = backend_types[backend_index]
+        if not plotOptions["backend"] in backends:
+            if plotOptions["backend"] in backendModules:
+                # Try to dynload
+                backendModules[plotOptions["backend"]]["spec"].loader.exec_module(backendModules[plotOptions["backend"]]["module"])
+                backendModules[plotOptions["backend"]]["loaded"] = True
+                backends[plotOptions["backend"]] = backendModules[plotOptions["backend"]]["module"]
+            else:
+                raise ModuleNotFoundError("Backend module "+str(plotOptions["backend"])+" not found!")
+        axes, figure = plot(chosenDatasets, graphType, axes=axes, figure=figure, **plotOptions)
+        # If the axes are hidden, hide them
+        if cfg["plot"].get("hide-axes", False):
+            axes.hide_axes = "both"
 
-    # If an inset directive is present, add an inset to the current axes
-    if cfg["plot"].get("inset", False):
-        insetLines = cfg["plot"].get("inset").split("\n")
-        for i in range(len(insetLines)):
-            # Arguments are xpos, ypos, xwidth, ywidth
-            insetArgs = insetLines[i].split()
-            insetAxes = axes.inset_axes(*map(float, insetArgs[1:]))
-            # TODO : May not be needed in matplotlib, but needed in pgfplots
-            figure.axes.append(insetAxes)
-            fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets)
-    if cfg["plot"].get("overlay", False):
-        # Split by any whitespace
-        overlayLines = cfg["plot"].get("overlay").split()
-        for i in range(len(overlayLines)):
-            # Apply a second graph on top of this one
-            # TODO : Do not overwrite the options set up in the first (parent) config
-            fromConfig(overlayLines[i], axes=axes, figure=figure, datasets=datasets)
-    if cfg["plot"].get("twinx", False):
-        # Plot another dataset sharing the same x axis but different y axis
-        # Always, only a single twinx makes sense - provide no arguments
-        twinxAxes = axes.twinx()
-        figure.axes.append(twinxAxes)
-        fromConfig(cfg["plot"].get("twinx"), axes=twinxAxes, figure=figure, datasets=datasets)
-    if cfg["plot"].get("twiny", False):
-        # same as twinx, but for shared y-axis
-        twinyAxes = axes.twiny()
-        figure.axes.append(twinyAxes)
-        fromConfig(cfg["plot"].get("twiny"), axes=twinyAxes, figure=figure, datasets=datasets)
-    # If axes are provided, assume figure is printed somewhere else
-    # TODO : Is this a reasonable assumption?
-    if axesGiven:
-        # This is not a top-level config - just return, do not create figure files
-        return True
-    if plotOptions["figfile"]:
-        # Can output the same figure in different formats
-        for figFileName in plotOptions["figfile"].split():
+        for i in range(len(fit_results)):
+            # TODO : Styles
+            # TODO : Fit param position
+            # TODO : Direct link to axes might not be the best way -- should or should not go through plot()?
+            axes.plot(fit_results[i]["interpolation"][0], fit_results[i]["interpolation"][1],
+                      label=fit_results[i]["label"], color=fit_results[i]["color"], linestyle="dotted")
+            fit_offset = i * 0.04 * len(fit_results[i]["text"].split("\n"))
+            axes.text((0.05, 0.8 - fit_offset), fit_results[i]["text"])
+
+        # Handle decorations for axes
+        for decorationArgs in decorationCommands:
+            decorationSplit = decorationArgs.split()
+            # All commands should be loaded
+            axes, datasets = decorations[decorationSplit[0]](axes, datasets, decorationSplit[1:])
+        # Legend options -- TODO : check whether here is good
+        axes.legend_pos = plotOptions["legend-pos"]
+        axes.legend_cols = plotOptions["legend-cols"]
+
+        # If an inset directive is present, add an inset to the current axes
+        if cfg["plot"].get("inset", False):
+            insetLines = cfg["plot"].get("inset").split("\n")
+            for i in range(len(insetLines)):
+                # Arguments are xpos, ypos, xwidth, ywidth
+                insetArgs = insetLines[i].split()
+                insetAxes = axes.inset_axes(*map(float, insetArgs[1:]))
+                # TODO : May not be needed in matplotlib, but needed in pgfplots
+                figure.axes.append(insetAxes)
+                fromConfig(insetArgs[0], axes=insetAxes, figure=figure, datasets=datasets, backend=plotOptions["backend"])
+        if cfg["plot"].get("overlay", False):
+            # Split by any whitespace
+            overlayLines = cfg["plot"].get("overlay").split()
+            for i in range(len(overlayLines)):
+                # Apply a second graph on top of this one
+                # TODO : Do not overwrite the options set up in the first (parent) config
+                fromConfig(overlayLines[i], axes=axes, figure=figure, datasets=datasets, backend=plotOptions["backend"])
+        if cfg["plot"].get("twinx", False):
+            # Plot another dataset sharing the same x axis but different y axis
+            # Always, only a single twinx makes sense - provide no arguments
+            twinxAxes = axes.twinx()
+            figure.axes.append(twinxAxes)
+            fromConfig(cfg["plot"].get("twinx"), axes=twinxAxes, figure=figure, datasets=datasets, backend=plotOptions["backend"])
+        if cfg["plot"].get("twiny", False):
+            # same as twinx, but for shared y-axis
+            twinyAxes = axes.twiny()
+            figure.axes.append(twinyAxes)
+            fromConfig(cfg["plot"].get("twiny"), axes=twinyAxes, figure=figure, datasets=datasets, backend=plotOptions["backend"])
+        for figFileName in backend_figfiles[backend_index]:
             # TODO : Backend settings in backend implementation?
             # plt.savefig(figFileName, bbox_inches="tight", dpi=int(cfg["plot"].get("dpi", "300")))
             figure.save(figFileName)
-    else:
-        # TODO : Interactive show?
-        # TODO : Default extension in backend?
-        figure.save(configFileName+".graph")
     return figure
+
+def guess_backends(filenames):
+    needed_backends = []
+    figfiles_for_backends = []
+    for filename in filenames:
+        basename, ext = os.path.splitext(filename)
+        if ext in preferred_backends:
+            if not preferred_backends[ext] in needed_backends:
+                needed_backends.append(preferred_backends[ext])
+                figfiles_for_backends.append([filename])
+            else:
+                # Backend already required, find its index
+                figfiles_for_backends[needed_backends.index(preferred_backends[ext])].append(filename)
+        else:
+            raise ValueError("Chosen extension in the figfile {filename} does not have a preferred backend! Please specify.")
+    return needed_backends, figfiles_for_backends
