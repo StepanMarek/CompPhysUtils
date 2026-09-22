@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from .. import __user_conf_dir
 from ..parser import parseDatasetConfig
 from ..parser import save, writeFile

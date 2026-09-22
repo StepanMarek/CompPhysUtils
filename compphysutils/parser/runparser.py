@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
 import argparse
-import sys
 from compphysutils.parser import parseDatasetConfig
 
 ap = argparse.ArgumentParser(description="Runs only the parseDatasetConfig function on a given filenames, can be used mostly for parsing from a single file format to other.")
 ap.add_argument("filenames", metavar="filename", nargs="+", help="Names of the dataset config files.")
 
-args = ap.parse_args()
+def main():
+    args = ap.parse_args()
 
-for filename in args.filenames:
-    parseDatasetConfig(filename)
+    for filename in args.filenames:
+        parseDatasetConfig(filename)
+    return 0
 
-sys.exit(0)
