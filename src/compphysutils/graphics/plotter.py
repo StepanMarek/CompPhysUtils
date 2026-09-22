@@ -224,7 +224,7 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     else:
         # One given from upper figure
         backend_types = [backend]
-        backend_figfiles = []
+        backend_figfiles = [[]]
     for backend_index in range(len(backend_types)):
         if not axesGiven:
             # Top level figure -- reset for every backend
