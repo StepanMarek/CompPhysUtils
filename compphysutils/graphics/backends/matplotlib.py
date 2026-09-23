@@ -1,5 +1,6 @@
 from compphysutils.graphics import Figure as FigureBase, Axes as AxesBase
 import matplotlib
+import matplotlib.figure
 
 annotate_cs = {
     "data" : "data",

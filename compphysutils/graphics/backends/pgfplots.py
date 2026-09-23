@@ -1,4 +1,5 @@
 from compphysutils.graphics import Figure as FigureBase, Axes as AxesBase
+import os
 
 anchor_translator = {
     "upper left" : "north west",
@@ -36,11 +37,27 @@ transform_cs = {
 Standard coord transforms
 """
 
+tex_header = r"""\documentclass{minimal}
+
+\usepackage[utf8]{inputenc}
+\usepackage[paperwidth=20cm,paperheight=16cm,margin=2cm]{geometry}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18,width=\columnwidth}
+\usepgfplotslibrary{patchplots}
+\usepgfplotslibrary{fillbetween}
+
+\begin{document}
+
+"""
+
+
 class Figure(FigureBase):
 
     def __init__(self):
         super().__init__()
         self.allowed_formats.append("pgf")
+        self.allowed_formats.append("tex")
         # TODO - tex format - standalone, compilable tex
         # TODO - pdf format - when pdflatex/other tex engine is present, compile with it?
 
@@ -50,21 +67,31 @@ class Figure(FigureBase):
     def tikzfooter(self):
         return "\\end{tikzpicture}\n"
 
-    def start(self):
-        return self.tikzheader()
+    def start(self, filetype="pgf"):
+        header = ""
+        if filetype == "tex":
+            header = header + tex_header
+        header += self.tikzheader()
+        return header
 
-    def end(self):
-        return self.tikzfooter()
+    def end(self, filetype="pgf"):
+        footer = self.tikzfooter()
+        if filetype == "tex":
+            footer += "\n\\end{document}"
+        return footer
 
     def save(self, name):
-        out = self.start()
+        basename, extension = os.path.splitext(name)
+        if extension[1:] not in self.allowed_formats:
+            raise ValueError("Unknown extension for pgfplots backend")
+        out = self.start(extension[1:])
         for ax in self.axes:
             # TODO : Redo via headers API
             # out += ax.start(width=self.width, height=self.height)
             out += ax.start()
             out += ax.buffer
             out += ax.end()
-        out += self.end()
+        out += self.end(extension[1:])
         # TODO : Lot of checks
         with open(name, "w+") as file:
             file.write(out)
