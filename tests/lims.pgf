@@ -2,8 +2,8 @@
 \usetikzlibrary{}
 \begin{axis}[width=16cm,
 height=12cm,
-xlabel=$x$,
-ylabel=$y$,
+xlabel={$x$},
+ylabel={$y$},
 xmin=1.0,
 xmax=3.0,
 ymin=2.0,

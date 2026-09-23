@@ -56,6 +56,7 @@ GRAPHICSSOURCE += compphysutils/graphics/decorate/line.py
 GRAPHICSSOURCE += compphysutils/graphics/decorate/image.py
 GRAPHICSSOURCE += compphysutils/graphics/decorate/text.py
 GRAPHICSSOURCE += compphysutils/graphics/decorate/arrow.py
+GRAPHICSSOURCE += compphysutils/graphics/decorate/rect.py
 GRAPHICSSOURCE += compphysutils/graphics/decorate/__init__.py
 
 FITTINGSOURCE := compphysutils/fitting/__init__.py
@@ -65,6 +66,8 @@ FITTINGSOURCE += compphysutils/fitting/fit_types/linear.py
 
 BASESOURCE := compphysutils/__init__.py
 BASESOURCE += compphysutils/util.py
+
+.PHONY: install
 
 install: $(WHEELFILE)
 	#pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
@@ -78,3 +81,7 @@ upload: $(WHEELFILE)
 
 $(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE) $(FITTINGSOURCE) MANIFEST.in pyproject.toml
 	python -m build
+
+test: install
+	cd tests/ && python -m unittest
+

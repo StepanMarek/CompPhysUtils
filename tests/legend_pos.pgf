@@ -2,8 +2,8 @@
 \usetikzlibrary{}
 \begin{axis}[width=16cm,
 height=12cm,
-xlabel=$x$,
-ylabel=$y$,
+xlabel={$x$},
+ylabel={$y$},
 legend style={at={(0.8,0.1)},anchor=south},
 legend columns=1,
 line width=1pt

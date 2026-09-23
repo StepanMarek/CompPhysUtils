@@ -2,6 +2,7 @@
 \usetikzlibrary{}
 \begin{axis}[width=16cm,
 height=12cm,
+line width=1pt,
 x tick label style={rotate=45.0},
 y tick label style={rotate=90.0}
 ]

@@ -6,10 +6,9 @@ ymode=log,
 log basis y=3,
 width=16cm,
 height=12cm,
-xlabel=$x$,
-ylabel=$x^3$,
-legend pos=north east,
-legend columns=1
+xlabel={$x$},
+ylabel={$x^3$},
+line width=1pt
 ]
 \addplot[only marks,
 mark size=10,

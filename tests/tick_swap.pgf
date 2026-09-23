@@ -3,7 +3,8 @@
 \begin{axis}[width=16cm,
 height=12cm,
 xticklabel pos=upper,
-yticklabel pos=upper
+yticklabel pos=upper,
+line width=1pt
 ]
 \addplot[sharp plot,
 solid,

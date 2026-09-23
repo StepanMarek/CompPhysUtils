@@ -1,12 +1,14 @@
 \begin{tikzpicture}
+\usetikzlibrary{}
 \begin{axis}[ymode=log,
 log basis y=2,
 width=16cm,
 height=12cm,
-xlabel=$x$,
-ylabel=$y$,
-legend pos=north east,
-legend columns=1
+xlabel={$x$},
+ylabel={$y$},
+legend style={at={(0.95,0.95)},anchor=north east},
+legend columns=1,
+line width=1pt
 ]
 \addplot[sharp plot,
 solid,

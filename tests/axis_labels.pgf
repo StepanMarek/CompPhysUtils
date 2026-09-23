@@ -2,8 +2,9 @@
 \usetikzlibrary{}
 \begin{axis}[width=16cm,
 height=12cm,
-xlabel=$x$,
-ylabel=$x^2$
+xlabel={$x$},
+ylabel={$x^2$},
+line width=1pt
 ]
 \addplot[sharp plot,
 solid,
