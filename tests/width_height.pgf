@@ -1,7 +1,7 @@
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=10.0\columnwidth,
-height=20.0\columnwidth,
+\begin{axis}[width=4.0cm,
+height=3.0cm,
 line width=1pt
 ]
 \addplot[sharp plot,

@@ -130,6 +130,9 @@ class Figure(FigureBase):
             self.width.amount = amount
             if unit:
                 self.width.unit = unit
+            else:
+                # Defaults to cm
+                self.width.unit = "cm"
         else:
             self.width = TeXLength(amount, unit="cm")
 
@@ -138,6 +141,9 @@ class Figure(FigureBase):
             self.height.amount = amount
             if unit:
                 self.height.unit = unit
+            else:
+                # Defaults to cm
+                self.height.unit = "cm"
         else:
             self.height = TeXLength(amount, unit="cm")
 
