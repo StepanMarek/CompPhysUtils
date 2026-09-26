@@ -1,7 +1,7 @@
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=16cm,
-height=12cm,
+\begin{axis}[width=1.0\columnwidth,
+height=0.75\columnwidth,
 xmin=0.0,
 xmax=5.0,
 ymin=0.0,

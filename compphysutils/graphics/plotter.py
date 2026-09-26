@@ -67,13 +67,14 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         axes.yticks_rotate = plotOptions["yticks-rotate"]
     # TODO : Is it worth allowing for differing axes and figure dimensions?
     if plotOptions["fig-width"]:
-        figure.width = plotOptions["fig-width"]
-    if plotOptions["fig-width"]:
-        figure.height = plotOptions["fig-height"]
-    if plotOptions["axes-width"]:
-        axes.width = plotOptions["axes-width"]
-    if plotOptions["axes-width"]:
-        axes.height = plotOptions["axes-height"]
+        figure.set_width(plotOptions["fig-width"])
+    if plotOptions["fig-height"]:
+        figure.set_height(plotOptions["fig-height"])
+    # TODO : This probably does not yet work in matplotlib
+    #if plotOptions["axes-width"]:
+    #    axes.set_width = plotOptions["axes-width"]
+    #if plotOptions["axes-width"]:
+    #    axes.set_height = plotOptions["axes-height"]
     if plotOptions["axes-linewidth"]:
         axes.axes_linewidth = plotOptions["axes-linewidth"]
     # Legend
@@ -145,11 +146,9 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     #     plt.rcParams["font.size"] = int(cfg["plot"].get("font-size", 12))
     # if "mathfont" in cfg["plot"]:
     #     plt.rcParams["mathtext.fontset"] = cfg["plot"].get("mathfont", "cm")
-    # Figure width - for pgfplots set via axis width
-    # Units are cm
-    # Default aspect ratio is 4/3
-    plotOptions["fig-width"] = cfg["plot"].getfloat("fig-width", 16)
-    plotOptions["fig-height"] = cfg["plot"].getfloat("fig-height", 12)
+    # Figure width - the default value is chosen by Figure API, which is set to 16/12
+    plotOptions["fig-width"] = cfg["plot"].getfloat("fig-width", False)
+    plotOptions["fig-height"] = cfg["plot"].getfloat("fig-height", False)
     if not axesGiven:
         # TODO : Should the axis settings be available on a per-axis basis? And exposed to user?
         plotOptions["axes-width"] = plotOptions["fig-width"]

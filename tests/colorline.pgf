@@ -2,8 +2,8 @@
 \usetikzlibrary{}
 \begin{axis}[colorbar,
 colormap name=hot,
-width=16cm,
-height=12cm,
+width=1.0\columnwidth,
+height=0.75\columnwidth,
 line width=1pt
 ]
 \addplot[point meta=explicit,

@@ -1,7 +1,7 @@
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=16cm,
-height=12cm,
+\begin{axis}[width=1.0\columnwidth,
+height=0.75\columnwidth,
 xticklabel pos=upper,
 yticklabel pos=upper,
 line width=1pt

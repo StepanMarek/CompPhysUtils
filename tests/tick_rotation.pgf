@@ -1,7 +1,7 @@
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=16cm,
-height=12cm,
+\begin{axis}[width=1.0\columnwidth,
+height=0.75\columnwidth,
 line width=1pt,
 x tick label style={rotate=45.0},
 y tick label style={rotate=90.0}

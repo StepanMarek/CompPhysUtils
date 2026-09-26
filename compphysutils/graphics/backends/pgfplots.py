@@ -51,6 +51,67 @@ tex_header = r"""\documentclass{minimal}
 
 """
 
+class TeXLength():
+
+    def __init__(self, amount=1.0, unit="\columnwidth"):
+        self.unit = unit
+        self.amount = amount
+
+    def __mul__(self, other):
+        if type(other) == int or type(other) == float:
+            return TeXLength(self.amount * other, self.unit)
+        else:
+            raise TypeError("Multiplication not implemented for TeXLength and {}".format(type(other)))
+
+    def __rmul__(self, other):
+        # Commutative
+        return self * other
+
+    def __add__(self, other):
+        if type(other) == TeXLength:
+            if other.unit == self.unit:
+                return TeXLength(self.amount + other.amount, self.unit)
+            else:
+                raise ValueError("Inconsistent units in TeXLength addition")
+        else:
+            raise TypeError("Addition not implemented for TeXLength and {}".format(type(other)))
+
+    def __radd__(self, other):
+        # Commutative
+        return self + other
+
+    def get_length(self):
+        return str(self.amount)+self.unit
+
+class TeXScaledLength():
+    """
+    Keeps reference to the parent length, so that when the parent length changes, so does this length
+    """
+
+    def __init__(self, target, amount=1.0):
+        if type(target) == TeXLength or type(target) == TeXScaledLength:
+            self.target = target
+            self.amount = amount
+        else:
+            raise TypeError("Target of TeXScaledLength can be only TeXLength")
+
+    def __mul__(self, other):
+        if type(other) == int or type(other) == float:
+            return TeXScaledLength(self.target, other * self.amount)
+        else:
+            raise TypeError("Multiplication not implemented for TeXScaledLength and {}".format(type(other)))
+
+    def __rmul__(self, other):
+        # Commutative
+        return self * other
+
+    def get_length(self, factor=1.0):
+        if type(self.target) == TeXLength:
+            return str(factor * self.amount * self.target.amount)+self.target.unit
+        elif type(self.target) == TeXScaledLength:
+            return self.target.get_length(factor * self.amount)
+        else:
+            raise TypeError("Invalid target {} for TeXScaledLength".format(type(self.target)))
 
 class Figure(FigureBase):
 
@@ -58,8 +119,27 @@ class Figure(FigureBase):
         super().__init__()
         self.allowed_formats.append("pgf")
         self.allowed_formats.append("tex")
-        # TODO - tex format - standalone, compilable tex
+        # Change the default figure size to relative ones
+        # Keeping the 4:3 aspect ratio
+        self.set_width(1.0, "\columnwidth")
+        self.set_height(0.75, "\columnwidth")
         # TODO - pdf format - when pdflatex/other tex engine is present, compile with it?
+
+    def set_width(self, amount, unit=False):
+        if self.width:
+            self.width.amount = amount
+            if unit:
+                self.width.unit = unit
+        else:
+            self.width = TeXLength(amount, unit="cm")
+
+    def set_height(self, amount, unit=False):
+        if self.height:
+            self.height.amount = amount
+            if unit:
+                self.height.unit = unit
+        else:
+            self.height = TeXLength(amount, unit="cm")
 
     def tikzheader(self):
         return "\\begin{tikzpicture}\n"
@@ -86,8 +166,6 @@ class Figure(FigureBase):
             raise ValueError("Unknown extension for pgfplots backend")
         out = self.start(extension[1:])
         for ax in self.axes:
-            # TODO : Redo via headers API
-            # out += ax.start(width=self.width, height=self.height)
             out += ax.start()
             out += ax.buffer
             out += ax.end()
@@ -111,8 +189,13 @@ class Axes(AxesBase):
         self.inset_id = 0
         # Loading of extra tikz libs
         self.extra_libs = []
+        self.parent_axes = False
+        # Width and height relate to figure width and height
         if figure:
+            self.width = TeXScaledLength(figure.width, 1.0)
+            self.height = TeXScaledLength(figure.height, 1.0)
             figure.axes.append(self)
+        # If not given, assume axes will resolve this
 
     def add_header(self, header, value=None):
         self.headers[header] = value
@@ -132,14 +215,8 @@ class Axes(AxesBase):
 
     def axesheader(self):
         # Axes size
-        if type(self.width) == float or type(self.width) == int:
-            self.add_header("width", str(self.width)+"cm")
-        else:
-            self.add_header("width", str(self.width))
-        if type(self.height) == float or type(self.height) == int:
-            self.add_header("height", str(self.height)+"cm")
-        else:
-            self.add_header("height", str(self.height))
+        self.add_header("width", self.width.get_length())
+        self.add_header("height", self.height.get_length())
         # Hide axes
         if self.hide_axes == "both":
             self.add_header("axis lines", "none")
@@ -162,6 +239,7 @@ class Axes(AxesBase):
             #     self.add_header("ylabel", self.labels[1])
             self.add_header("ylabel", "{"+self.labels[1]+"}")
         # Limits
+        # TODO : Fix the limits when parent axis set in twiny/twinx case
         if self.xlim:
             if self.xlim[0] or type(self.xlim[0]) != bool:
                 self.add_header("xmin", self.xlim[0])
@@ -494,20 +572,16 @@ class Axes(AxesBase):
         Create the inset axes object
          - add coordinate reference to this axes
          - add at header to the new axes
+         - width and height are assumed to be relative to parent axes
         """
         new_axes = Axes()
+        new_axes.parent_axes = self
+        new_axes.width = TeXScaledLength(self.width, width)
+        new_axes.height = TeXScaledLength(self.height, height)
+
         self.buffer += "\\coordinate (insetref"+str(self.inset_id)+") at (rel axis cs: "+str(x)+","+str(y)+");\n"
         new_axes.add_header("at", "{(insetref"+str(self.inset_id)+")}")
-        if type(self.width) == float or type(self.width) == int:
-            new_axes.width = self.width*width
-        else:
-            # String description assumed
-            new_axes.width = str(width)+self.width
-        if type(self.height) == float or type(self.height) == int:
-            new_axes.height = self.height*height
-        else:
-            # String description assumed
-            new_axes.height = str(height)+self.height
+
         self.inset_id += 1;
         return new_axes
 
@@ -518,8 +592,8 @@ class Axes(AxesBase):
         new_axes = Axes()
         if "at" in self.headers:
             new_axes.add_header("at", self.headers["at"])
-        new_axes.width = self.width
-        new_axes.height = self.height
+        new_axes.width = TeXScaledLength(self.width)
+        new_axes.height = TeXScaledLength(self.height)
         new_axes.add_header("axis x line", "none")
         new_axes.add_header("yticklabel pos", "right")
         new_axes.add_header("axis y line", "right")
@@ -541,8 +615,8 @@ class Axes(AxesBase):
         new_axes = Axes()
         if "at" in self.headers:
             new_axes.add_header("at", self.headers["at"])
-        new_axes.width = self.width
-        new_axes.height = self.height
+        new_axes.width = TeXScaledLength(self.width)
+        new_axes.height = TeXScaledLength(self.height)
         new_axes.add_header("axis y line", "none")
         new_axes.add_header("xticklabel pos", "upper")
         new_axes.add_header("axis x line", "top")

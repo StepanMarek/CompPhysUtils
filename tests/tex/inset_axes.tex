@@ -1,7 +1,21 @@
+\documentclass{minimal}
+
+\usepackage[utf8]{inputenc}
+\usepackage[paperwidth=20cm,paperheight=16cm,margin=2cm]{geometry}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18,width=\columnwidth}
+\usepgfplotslibrary{patchplots}
+\usepgfplotslibrary{fillbetween}
+
+\begin{document}
+
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=1.0\columnwidth,
-height=0.75\columnwidth,
+	\newlength{\mywidth}
+	\setlength{\mywidth}{\columnwidth}
+\begin{axis}[width=\mywidth,
+	y post scale=0.75,
 legend style={at={(0.95,0.95)},anchor=north east},
 legend columns=1,
 line width=1pt
@@ -19,8 +33,8 @@ red
 \end{axis}
 \usetikzlibrary{}
 \begin{axis}[at={(insetref0)},
-width=0.4\columnwidth,
-height=0.30000000000000004\columnwidth,
+width=\axisdefaultwidth,
+height=\axisdefaultheight,
 legend style={at={(0.95,0.95)},anchor=north east},
 legend columns=1,
 line width=1pt
@@ -36,3 +50,5 @@ red
 };
 \end{axis}
 \end{tikzpicture}
+
+\end{document}
