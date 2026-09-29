@@ -5,7 +5,6 @@ from ..util import dynmod, ColorIterator, CyclicIterator, LinestyleIterator, Mar
 import configparser
 from ..parser.combine import runGroupData
 from ..fitting.fitter import from_config as fit_from_config 
-from .transformer import transforms,transformModules
 from .decorator import decorations,decorationModules
 import importlib
 import os
@@ -90,22 +89,6 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     cfg.read(configFileName)
     # Run processing up to combine_commands
     datasets.update(runGroupData(cfg, datasets, configFileName))
-    # Now, run any transform commands
-    if "transform" in cfg["plot"]:
-        transformCommands = cfg["plot"].get("transform").split("\n")
-        for commandLine in transformCommands:
-            commandSplitLine = commandLine.split()
-            commandName = commandSplitLine[0]
-            if not commandName in transformModules:
-                raise ModuleNotFoundError("Transform module "+commandName+" not found in the search tree!")
-            if not commandName in transforms:
-                # Load
-                transformModules[commandName]["spec"].loader.exec_module(transformModules[commandName]["module"])
-                transforms[commandName] = transformModules[commandName]["module"].command
-                transformModules[commandName]["loaded"] = True
-            datasets = transforms[commandName](datasets, commandSplitLine[1:])
-    if "savepoint" in cfg["plot"]:
-        save(cfg["plot"].get("savepoint"), "transform", datasets)
     # Now, datasets are complete, and we can read the plot group
     # Start by processing all options/settings, which do not require us to have a specific backend setup
     # Also include options that are set directly via type - should be reserved for options that are not usable for many plot types
