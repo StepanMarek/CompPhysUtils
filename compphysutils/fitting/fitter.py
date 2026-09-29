@@ -5,6 +5,7 @@ import importlib
 import os
 import configparser
 from ..util import ColorIterator
+from ..parser import save
 
 from ..util import dynmod
 
@@ -107,6 +108,18 @@ def from_config(configname, datasets):
     if "fit" in cfg:
         # Determine the fit datasets
         fit_dataset_cols = cfg["fit"].get("cols", False)
+        # Determine whether some of the fit parameters should be saved
+        fit_names = cfg["fit"].get("fit_names", False)
+        if fit_names:
+            fit_names = fit_names.split("\n")
+        else:
+            fit_names = []
+        # Determine whether some of the interpolations should be saved
+        interpolation_names = cfg["fit"].get("interpolation_names", False)
+        if interpolation_names:
+            interpolation_names = interpolation_names.split("\n")
+        else:
+            interpolation_names = []
         if type(fit_dataset_cols) != bool:
             # Some datasets
             fit_dataset_cols = fit_dataset_cols.split("\n")
@@ -171,11 +184,15 @@ def from_config(configname, datasets):
                 fit_params["xmin"] = xmins[i]
                 fit_params["xmax"] = xmaxs[i]
                 popt, perr, xmin, xmax = fit_dataset(fit_datasets[i], fit_types[i], **fit_params)
+                if i < len(fit_names):
+                    datasets[fit_names[i]] = [popt, perr]
+                # End the non-graphics part here
                 text = ""
-                for j in range(len(popt)):
-                    text += param_names[fit_types[i]][j] + " : "
-                    text += str(round_significant_figures(popt[j],perr[j],match_order=True))
-                    text += " ± " + str(round_significant_figures(perr[j],1)) + "\n"
+                if fit_params["show_params"]:
+                    for j in range(len(popt)):
+                        text += param_names[fit_types[i]][j] + " : "
+                        text += str(round_significant_figures(popt[j],perr[j],match_order=True))
+                        text += " ± " + str(round_significant_figures(perr[j],1)) + "\n"
                 fit_results.append({
                     "popt" : popt,
                     "perr" : perr,
@@ -184,68 +201,10 @@ def from_config(configname, datasets):
                     "text" : text,
                     "interpolation" : interpolate_fit(fit_types[i], popt, xmin, xmax, npoints[i])
                 })
+                if i < len(interpolation_names):
+                    datasets[interpolation_names[i]] = list(fit_results[-1]["interpolation"])
+        # TODO : Savepoint here
+        savepoint = cfg["fit"].get("savepoint", False)
+        if savepoint:
+            save(savepoint, "fit", datasets)
     return fit_results
-
-
-def plotFit(dataset, fitFunctionName, axisObj, **fitParams):
-    # Behaviour changes depending on the number of columns
-    # TODO : Do other possibilities (i.e. xerr and yerr and no error)
-    # Find the indices for the required coordinates
-    if not fitModules[fitFunctionName]["loaded"]:
-        loadFitType(fitFunctionName)
-    ixMin = 0
-    if fitParams["xMin"]:
-        while fitParams["xMin"] > dataset[0][ixMin]:
-            ixMin += 1
-    ixMax = len(dataset[0])-1
-    if fitParams["xMax"]:
-        while fitParams["xMax"] < dataset[0][ixMax]:
-            ixMax -= 1
-    # Guess the initial params for faster fitting (or succesfull fitting at all)
-    guesses = None
-    if guessFunctions[fitFunctionName]:
-        guesses = guessFunctions[fitFunctionName](dataset[0][ixMin:ixMax+1], dataset[1][ixMin:ixMax+1])
-    if fitParams["dirtyRun"]:
-        popt = guesses
-        perr = guesses
-    else:
-        try:
-            if len(dataset) == 3:
-                popt, pcov = curve_fit(fitFunctions[fitFunctionName], dataset[0][ixMin:ixMax+1], dataset[1][ixMin:ixMax+1], sigma=dataset[2][ixMin:ixMax+1], p0=guesses)
-            else:
-                popt, pcov = curve_fit(fitFunctions[fitFunctionName], dataset[0][ixMin:ixMax+1], dataset[1][ixMin:ixMax+1], p0=guesses)
-        except RuntimeError:
-            raise RuntimeError(f'Did not manage to find params for fit {fitParams["fitIndex"]}')
-        perr = []
-        for i in range(len(pcov)):
-            perr.append(pcov[i][i] ** 0.5)
-    xMin = dataset[0][ixMin]
-    xMax = dataset[0][ixMax]
-    dx = (xMax - xMin) / (fitParams["fitPoints"] - 1)
-    xs = []
-    ys = []
-    for i in range(fitParams["fitPoints"]):
-        xs.append(xMin + dx*i)
-        ys.append(fitFunctions[fitFunctionName](xMin + dx*i, *popt))
-    if fitParams["fitLabel"]:
-        axisObj.plot(xs,ys,label=fitParams["fitLabel"],color=next(fitParams["fitColorCycle"]),ls=next(fitParams["fitLinestyleCycle"]))
-    else:
-        axisObj.plot(xs,ys,color=next(fitParams["fitColorCycle"]),ls=next(fitParams["fitLinestyleCycle"]))
-    # Construct the param string
-    if fitParams["showParams"]:
-        pstring = ""
-        for i in range(len(popt)):
-            result = roundSignificantFigures(popt[i], perr[i], matchOrder=True)
-            error = roundSignificantFigures(perr[i], 1)
-            if fitParams["showError"]:
-                pstring += paramNames[fitFunctionName][i]+" : "+str(result)+r"$\pm$"+str(error)+"\n"
-            else:
-                pstring += paramNames[fitFunctionName][i]+" : "+str(result)+"\n"
-        if fitParams["paramsPlacement"]:
-            # Text anchor is the bottom left corner by default
-            if fitParams["paramsPlacement"] == "tl":
-                axisObj.text(0.1, 0.9-0.07*(len(popt)-1)-0.07*(fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
-        else:
-            # Default to top left
-            axisObj.text(1.1, 0.9-0.07*(len(popt)-1)-0.07*(fitParams["paramsOffset"]), pstring, transform=axisObj.transAxes)
-    return popt, perr

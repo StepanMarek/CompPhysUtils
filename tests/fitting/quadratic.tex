@@ -1,7 +1,19 @@
+\documentclass{minimal}
+
+\usepackage[utf8]{inputenc}
+\usepackage[paperwidth=20cm,paperheight=16cm,margin=2cm]{geometry}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18,width=\columnwidth}
+\usepgfplotslibrary{patchplots}
+\usepgfplotslibrary{fillbetween}
+
+\begin{document}
+
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=16cm,
-height=12cm,
+\begin{axis}[width=1.0\columnwidth,
+height=0.75\columnwidth,
 legend style={at={(0.95,0.95)},anchor=north east},
 legend columns=1,
 line width=1pt
@@ -24,7 +36,7 @@ error mark options={rotate=90,mark size=4,line width=2pt}
 (  3.0000E+00,  7.8000E+00) +- (  0.0000E+00,  2.0000E-01)
 (  4.0000E+00,  1.6100E+01) +- (  0.0000E+00,  1.0000E-01)
 };
-\addplot[sharp plot,
+\addlegendentry{Data}\addplot[sharp plot,
 dotted,
 green
 ] coordinates {
@@ -129,9 +141,7 @@ green
 (  3.9596E+00,  1.3422E+01)
 (  4.0000E+00,  1.3580E+01)
 };
-\addlegendentry{Linear fit}\node [anchor=south west] at (rel axis cs:  5.0000E-02,  8.0000E-01) {Gradient : 3.9 ± 0.8
-Intercept : -2.0 ± 2.0
-};
+\addlegendentry{Linear fit}\node [anchor=south west] at (rel axis cs:  5.0000E-02,  8.0000E-01) {};
 \addplot[sharp plot,
 dotted,
 green,
@@ -238,10 +248,7 @@ blue
 (  3.9596E+00,  1.5667E+01)
 (  4.0000E+00,  1.5988E+01)
 };
-\addlegendentry{Quadratic fit}\node [anchor=south west] at (rel axis cs:  5.0000E-02,  6.4000E-01) {Curvature : 1.0 ± 0.04
-Centre : -0.0 ± 0.04
-Offset : 0.0 ± 0.04
-};
+\addlegendentry{Quadratic fit}\node [anchor=south west] at (rel axis cs:  5.0000E-02,  7.6000E-01) {};
 \addplot[sharp plot,
 dotted,
 green,
@@ -348,8 +355,8 @@ blue
 (  2.9798E+00,  6.9492E+00)
 (  3.0000E+00,  7.0099E+00)
 };
-\addlegendentry{Linear part}\node [anchor=south west] at (rel axis cs:  5.0000E-02,  5.6000E-01) {Gradient : 3.01 ± 0.06
-Intercept : -2.01 ± 0.09
-};
+\addlegendentry{Linear part}\node [anchor=south west] at (rel axis cs:  5.0000E-02,  7.2000E-01) {};
 \end{axis}
 \end{tikzpicture}
+
+\end{document}
