@@ -1,5 +1,4 @@
 import argparse
-import matplotlib
 
 AP = argparse.ArgumentParser()
 AP.add_argument("--start", nargs=2, type=float, default=[0.0,0.0], help="Data coordinates of the rectangle start.")

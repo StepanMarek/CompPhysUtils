@@ -8,8 +8,10 @@ class Figure():
         # List of export formats supported by the backend
         self.allowed_formats = []
         # Default dimensions - in cm - ratio 4/3
-        self.width = 16
-        self.height = 12
+        self.width = False
+        self.height = False
+        self.set_width(16)
+        self.set_height(12)
 
     def start(self):
         raise NotImplementedError("Start function for figure not implemented")
@@ -23,6 +25,12 @@ class Figure():
         Extension should be determined by allowed_formats.
         """
         raise NotImplementedError("Save not implemented in this backend")
+
+    def set_width(self, amount):
+        self.width = amount
+
+    def set_height(self, amount):
+        self.height = amount
 
 class Axes():
 

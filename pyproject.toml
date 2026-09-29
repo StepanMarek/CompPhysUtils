@@ -1,5 +1,38 @@
 [build-system]
 requires = [
-	"setuptools>=42"
+	"setuptools>=77.0.3"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "compphysutils"
+version = "0.6.0"
+requires-python = ">= 3.9"
+authors = [
+	{name = "Stepan Marek"}
+]
+description = "Set of utilities not only for computational condensed matter physics"
+readme = "README.md"
+license = "LGPL-3.0-or-later"
+license-files = ["LICENSE", "COPYING.reference"]
+classifiers = [
+	"Programming Language :: Python :: 3",
+	"Development Status :: 3 - Alpha"
+]
+# TODO : Separate the fitting load, so that scipy is not loaded unless actually fitting
+dependencies = ["numpy", "scipy"]
+
+[project.urls]
+source = "https://github.com/StepanMarek/CompPhysUtils"
+
+[project.optional-dependencies]
+matplotlib = ["matplotlib>=3.10.1"]
+# TODO : Separate the fitting load, so that scipy is not loaded unless actually fitting
+#fitting = ["scipy"]
+plot3d = ["raylib>=5.5.0.0"]
+all = ["compphysutils[matplotlib, fitting, plot3d]"]
+
+[project.scripts]
+plotconfig = "compphysutils.graphics.plotconfig:main"
+runparser = "compphysutils.parser.runparser:main"
+runcombine = "compphysutils.parser.runcombine:main"

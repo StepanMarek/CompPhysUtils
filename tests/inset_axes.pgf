@@ -1,7 +1,7 @@
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=16cm,
-height=12cm,
+\begin{axis}[width=1.0\columnwidth,
+height=0.75\columnwidth,
 legend style={at={(0.95,0.95)},anchor=north east},
 legend columns=1,
 line width=1pt
@@ -19,8 +19,8 @@ red
 \end{axis}
 \usetikzlibrary{}
 \begin{axis}[at={(insetref0)},
-width=4.8cm,
-height=3.5999999999999996cm,
+width=0.4\columnwidth,
+height=0.30000000000000004\columnwidth,
 legend style={at={(0.95,0.95)},anchor=north east},
 legend columns=1,
 line width=1pt

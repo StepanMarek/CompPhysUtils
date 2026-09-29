@@ -1,5 +1,6 @@
 from compphysutils.graphics import Figure as FigureBase, Axes as AxesBase
 import matplotlib
+import matplotlib.figure
 
 annotate_cs = {
     "data" : "data",
@@ -29,6 +30,8 @@ class Figure(FigureBase):
         #        self._figure.set_figheight(self.axes[0].height / 2.54)
         for i in range(len(self.axes)):
             self.axes[i].save()
+            if self.axes[i].colorbarref:
+                self._figure.colorbar(self.axes[i].colorbarref)
         self._figure.savefig(name)
 
 class Axes(AxesBase):
@@ -44,6 +47,7 @@ class Axes(AxesBase):
             self._axes = axes_obj
         # Cumulative for labels -- to disable legend warnings
         self.legend_labels = False
+        self.colorbarref = False
         if figure:
             figure.axes.append(self)
 
@@ -147,17 +151,19 @@ class Axes(AxesBase):
         markerstyle = markerstyle if markerstyle else None
         color = color if color else None
         label = label if label else None
-        self._axes.errorbar(x, y, xerr, yerr, color=color, linestyle=linestyle, marker=markerstyle, label=label,
+        self._axes.errorbar(x, y, yerr=yerr, xerr=xerr, color=color, linestyle=linestyle, marker=markerstyle, label=label,
                             elinewidth=elinewidth, capsize=capsize, linewidth=linewidth)
         self.legend_labels = self.legend_labels or bool(label)
 
     def colormap(self, x, y, c, label=None, cmap=None, norm=None, vmin=None, vmax=None):
         # Use pcolormesh, probably better than imshow, in principle also allows for quadriliterals instead of rectangles
         norm_translator = {
-            "lin" : "linear"
+            "lin" : "linear",
+            "log" : "log"
         }
-        self._axes.pcolormesh(x, y, c, label=label, cmap=cmap, shading="gouraud", norm=norm_translator[norm], vmin=vmin, vmax=vmax)
+        colorbarref = self._axes.pcolormesh(x, y, c, label=label, cmap=cmap, shading="nearest", norm=norm_translator[norm], vmin=vmin, vmax=vmax)
         self.legend_labels = self.legend_labels or bool(label)
+        self.colorbarref = colorbarref
 
     def colorline(self, x, y, c, linestyle="solid", cmap=None, label=None):
         # Construct a line collection

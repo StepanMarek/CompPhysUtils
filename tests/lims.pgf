@@ -1,9 +1,9 @@
 \begin{tikzpicture}
 \usetikzlibrary{}
-\begin{axis}[width=16cm,
-height=12cm,
-xlabel=$x$,
-ylabel=$y$,
+\begin{axis}[width=1.0\columnwidth,
+height=0.75\columnwidth,
+xlabel={$x$},
+ylabel={$y$},
 xmin=1.0,
 xmax=3.0,
 ymin=2.0,

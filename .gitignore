@@ -1,6 +1,6 @@
 __pycache__
 dist/*
-src/compphysutils.egg*
+compphysutils.egg*
 docs/*
 Doxyfile
 custom_doxygen.css
