@@ -72,7 +72,7 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         figure.height = plotOptions["fig-height"]
     if plotOptions["axes-width"]:
         axes.width = plotOptions["axes-width"]
-    if plotOptions["axes-width"]:
+    if plotOptions["axes-height"]:
         axes.height = plotOptions["axes-height"]
     if plotOptions["axes-linewidth"]:
         axes.axes_linewidth = plotOptions["axes-linewidth"]

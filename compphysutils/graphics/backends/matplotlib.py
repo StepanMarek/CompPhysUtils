@@ -165,7 +165,7 @@ class Axes(AxesBase):
         self.legend_labels = self.legend_labels or bool(label)
         self.colorbarref = colorbarref
 
-    def colorline(self, x, y, c, linestyle="solid", cmap=None, label=None):
+    def colorline(self, x, y, c, linestyle="solid", cmap=None, label=None, vmin=None, vmax=None, norm=None, interpolation="lower"):
         # Construct a line collection
         segments = []
         colors = []
@@ -174,8 +174,13 @@ class Axes(AxesBase):
             segments[-1].append([x[i],y[i]])
             segments[-1].append([x[i+1],y[i+1]])
             # Interpolate the color
-            colors.append(0.5 * (c[i] + c[i+1]))
-        self._axes.add_collection(matplotlib.collections.LineCollection(segments, array=colors))
+            # TODO : as argument
+            if interpolation == "mid":
+                colors.append(0.5 * (c[i] + c[i+1]))
+            else:
+                # Default to lower
+                colors.append(c[i])
+        self.colorbarref = self._axes.add_collection(matplotlib.collections.LineCollection(segments, array=colors, clim=(vmin,vmax), norm=norm))
         # TODO : Labels
 
     def level(self, xs, lineoffset=0, linelength=1.0, orientation="vertical", label=None, color=None, linestyle=None):
