@@ -95,20 +95,20 @@ if args.triangles:
         for i in range(len(triset[0])):
             for j in range(9):
                 vertices[9*i+j] = triset[j][i]
-        #    # Calculate the normal of the face
-        #    p1 = numpy.array([triset[0][i],triset[1][i],triset[2][i]])
-        #    p2 = numpy.array([triset[3][i],triset[4][i],triset[5][i]])
-        #    p3 = numpy.array([triset[6][i],triset[7][i],triset[8][i]])
-        #    vec1 = p2 - p1
-        #    vec2 = p3 - p1
-        #    norm = numpy.cross(vec1, vec2)
-        #    norm = norm / numpy.linalg.norm(norm)
-        #    # Save the normal to each vertex
-        #    for j in range(3):
-        #        normals[9*i+3*j] = norm[0]
-        #        normals[9*i+3*j+1] = norm[1]
-        #        normals[9*i+3*j+2] = norm[2]
-        mesh = pyray.Mesh(3*len(triset[0]), len(triset[0]), vertices, normals)
+            # Calculate the normal of the face
+            p1 = numpy.array([triset[0][i],triset[1][i],triset[2][i]])
+            p2 = numpy.array([triset[3][i],triset[4][i],triset[5][i]])
+            p3 = numpy.array([triset[6][i],triset[7][i],triset[8][i]])
+            vec1 = p2 - p1
+            vec2 = p3 - p1
+            norm = numpy.cross(vec1, vec2)
+            norm = norm / numpy.linalg.norm(norm)
+            # Save the normal to each vertex
+            for j in range(3):
+                normals[9*i+3*j] = norm[0]
+                normals[9*i+3*j+1] = norm[1]
+                normals[9*i+3*j+2] = norm[2]
+        mesh = pyray.Mesh(3*len(triset[0]), len(triset[0]), vertices, pyray.ffi.NULL, pyray.ffi.NULL, normals)
         #mesh = pyray.Mesh(3*len(triset[0]), len(triset[0]), vertices)
         pyray.upload_mesh(mesh, True)
         model = pyray.load_model_from_mesh(mesh)

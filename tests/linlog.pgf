@@ -2,8 +2,8 @@
 \usetikzlibrary{}
 \begin{axis}[ymode=log,
 log basis y=2,
-width=16cm,
-height=12cm,
+width=1.0\columnwidth,
+height=0.75\columnwidth,
 xlabel={$x$},
 ylabel={$y$},
 legend style={at={(0.95,0.95)},anchor=north east},

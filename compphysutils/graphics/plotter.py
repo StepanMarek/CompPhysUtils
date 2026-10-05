@@ -5,7 +5,6 @@ from ..util import dynmod, ColorIterator, CyclicIterator, LinestyleIterator, Mar
 import configparser
 from ..parser.combine import runGroupData
 from ..fitting.fitter import from_config as fit_from_config 
-from .transformer import transforms,transformModules
 from .decorator import decorations,decorationModules
 import importlib
 import os
@@ -67,13 +66,14 @@ def plot(datasets, plotType="scatter", axes=False, figure=False, **plotOptions):
         axes.yticks_rotate = plotOptions["yticks-rotate"]
     # TODO : Is it worth allowing for differing axes and figure dimensions?
     if plotOptions["fig-width"]:
-        figure.width = plotOptions["fig-width"]
-    if plotOptions["fig-width"]:
-        figure.height = plotOptions["fig-height"]
-    if plotOptions["axes-width"]:
-        axes.width = plotOptions["axes-width"]
-    if plotOptions["axes-height"]:
-        axes.height = plotOptions["axes-height"]
+        figure.set_width(plotOptions["fig-width"])
+    if plotOptions["fig-height"]:
+        figure.set_height(plotOptions["fig-height"])
+    # TODO : This probably does not yet work in matplotlib
+    #if plotOptions["axes-width"]:
+    #    axes.set_width = plotOptions["axes-width"]
+    #if plotOptions["axes-width"]:
+    #    axes.set_height = plotOptions["axes-height"]
     if plotOptions["axes-linewidth"]:
         axes.axes_linewidth = plotOptions["axes-linewidth"]
     # Legend
@@ -89,22 +89,6 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     cfg.read(configFileName)
     # Run processing up to combine_commands
     datasets.update(runGroupData(cfg, datasets, configFileName))
-    # Now, run any transform commands
-    if "transform" in cfg["plot"]:
-        transformCommands = cfg["plot"].get("transform").split("\n")
-        for commandLine in transformCommands:
-            commandSplitLine = commandLine.split()
-            commandName = commandSplitLine[0]
-            if not commandName in transformModules:
-                raise ModuleNotFoundError("Transform module "+commandName+" not found in the search tree!")
-            if not commandName in transforms:
-                # Load
-                transformModules[commandName]["spec"].loader.exec_module(transformModules[commandName]["module"])
-                transforms[commandName] = transformModules[commandName]["module"].command
-                transformModules[commandName]["loaded"] = True
-            datasets = transforms[commandName](datasets, commandSplitLine[1:])
-    if "savepoint" in cfg["plot"]:
-        save(cfg["plot"].get("savepoint"), "transform", datasets)
     # Now, datasets are complete, and we can read the plot group
     # Start by processing all options/settings, which do not require us to have a specific backend setup
     # Also include options that are set directly via type - should be reserved for options that are not usable for many plot types
@@ -145,11 +129,9 @@ def fromConfig(configFileName, axes=False, figure=False, backend=False, datasets
     #     plt.rcParams["font.size"] = int(cfg["plot"].get("font-size", 12))
     # if "mathfont" in cfg["plot"]:
     #     plt.rcParams["mathtext.fontset"] = cfg["plot"].get("mathfont", "cm")
-    # Figure width - for pgfplots set via axis width
-    # Units are cm
-    # Default aspect ratio is 4/3
-    plotOptions["fig-width"] = cfg["plot"].getfloat("fig-width", 16)
-    plotOptions["fig-height"] = cfg["plot"].getfloat("fig-height", 12)
+    # Figure width - the default value is chosen by Figure API, which is set to 16/12
+    plotOptions["fig-width"] = cfg["plot"].getfloat("fig-width", False)
+    plotOptions["fig-height"] = cfg["plot"].getfloat("fig-height", False)
     if not axesGiven:
         # TODO : Should the axis settings be available on a per-axis basis? And exposed to user?
         plotOptions["axes-width"] = plotOptions["fig-width"]

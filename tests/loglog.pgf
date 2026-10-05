@@ -4,8 +4,8 @@
 log basis x=3,
 ymode=log,
 log basis y=3,
-width=16cm,
-height=12cm,
+width=1.0\columnwidth,
+height=0.75\columnwidth,
 xlabel={$x$},
 ylabel={$x^3$},
 line width=1pt
