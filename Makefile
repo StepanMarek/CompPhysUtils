@@ -29,6 +29,8 @@ PARSERSOURCE += compphysutils/parser/parsers/coord-tm.py
 PARSERSOURCE += compphysutils/parser/parsers/coord-aims.py
 PARSERSOURCE += compphysutils/parser/parsers/coord-cub.py
 PARSERSOURCE += compphysutils/parser/combine_commands/translate.py
+PARSERSOURCE += compphysutils/parser/combine_commands/scale.py
+PARSERSOURCE += compphysutils/parser/combine_commands/join-partial.py
 
 GRAPHICSSOURCE := compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += compphysutils/graphics/Figure.py

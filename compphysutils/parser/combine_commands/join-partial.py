@@ -1,33 +1,18 @@
 import argparse
+from ..parser import parse_ranges, ranges_to_indices
 
-joinAP = argparse.ArgumentParser()
+joinAP = argparse.ArgumentParser(prog="join-partial", description="Joins chosen columns from different datasets into a new dataset.")
 joinAP.add_argument("new_name", help="Name of the joined dataset.")
-joinAP.add_argument("cols_to_join", nargs="+", help="Columns to be joined - always pair dataset name and column index. Can use '1:' etc. i.e. python slices")
-
-def indicesFromSlice(sliceString, dataset):
-    # Start by determining number of parameters
-    split = sliceString.split(":")
-    numArgs = len(split)
-    if numArgs == 1:
-        # Single column
-        return [int(split[0])]
-    if numArgs == 2:
-        # Step = 1, unclear whether end is present
-        if split[1] == "":
-            # Create default end - end of dataset
-            split[1] = len(dataset)
-        return range(int(split[0]), int(split[1]))
-    if numArgs == 3:
-       # fully customized, assume all is defined
-       return range(*map(int, split))
+joinAP.add_argument("col_doubles", nargs="+", help="Dataset name and range of columns to join. Here, range is specified as union of slices, e.g. 1,2:4,6:-1:2")
 
 def command(datasets, commandArgs):
     args = joinAP.parse_args(commandArgs)
-    if len(args.cols_to_join) % 2 != 0:
+    if len(args.col_doubles) % 2 != 0:
         raise ValueError("Incorrect column coordinates for join-partial.")
     newDataset = []
-    for i in range(0, len(args.cols_to_join), 2):
-        for j in indicesFromSlice(args.cols_to_join[i+1], datasets[args.cols_to_join[i]]):
-            newDataset.append(datasets[args.cols_to_join[i]][j])
+    for i in range(0, len(args.col_doubles), 2):
+        cols = ranges_to_indices(parse_ranges(args.col_doubles[i+1]), datasets[args.col_doubles[i]])
+        for j in cols:
+            newDataset.append(datasets[args.col_doubles[i]][j])
     datasets[args.new_name] = newDataset
     return datasets
