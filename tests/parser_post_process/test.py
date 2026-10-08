@@ -14,6 +14,17 @@ target_contents["average"] = [
 """3.0 0.0 4.0
 """]
 
+target_files["gap"] = [
+    "gap.dat",
+    "gap_frac.dat"
+]
+target_contents["gap"] = [
+"""1.5
+""",
+"""1.7
+"""
+]
+
 class PostProcessTest(unittest.TestCase):
 
     def run_file_test(self, name):
@@ -28,3 +39,6 @@ class PostProcessTest(unittest.TestCase):
 
     def test_average(self):
         self.run_file_test("average")
+
+    def test_gap(self):
+        self.run_file_test("gap")
