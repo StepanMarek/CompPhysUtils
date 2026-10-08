@@ -1,35 +1,18 @@
 import argparse
 import numpy
+from ..parser import parse_ranges, ranges_to_indices
 
-def getRange(rangeString, dataset):
-    if rangeString.find(":") > -1:
-        # Standard range
-        rangeStart, rangeEnd = rangeString.split(":")
-        if rangeStart == "":
-            # Start at 0
-            rangeStart = 0
-        else:
-            rangeStart = int(rangeStart)
-        if rangeEnd == "":
-            # Len of dataset
-            rangeEnd = len(dataset)
-        else:
-            rangeEnd = int(rangeEnd)
-    else:
-        # Single index - cannot work
-        raise ValueError("Wrong range "+rangeString+" in plane-rotate")
-    return list(range(rangeStart, rangeEnd))
+ap = argparse.ArgumentParser(prog="plane-rotate", description="Rotate the subset of atoms by an angle in plane. The plane is defined by the center (average) of the atom positions and two specified atoms.")
+ap.add_argument("--rowRange", type=parse_ranges, default=":", help="Range of row indices that define the atoms for which the average plane is to be determined.")
+ap.add_argument("angle", type=float, default=0.0, help="Angle of rotation, in degrees.")
 
 def command(dataset, argString):
-    ap = argparse.ArgumentParser(prog="plane-rotate", description="Rotate the subset of atoms by an angle in plane. The plane is defined by the center (average) of the atom positions and two specified atoms.")
-    ap.add_argument("--rowRange", type=lambda x: getRange(x, dataset), default=list(range(len(dataset))), help="Range of row indices that define the atoms for which the average plane is to be determined.")
-    ap.add_argument("--initialPoints", nargs=2, type=int, default=[0,1], help="Indices of initial two points which are used to form the first approximate plane normal vector.")
-    ap.add_argument("angle", type=float, default=0.0, help="Angle of rotation, in degrees.")
     args = ap.parse_args(argString)
     rotAngle = args.angle * numpy.pi / 180
     # Start by converting chosen points to vectors in numpy
     points = []
-    for i in args.rowRange:
+    rows = ranges_to_indices(args.rowRange, dataset[0])
+    for i in rows:
         points.append([])
         for j in range(3):
             points[-1].append(dataset[j][i])
@@ -74,14 +57,17 @@ def command(dataset, argString):
     rotatedPoints = rotatedPoints + rcm
     # Prepend and append 
     newDataset = [[],[],[],[]]
+    rotated_index = 0
     for j in range(len(dataset[0])):
         for i in range(3):
-            if j in args.rowRange:
+            if j in rows:
                 # Take values from rotatedPoints
-                newDataset[i].append(rotatedPoints[j-args.rowRange[0]][i])
+                newDataset[i].append(rotatedPoints[rotated_index][i])
             else:
                 # Take values from original dataset
                 newDataset[i].append(dataset[i][j])
+        if j in rows:
+            rotated_index += 1
         # Copy name of element
         newDataset[3].append(dataset[3][j])
     return newDataset
