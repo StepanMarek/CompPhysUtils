@@ -31,6 +31,7 @@ PARSERSOURCE += compphysutils/parser/parsers/coord-cub.py
 PARSERSOURCE += compphysutils/parser/combine_commands/translate.py
 PARSERSOURCE += compphysutils/parser/combine_commands/scale.py
 PARSERSOURCE += compphysutils/parser/combine_commands/join-partial.py
+PARSERSOURCE += compphysutils/parser/post_process/average.py
 
 GRAPHICSSOURCE := compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += compphysutils/graphics/Figure.py
