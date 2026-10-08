@@ -67,7 +67,7 @@ FITTINGSOURCE += compphysutils/fitting/fit_types/linear.py
 BASESOURCE := compphysutils/__init__.py
 BASESOURCE += compphysutils/util.py
 
-.PHONY: install test test_fitting test_graphics
+.PHONY: install test test_fitting test_graphics test_parser_combine
 
 install: $(WHEELFILE)
 	#pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
@@ -82,10 +82,13 @@ upload: $(WHEELFILE)
 $(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE) $(FITTINGSOURCE) MANIFEST.in pyproject.toml
 	python -m build
 
-test: test_fitting test_graphics
+test: test_fitting test_graphics test_parser_combine
 
 test_graphics: install
 	cd tests/ && python -m unittest
 
 test_fitting: install
 	cd tests/fitting && python -m unittest
+
+test_parser_combine: install
+	cd tests/parser_combine && python -m unittest
