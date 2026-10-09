@@ -48,6 +48,17 @@ target_contents["join-partial"] = [
 4.0 -4.0 8.0 12.0
 """]
 
+target_files["union-partial"] = [
+    "union-partial.dat"
+]
+target_contents["union-partial"] = [
+"""1.0 8.0
+2.0 9.0
+3.0 10.0
+4.0 11.0
+"""
+]
+
 class CombineTests(unittest.TestCase):
 
     def run_file_test(self, name):
@@ -71,3 +82,6 @@ class CombineTests(unittest.TestCase):
 
     def test_join_partial(self):
         self.run_file_test("join-partial")
+
+    def test_union_partial(self):
+        self.run_file_test("union-partial")
