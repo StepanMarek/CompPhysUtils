@@ -34,6 +34,8 @@ PARSERSOURCE += compphysutils/parser/combine_commands/join-partial.py
 PARSERSOURCE += compphysutils/parser/post_process/average.py
 PARSERSOURCE += compphysutils/parser/post_process/gap.py
 PARSERSOURCE += compphysutils/parser/post_process/plane-rotate.py
+PARSERSOURCE += compphysutils/parser/post_process/scale.py
+PARSERSOURCE += compphysutils/parser/post_process/mirror.py
 
 GRAPHICSSOURCE := compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += compphysutils/graphics/Figure.py

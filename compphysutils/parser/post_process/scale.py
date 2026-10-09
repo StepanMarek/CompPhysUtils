@@ -1,7 +1,8 @@
 import argparse
+from ..parser import parse_ranges, ranges_to_indices
 
 ap = argparse.ArgumentParser()
-ap.add_argument("column", type=int, default=0, help="Number of the column to apply the scaling to. [default : 0]")
+ap.add_argument("column", type=parse_ranges, default="0", help="Range of the columns to apply the scaling to. [default : 0]")
 ap.add_argument("amount", type=float, default=1.0, help="Multiply all values in the given column by this value. [default : 1.0]")
 
 def command(dataset, argString):
@@ -12,7 +13,9 @@ def command(dataset, argString):
         newDataset.append([])
         for j in range(len(dataset[i])):
             newDataset[i].append(dataset[i][j])
-    for i in range(len(newDataset[args.column])):
-        # Output the same dataset, but with opposite value in the given axis index
-        newDataset[args.column][i] *= args.amount
+    scaled_cols = ranges_to_indices(args.column, newDataset)
+    for i in scaled_cols:
+        for j in range(len(newDataset[i])):
+            # Scale the column
+            newDataset[i][j] *= args.amount
     return newDataset
