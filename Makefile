@@ -1,4 +1,4 @@
-VERSION := 0.6.0
+VERSION := 0.6.1
 
 WHEELFILE := dist/compphysutils-$(VERSION)-py3-none-any.whl
 TARFILE := dist/compphysutils-$(VERSION).tar.gz
@@ -29,6 +29,14 @@ PARSERSOURCE += compphysutils/parser/parsers/coord-tm.py
 PARSERSOURCE += compphysutils/parser/parsers/coord-aims.py
 PARSERSOURCE += compphysutils/parser/parsers/coord-cub.py
 PARSERSOURCE += compphysutils/parser/combine_commands/translate.py
+PARSERSOURCE += compphysutils/parser/combine_commands/scale.py
+PARSERSOURCE += compphysutils/parser/combine_commands/join-partial.py
+PARSERSOURCE += compphysutils/parser/combine_commands/union-partial.py
+PARSERSOURCE += compphysutils/parser/post_process/average.py
+PARSERSOURCE += compphysutils/parser/post_process/gap.py
+PARSERSOURCE += compphysutils/parser/post_process/plane-rotate.py
+PARSERSOURCE += compphysutils/parser/post_process/scale.py
+PARSERSOURCE += compphysutils/parser/post_process/mirror.py
 
 GRAPHICSSOURCE := compphysutils/graphics/__init__.py
 GRAPHICSSOURCE += compphysutils/graphics/Figure.py
@@ -65,7 +73,7 @@ FITTINGSOURCE += compphysutils/fitting/fit_types/linear.py
 BASESOURCE := compphysutils/__init__.py
 BASESOURCE += compphysutils/util.py
 
-.PHONY: install test test_fitting test_graphics
+.PHONY: install test test_fitting test_graphics test_parser_combine
 
 install: $(WHEELFILE)
 	#pip3 install --break-system-packages --force-reinstall $(WHEELFILE)
@@ -80,10 +88,13 @@ upload: $(WHEELFILE)
 $(WHEELFILE): $(CRYSTALGENSOURCE) $(GRAPHICSSOURCE) $(BASESOURCE) $(PARSERSOURCE) $(FITTINGSOURCE) MANIFEST.in pyproject.toml
 	python -m build
 
-test: test_fitting test_graphics
+test: test_fitting test_graphics test_parser_combine
 
 test_graphics: install
 	cd tests/ && python -m unittest
 
 test_fitting: install
 	cd tests/fitting && python -m unittest
+
+test_parser_combine: install
+	cd tests/parser_combine && python -m unittest

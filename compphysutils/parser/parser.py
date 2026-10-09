@@ -323,3 +323,46 @@ def parseRange(rangeString):
         return toReturn
     else:
         raise ValueError("Cannot parse "+rangeString+" as python-like range.")
+
+def parse_ranges(range_string, separator=","):
+    """
+    Helper routine for parsing sequence of slices.
+    """
+    split_range = range_string.split(separator)
+    slices = []
+    for slice_string in split_range:
+        slice_args = slice_string.split(":")
+        for i in range(len(slice_args)):
+            if slice_args[i] == "":
+                slice_args[i] = None
+            else:
+                slice_args[i] = int(slice_args[i])
+        if len(slice_args) == 1:
+            # Just one index -- slightly different behaviour than python slices
+            slice_args = [slice_args[0], slice_args[0]+1]
+        slices.append(slice(*slice_args))
+    return slices
+
+def ranges_to_indices(ranges, target):
+    indices = []
+    for sl in ranges:
+        indices = indices + list(range(len(target))[sl])
+    return indices
+
+def point_transformation_bounds(row_range, col_triples, datasets, all_cols=False):
+    """
+    Based on typical arguments passed to combine commands,
+    determine the mask and indices for rows and columns,
+    which are transformed by the transformation
+    """
+    col_mask = []
+    all_col_indices = []
+    for i in range(0, len(col_triples), 3):
+        col_indices = ranges_to_indices(parse_ranges(col_triples[i+1]), datasets[col_triples[i]])
+        col_mask.append(list(map(lambda x: x in col_indices, range(len(datasets[col_triples[i]])))))
+        if all_cols:
+            col_indices = list(range(len(datasets[col_triples[i]])))
+        all_col_indices.append(col_indices)
+    row_indices = ranges_to_indices(row_range, datasets[col_triples[0]][all_col_indices[0][0]])
+    row_mask = list(map(lambda x: x in row_indices, range(len(datasets[col_triples[0]][all_col_indices[0][0]]))))
+    return all_col_indices, row_indices, col_mask, row_mask
